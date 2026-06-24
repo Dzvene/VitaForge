@@ -41,6 +41,25 @@ async def get_current_user(
     return user
 
 
+async def get_optional_user(
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
+    db: DbSession,
+) -> User | None:
+    """Like `get_current_user` but returns None instead of 401 when no/invalid
+    token is presented. Used by read endpoints that a guest may hit — they fall
+    back to the shared catalog only."""
+    if credentials is None:
+        return None
+    payload = decode_token(credentials.credentials)
+    if not payload or payload.get("type") != "access":
+        return None
+    user_id = payload.get("sub")
+    if not user_id:
+        return None
+    user = (await db.execute(select(User).where(User.id == int(user_id)))).scalar_one_or_none()
+    return user if user and user.is_active else None
+
+
 async def require_admin(user: Annotated[User, Depends(get_current_user)]) -> User:
     if user.role != "admin":
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Admin privileges required")
@@ -48,4 +67,5 @@ async def require_admin(user: Annotated[User, Depends(get_current_user)]) -> Use
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
+OptionalUser = Annotated[User | None, Depends(get_optional_user)]
 AdminUser = Annotated[User, Depends(require_admin)]

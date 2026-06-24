@@ -16,11 +16,14 @@ class FoodService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    def _visible(self, user_id: int):
-        # Shared products (owner NULL) + this user's own custom products.
+    def _visible(self, user_id: int | None):
+        # Shared products (owner NULL) + this user's own custom products. A guest
+        # (user_id is None) sees the shared catalog only.
+        if user_id is None:
+            return Food.owner_user_id.is_(None)
         return or_(Food.owner_user_id.is_(None), Food.owner_user_id == user_id)
 
-    async def get(self, user_id: int, food_id: int) -> Food:
+    async def get(self, user_id: int | None, food_id: int) -> Food:
         food = (
             await self.db.execute(
                 select(Food).where(Food.id == food_id, self._visible(user_id))
@@ -30,7 +33,7 @@ class FoodService:
             raise NotFoundError("Food not found")
         return food
 
-    async def by_barcode(self, user_id: int, barcode: str) -> Food:
+    async def by_barcode(self, user_id: int | None, barcode: str) -> Food:
         food = (
             await self.db.execute(
                 select(Food).where(Food.barcode == barcode, self._visible(user_id))
@@ -40,7 +43,7 @@ class FoodService:
             raise NotFoundError("No product with that barcode")
         return food
 
-    async def search(self, user_id: int, query: str, limit: int = 30) -> list[Food]:
+    async def search(self, user_id: int | None, query: str, limit: int = 30) -> list[Food]:
         q = query.strip()
         stmt = (
             select(Food)

@@ -98,10 +98,12 @@ from app.modules.identity.admin_router import admin_router as users_admin_router
 from app.modules.nutrition import subscribers as _nut_subs  # noqa: E402, F401
 from app.modules.nutrition.router import router as nutrition_router  # noqa: E402
 from app.modules.profile.router import router as profile_router  # noqa: E402
+from app.modules.public.router import router as public_router  # noqa: E402
 from app.modules.weight.router import router as weight_router  # noqa: E402
 
 api_v1 = settings.API_V1_PREFIX
 for r in (
+    public_router,
     auth_router,
     profile_router,
     nutrition_router,

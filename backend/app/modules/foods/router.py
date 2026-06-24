@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Query, status
 
-from app.core.deps import CurrentUser, DbSession
+from app.core.deps import CurrentUser, DbSession, OptionalUser
 from app.modules.foods.schemas import FoodCreate, FoodOut
 from app.modules.foods.service import FoodService
 
@@ -11,17 +11,18 @@ router = APIRouter(prefix="/foods", tags=["foods"])
 
 @router.get("/search", response_model=list[FoodOut])
 async def search(
-    user: CurrentUser,
+    user: OptionalUser,
     db: DbSession,
     q: str = Query(min_length=1, max_length=128),
 ) -> list[FoodOut]:
-    foods = await FoodService(db).search(user.id, q)
+    # Guests (no token) search the shared catalog; authed users also see their own.
+    foods = await FoodService(db).search(user.id if user else None, q)
     return [FoodOut.model_validate(f) for f in foods]
 
 
 @router.get("/barcode/{barcode}", response_model=FoodOut)
-async def by_barcode(barcode: str, user: CurrentUser, db: DbSession) -> FoodOut:
-    food = await FoodService(db).by_barcode(user.id, barcode)
+async def by_barcode(barcode: str, user: OptionalUser, db: DbSession) -> FoodOut:
+    food = await FoodService(db).by_barcode(user.id if user else None, barcode)
     return FoodOut.model_validate(food)
 
 
@@ -38,8 +39,8 @@ async def create_custom(payload: FoodCreate, user: CurrentUser, db: DbSession) -
 
 
 @router.get("/{food_id}", response_model=FoodOut)
-async def get_food(food_id: int, user: CurrentUser, db: DbSession) -> FoodOut:
-    food = await FoodService(db).get(user.id, food_id)
+async def get_food(food_id: int, user: OptionalUser, db: DbSession) -> FoodOut:
+    food = await FoodService(db).get(user.id if user else None, food_id)
     return FoodOut.model_validate(food)
 
 

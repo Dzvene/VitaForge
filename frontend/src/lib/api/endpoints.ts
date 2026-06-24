@@ -1,5 +1,6 @@
 import { api } from "@/lib/api/client";
 import type {
+  ActivityLevel,
   AdminStats,
   AdminUser,
   CalibrationStatus,
@@ -10,10 +11,12 @@ import type {
   EstimateResult,
   FoodCreate,
   FoodOut,
+  GoalKind,
   Hint,
   ParamsView,
   ProfileOut,
   ProfileUpsert,
+  Sex,
   TargetOut,
   TokenPair,
   UserOut,
@@ -21,12 +24,53 @@ import type {
   WeightSeries,
 } from "@/lib/api/types";
 
+// Guest preview inputs (no identity, no persistence — see backend public slice).
+export interface PreviewProfile {
+  sex: Sex;
+  age: number;
+  height_cm: number;
+  current_weight_kg: number;
+  activity_level: ActivityLevel;
+  goal: GoalKind;
+  target_rate_kg_per_week: number;
+  protein_g_per_kg?: number | null;
+  protein_g_abs?: number | null;
+  fat_g_per_kg?: number | null;
+}
+
+export interface PreviewWeightPoint {
+  logged_on: string;
+  weight_kg: number;
+}
+export interface PreviewIntake {
+  day: string;
+  kcal: number;
+}
+
 export const auth = {
   register: (body: { email: string; password: string; full_name?: string }) =>
     api<UserOut>("/auth/register", { method: "POST", body, auth: false }),
   login: (body: { email: string; password: string }) =>
     api<TokenPair>("/auth/login", { method: "POST", body, auth: false }),
   me: () => api<UserOut>("/auth/me"),
+};
+
+// Guest preview — stateless, no token (backend `app.modules.public`).
+export const preview = {
+  nutrition: (profile: PreviewProfile, maintenance_kcal?: number) =>
+    api<TargetOut>("/public/nutrition/preview", {
+      method: "POST",
+      auth: false,
+      body: { profile, maintenance_kcal: maintenance_kcal ?? null },
+    }),
+  weightTrend: (points: PreviewWeightPoint[]) =>
+    api<WeightSeries>("/public/weight/trend", { method: "POST", auth: false, body: { points } }),
+  calibration: (weights: PreviewWeightPoint[], intake: PreviewIntake[]) =>
+    api<EstimateResult>("/public/calibration/preview", {
+      method: "POST",
+      auth: false,
+      body: { weights, intake },
+    }),
 };
 
 export const profile = {

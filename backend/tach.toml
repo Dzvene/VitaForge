@@ -61,6 +61,12 @@ depends_on = ["app.modules.profile"]
 path = "app.modules.foods"
 depends_on = []
 
+# Public preview slice — stateless guest endpoints. A leaf: reuses only the
+# `app.core` engine (utility edge), never another slice.
+[[modules]]
+path = "app.modules.public"
+depends_on = []
+
 [[modules]]
 path = "app.modules.weight"
 depends_on = ["app.modules.profile"]

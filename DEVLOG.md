@@ -4,6 +4,44 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-24 — Guest preview slice (try-before-signup), tests, deploy
+
+Finished the half-built guest/public preview that was sitting uncommitted in the
+working tree, then added the tests it lacked and a frontend page to use it.
+
+**Backend — `public` slice (new, tach leaf, depends_on=[])**
+- `app/modules/public/` — stateless guest endpoints, no auth, no DB:
+  `POST /public/nutrition/preview` (starting target), `/public/weight/trend`
+  (EMA), `/public/calibration/preview` (real-TDEE estimate). Service mirrors the
+  authenticated slices faithfully using only `app.core` engine + default params,
+  so a guest's numbers reproduce exactly post-registration. Schemas re-declared
+  locally so the slice never grows a cross-slice edge.
+- Foods read endpoints made guest-accessible: new `get_optional_user` dep +
+  `OptionalUser` type; `FoodService` visibility now accepts `user_id=None` →
+  shared catalog only (a guest never sees anyone's custom foods).
+- **`tests/test_public.py` — 14 tests** (was the gap): formula-hold vs
+  calibrated target, guest↔authenticated parity, EMA trend, real-TDEE estimate +
+  soft-degrade refusals, guest foods visibility. Backend now **114 green**;
+  `tach check` green (10 slices, acyclic).
+
+**Frontend**
+- `lib/api/endpoints.ts` — `preview.{nutrition,weightTrend,calibration}` (auth:false).
+- `app/try/page.tsx` — public "Try it, no account" calculator: onboarding-style
+  form → target + macros, plus an honest panel explaining this is a *formula
+  guess* and that Baseline calibrates real maintenance from logged data. CTA →
+  /register. Link added from /login.
+- `test/preview.test.ts` — asserts no bearer is attached and the body shape.
+  Frontend **25 green**, lint clean, typecheck clean.
+
+**Deploy:** rebuilt + redeployed (`-p vitaforge up -d --build`). Smoke (prod):
+`/health` 200, `/public/nutrition/preview` returns formula target,
+`/foods/search` 200 without a token, `/try` 200.
+
+**Still open:** unchanged from below (coaching copy, calibration field-tuning,
+OFF/USDA dump, mobile). The guest page only surfaces the nutrition preview; the
+weight-trend & calibration preview endpoints are wired in the API client but
+have no guest UI yet (intended for a future interactive calibration demo).
+
 ## 2026-06-24 — Integration tests, seed catalog, USDA import, barcode UI, deploy
 
 Closed the biggest v1 debts from `docs/STATUS.md`. All work was sitting

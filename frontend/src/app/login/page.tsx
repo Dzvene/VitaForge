@@ -66,6 +66,12 @@ export default function LoginPage() {
           Create an account
         </Link>
       </p>
+      <p className="mt-2 text-center text-sm text-ink-muted">
+        Just curious?{" "}
+        <Link href="/try" className="font-medium text-brand-400 hover:text-brand-500">
+          Try the calculator — no account
+        </Link>
+      </p>
     </AuthScaffold>
   );
 }
