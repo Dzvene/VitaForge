@@ -27,7 +27,7 @@ export function AuthScaffold({
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-500/15 ring-1 ring-brand-500/30">
             <Activity className="h-5 w-5 text-brand-400" />
           </div>
-          <span className="text-lg font-semibold tracking-tight">Baseline</span>
+          <span className="text-lg font-semibold tracking-tight">VitaForge</span>
         </div>
         <div className="max-w-md">
           <h1 className="text-3xl font-semibold leading-tight tracking-tight">

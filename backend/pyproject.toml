@@ -1,7 +1,7 @@
 [project]
-name = "baseline-backend"
+name = "vitaforge-backend"
 version = "0.1.0"
-description = "Baseline — calorie & macro tracker backend (FastAPI)"
+description = "VitaForge — calorie & macro tracker backend (FastAPI)"
 requires-python = ">=3.12"
 
 [tool.ruff]

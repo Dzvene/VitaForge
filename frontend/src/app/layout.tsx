@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Baseline — calorie & macro tracker",
+  title: "VitaForge — calorie & macro tracker",
   description:
     "Calibration-first nutrition tracking. No ads, no paywall. Measure your real maintenance, then build the cut from facts.",
 };

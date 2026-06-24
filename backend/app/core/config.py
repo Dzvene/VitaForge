@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     )
 
     # ----- Application -----
-    APP_NAME: str = "Baseline"
+    APP_NAME: str = "VitaForge"
     APP_ENV: str = "development"
     APP_DEBUG: bool = False
     LOG_LEVEL: str = "INFO"
@@ -32,7 +32,7 @@ class Settings(BaseSettings):
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
 
     # ----- Database -----
-    DATABASE_URL: str = "postgresql+asyncpg://baseline:baseline@localhost:5432/baseline"
+    DATABASE_URL: str = "postgresql+asyncpg://vitaforge:vitaforge@localhost:5432/vitaforge"
 
     @property
     def database_url_sync(self) -> str:

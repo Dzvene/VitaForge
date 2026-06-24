@@ -40,7 +40,7 @@ function Brand() {
         <Activity className="h-5 w-5 text-brand-400" />
       </div>
       <div className="leading-tight">
-        <p className="text-sm font-semibold tracking-tight text-ink">Baseline</p>
+        <p className="text-sm font-semibold tracking-tight text-ink">VitaForge</p>
         <p className="text-[11px] text-ink-faint">calibrate · track · adapt</p>
       </div>
     </div>

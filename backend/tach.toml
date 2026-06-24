@@ -1,4 +1,4 @@
-## Module-boundary lock for Baseline.
+## Module-boundary lock for VitaForge.
 ##
 ## Each `app.modules.<X>` is a vertical slice. Cross-slice imports must be
 ## declared under that slice's `depends_on`; an undeclared import fails
