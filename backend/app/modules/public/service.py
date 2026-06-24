@@ -87,7 +87,7 @@ def preview_weight_trend(payload: WeightTrendIn) -> WeightSeriesOut:
     trends = trend_series([w.weight_kg for w in points], DEFAULT_PARAMS.trend_alpha)
     out = [
         WeightPointOut(logged_on=p.logged_on, weight_kg=p.weight_kg, trend_kg=round(t, 2))
-        for p, t in zip(points, trends)
+        for p, t in zip(points, trends, strict=False)
     ]
     return WeightSeriesOut(points=out, latest_trend_kg=out[-1].trend_kg if out else None)
 

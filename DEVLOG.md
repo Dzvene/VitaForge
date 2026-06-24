@@ -4,6 +4,44 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-24 — Real food catalog at scale (104 → 458k), streaming importer, relevance search
+
+The #1 release blocker: a calorie tracker with 104 seed foods is unusable. Closed
+it — and fixed the half-truth that "the importers are ready" (they read whole
+files into memory; the USDA Branded dump is **3.16 GB** and would OOM this box).
+
+**Importer rewritten to stream** (`scripts/import_foods.py`)
+- `ijson` over the array (`<Key>.item`) instead of `read_text()` + `json.loads()`.
+  Top-level shape auto-detected by streaming the prefix (keyed object / array /
+  JSONL / lone object). Memory now flat regardless of file size — proven on the
+  3.16 GB branded file.
+- Insert-only + batched (`add_all` per 5000): existing keys for the source are
+  loaded once, then dedup is in-memory. Replaces a SELECT-per-row that would have
+  been ~450k round-trips. Idempotent across re-runs.
+- **Three real data bugs the real dumps surfaced** (would have silently lost food):
+  - USDA arrays carry stray JSON `null`s (32 in Foundation 2026-04) → both
+    mappers now skip non-dict rows.
+  - Foundation reports energy via **Atwater factors** (958 specific / 957
+    general), not 208 — only ~25% carry 208. Energy lookup now tries 208 → 958 →
+    957 (268 is kJ, excluded). Foundation yield 95 → 321 mapped.
+  - FK-resolution crash: must import `User` so `users` registers before the
+    `foods.owner_user_id` FK resolves (same trap as the seed script).
+
+**Relevance search** (`foods/service.py`) — was `ILIKE %q%` ordered alphabetically;
+on a 458k table "chicken" surfaced branded junk. Now: prefix match first, generic
+(no brand) over branded, then shorter/canonical name. Portable across Postgres
+(prod) and SQLite (tests). Migration `a1f2c3d4e5b6` adds a **pg_trgm GIN index**
+on `lower(name)` (Postgres-only; SQLite no-op) so the substring ILIKE is not a seq
+scan.
+
+**Loaded into prod** (USDA FoodData Central 2026-04 / SR Legacy 2018):
+- SR Legacy 7793 + Foundation 235 generic + Branded 450 023 (with barcodes) =
+  **458 155 foods, 450k with barcodes** (was 104).
+- Smoke: search "chicken"/"milk" → generic-first, 0.18 s; barcode lookup 34 ms.
+
+**Tests:** 114 → **119** (streaming detector, Atwater energy, null-skip, search
+relevance). `ruff` clean (fixed 2 pre-existing nits), `tach` green.
+
 ## 2026-06-24 — Mechanical lock for the VSA boundaries (canon gate)
 
 Roadmap/canon review: we are in **v1**, web part functionally near-complete

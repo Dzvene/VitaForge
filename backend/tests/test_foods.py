@@ -44,6 +44,19 @@ async def test_search_empty_query_rejected(client, admin):
     assert r.status_code == 422
 
 
+async def test_search_ranks_prefix_and_shorter_first(client, admin):
+    # A prefix hit ("Chicken …") must outrank a mid-string hit, and among hits the
+    # shorter, more canonical name comes first — not alphabetical order.
+    await _create(client, admin["headers"], {**CHICKEN, "name": "Grilled chicken sandwich wrap", "barcode": None})
+    await _create(client, admin["headers"], {**CHICKEN, "name": "Chicken breast, raw", "barcode": None})
+    await _create(client, admin["headers"], {**CHICKEN, "name": "Chicken", "barcode": None})
+    r = await client.get("/foods/search", params={"q": "chicken"}, headers=admin["headers"])
+    assert r.status_code == 200
+    names = [f["name"] for f in r.json()]
+    assert names[0] == "Chicken"  # shortest prefix match
+    assert names.index("Chicken breast, raw") < names.index("Grilled chicken sandwich wrap")
+
+
 async def test_barcode_lookup(client, admin):
     await _create(client, admin["headers"], CHICKEN)
     r = await client.get(f"/foods/barcode/{CHICKEN['barcode']}", headers=admin["headers"])

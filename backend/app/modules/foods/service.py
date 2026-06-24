@@ -4,7 +4,7 @@ Search hits the local DB only (dumps are imported ahead of time), so it never
 depends on Open Food Facts / USDA uptime (spec §7).
 """
 
-from sqlalchemy import or_, select
+from sqlalchemy import case, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.foods.models import Food, FoodFavorite, FoodPortion
@@ -45,10 +45,19 @@ class FoodService:
 
     async def search(self, user_id: int | None, query: str, limit: int = 30) -> list[Food]:
         q = query.strip()
+        if not q:
+            return []
+        # Relevance, not alphabetical (the catalog is ~2M rows; "chicken" must not
+        # surface "Abc chicken brand X" before plain "Chicken"). Portable ordering
+        # that works on both Postgres (prod, with a trigram GIN index on name) and
+        # SQLite (tests): prefix match first, then generic foods (no brand) over
+        # branded, then the shorter / more canonical name.
+        prefix_first = case((Food.name.ilike(f"{q}%"), 0), else_=1)
+        generic_first = case((Food.brand.is_(None), 0), else_=1)
         stmt = (
             select(Food)
             .where(self._visible(user_id), Food.name.ilike(f"%{q}%"))
-            .order_by(Food.name)
+            .order_by(prefix_first, generic_first, func.length(Food.name), Food.name)
             .limit(limit)
         )
         return list((await self.db.execute(stmt)).scalars().all())
