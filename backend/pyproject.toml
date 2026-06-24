@@ -1,0 +1,30 @@
+[project]
+name = "baseline-backend"
+version = "0.1.0"
+description = "Baseline — calorie & macro tracker backend (FastAPI)"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "C4", "SIM", "ASYNC"]
+ignore = [
+    "E501",   # line length enforced by formatter
+    "E402",   # late imports in main.py (subscribers before routers)
+    "N806",   # DbSession/CurrentUser type aliases
+    "B008",   # FastAPI Depends() in defaults
+    "B904",   # raise-without-from inside except
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "-q"
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+disallow_untyped_defs = false

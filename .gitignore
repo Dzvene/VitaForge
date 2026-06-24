@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+backend/venv/
+backend/.venv/
+backend/.env
+*.db
+_autogen.db
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Mobile
+ios-native/build/
+ios-native/*.xcodeproj
+ios-native/DerivedData/
+android-native/build/
+android-native/.gradle/
+android-native/app/build/
+android-native/local.properties
+*.keystore
+
+# Misc
+*.log

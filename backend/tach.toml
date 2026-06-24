@@ -1,0 +1,99 @@
+## Module-boundary lock for Baseline.
+##
+## Each `app.modules.<X>` is a vertical slice. Cross-slice imports must be
+## declared under that slice's `depends_on`; an undeclared import fails
+## `tach check`. The dependency graph is intentionally acyclic:
+##
+##   identity ← auth, profile
+##   profile  ← nutrition, weight
+##   foods    (leaf)
+##   nutrition, foods ← diary
+##   diary, weight, profile, nutrition ← calibration   (calibration WRITES nutrition)
+##   profile, nutrition, diary, weight, identity ← coaching
+##
+## The pure calculation engine lives in `app.core` (nutrition_math, params), so
+## every slice can reuse it without a cross-slice edge. `calibration` depends on
+## `nutrition` (one-directional write of the real maintenance figure) rather than
+## the reverse — that is what keeps diary→nutrition→… from forming a cycle.
+##
+## Regenerate with `tach sync` from `backend/`. Run `tach check` in CI.
+
+exclude = [
+    "alembic",
+    "scripts",
+    "tests",
+    "venv",
+    ".venv",
+]
+source_roots = ["."]
+
+[[modules]]
+path = "app.core"
+depends_on = ["app.modules.identity"]
+utility = true
+
+[[modules]]
+path = "app.shared"
+depends_on = []
+utility = true
+
+[[modules]]
+path = "app.modules.identity"
+depends_on = []
+
+[[modules]]
+path = "app.modules.auth"
+depends_on = ["app.modules.identity"]
+
+[[modules]]
+path = "app.modules.app_config"
+depends_on = []
+
+[[modules]]
+path = "app.modules.profile"
+depends_on = ["app.modules.identity", "app.modules.app_config"]
+
+[[modules]]
+path = "app.modules.nutrition"
+depends_on = ["app.modules.profile"]
+
+[[modules]]
+path = "app.modules.foods"
+depends_on = []
+
+[[modules]]
+path = "app.modules.weight"
+depends_on = ["app.modules.profile"]
+
+[[modules]]
+path = "app.modules.diary"
+depends_on = ["app.modules.foods", "app.modules.nutrition"]
+
+[[modules]]
+path = "app.modules.calibration"
+depends_on = [
+    "app.modules.diary",
+    "app.modules.weight",
+    "app.modules.profile",
+    "app.modules.nutrition",
+]
+
+[[modules]]
+path = "app.modules.coaching"
+depends_on = [
+    "app.modules.identity",
+    "app.modules.profile",
+    "app.modules.nutrition",
+    "app.modules.diary",
+    "app.modules.weight",
+]
+
+# Admin facade — read/manage across slices. Hub by design (admin surface only).
+[[modules]]
+path = "app.modules.admin"
+depends_on = [
+    "app.modules.identity",
+    "app.modules.foods",
+    "app.modules.diary",
+    "app.modules.weight",
+]
