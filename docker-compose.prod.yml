@@ -1,0 +1,53 @@
+# =============================================================================
+# VitaForge — Docker Compose (Production)
+# =============================================================================
+#   vitaforge.matrix-capital.net      → frontend  (127.0.0.1:3630)
+#   api-vitaforge.matrix-capital.net  → backend   (127.0.0.1:8130)
+#   postgres                          → internal only (compose network)
+#
+# External access via the host's nginx reverse proxy + Let's Encrypt.
+# Run with:  docker compose -f docker-compose.prod.yml -p vitaforge up -d --build
+# =============================================================================
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: vitaforge-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: vitaforge
+      POSTGRES_USER: vitaforge
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-tJxFbYFK0l3t8TxT-1C9nhxXJGPiw51i}
+    volumes:
+      - vitaforge_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vitaforge -d vitaforge"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    build: ./backend
+    container_name: vitaforge-backend
+    restart: unless-stopped
+    env_file: ./backend/.env
+    ports:
+      - "127.0.0.1:8130:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE: https://api-vitaforge.matrix-capital.net/api/v1
+    container_name: vitaforge-frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3630:3000"
+    depends_on:
+      - backend
+
+volumes:
+  vitaforge_pgdata:

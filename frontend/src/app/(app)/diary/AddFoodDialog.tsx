@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { ArrowLeft, Heart, Plus, Search, Star } from "lucide-react";
+import { ArrowLeft, Barcode, Heart, Plus, Search, Star } from "lucide-react";
 import { diary, foods } from "@/lib/api/endpoints";
 import { qk } from "@/lib/api/hooks";
 import { MEAL_LABELS } from "@/lib/format";
@@ -35,7 +35,17 @@ export function AddFoodDialog({
   const [tab, setTab] = useState<"search" | "recent" | "favorites">("recent");
   const [query, setQuery] = useState("");
   const [submitted, setSubmitted] = useState("");
+  const [barcode, setBarcode] = useState("");
   const [selected, setSelected] = useState<FoodOut | null>(null);
+
+  const lookup = useMutation({
+    mutationFn: (code: string) => foods.byBarcode(code),
+    onSuccess: (food) => {
+      setBarcode("");
+      pick(food);
+    },
+    onError: () => toast("No product with that barcode", "error"),
+  });
 
   // quantity step
   const [meal, setMeal] = useState<Meal>(defaultMeal);
@@ -133,6 +143,31 @@ export function AddFoodDialog({
             </form>
           )}
 
+          {tab === "search" && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const code = barcode.trim();
+                if (code) lookup.mutate(code);
+              }}
+              className="flex gap-2"
+            >
+              <div className="relative flex-1">
+                <Barcode className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" />
+                <Input
+                  className="pl-9"
+                  placeholder="Barcode number…"
+                  inputMode="numeric"
+                  value={barcode}
+                  onChange={(e) => setBarcode(e.target.value)}
+                />
+              </div>
+              <Button type="submit" variant="secondary" loading={lookup.isPending}>
+                Find
+              </Button>
+            </form>
+          )}
+
           <div className="max-h-[46vh] space-y-1.5 overflow-y-auto">
             {loading ? (
               <div className="grid place-items-center py-8">
@@ -215,12 +250,16 @@ function QuantityStep(props: {
   const factor = effGrams / 100;
   const kcal = Math.round(food.kcal_100g * factor);
 
+  const favorites = useQuery({ queryKey: ["foods", "favorites"], queryFn: foods.favorites });
+  const isFav = favorites.data?.some((f) => f.id === food.id) ?? false;
+
   const fav = useMutation({
-    mutationFn: () => foods.addFavorite(food.id),
+    mutationFn: () => (isFav ? foods.removeFavorite(food.id) : foods.addFavorite(food.id)),
     onSuccess: () => {
       props.qc.invalidateQueries({ queryKey: ["foods", "favorites"] });
-      toast("Saved to favorites", "ok");
+      toast(isFav ? "Removed from favorites" : "Saved to favorites", "ok");
     },
+    onError: () => toast("Could not update favorites", "error"),
   });
 
   return (
@@ -232,8 +271,16 @@ function QuantityStep(props: {
       <div className="rounded-xl bg-surface-2 p-4">
         <div className="flex items-center justify-between">
           <p className="nums text-2xl font-semibold">{kcal} kcal</p>
-          <button onClick={() => fav.mutate()} className="rounded-lg p-1.5 text-ink-muted hover:bg-surface-3 hover:text-danger">
-            <Heart className="h-4 w-4" />
+          <button
+            onClick={() => fav.mutate()}
+            disabled={fav.isPending}
+            aria-pressed={isFav}
+            aria-label={isFav ? "Remove from favorites" : "Save to favorites"}
+            className={`rounded-lg p-1.5 hover:bg-surface-3 ${
+              isFav ? "text-danger" : "text-ink-muted hover:text-danger"
+            }`}
+          >
+            <Heart className="h-4 w-4" fill={isFav ? "currentColor" : "none"} />
           </button>
         </div>
         <p className="nums mt-1 text-xs text-ink-faint">

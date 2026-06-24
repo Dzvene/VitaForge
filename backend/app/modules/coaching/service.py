@@ -52,7 +52,12 @@ class CoachingService:
     async def _upsert_state(self, user_id: int, wtype: str) -> CoachingWarningState:
         state = await self._state(user_id, wtype)
         if state is None:
-            state = CoachingWarningState(user_id=user_id, warning_type=wtype)
+            # Set the defaults explicitly: column `default=` is only applied at
+            # INSERT/flush, but accept() reads accepted_count straight after
+            # creating the row (before any flush), so it must already be 0.
+            state = CoachingWarningState(
+                user_id=user_id, warning_type=wtype, accepted_count=0, dismissed=False
+            )
             self.db.add(state)
         return state
 

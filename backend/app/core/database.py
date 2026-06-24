@@ -6,13 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from app.core.config import settings
 
-engine = create_async_engine(
-    settings.DATABASE_URL,
-    echo=settings.APP_DEBUG,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
-)
+# SQLite (used by the test harness) runs on a NullPool and rejects the
+# queue-pool sizing kwargs, so only pass them for real server databases.
+_engine_kwargs: dict = {"echo": settings.APP_DEBUG}
+if not settings.DATABASE_URL.startswith("sqlite"):
+    _engine_kwargs |= {"pool_pre_ping": True, "pool_size": 10, "max_overflow": 20}
+
+engine = create_async_engine(settings.DATABASE_URL, **_engine_kwargs)
 
 AsyncSessionLocal = async_sessionmaker(
     engine,
