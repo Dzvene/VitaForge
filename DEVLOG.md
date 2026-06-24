@@ -4,6 +4,30 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-24 — Mechanical lock for the VSA boundaries (canon gate)
+
+Roadmap/canon review: we are in **v1**, web part functionally near-complete
+(profile/onboarding, norm+macros, calibration real-maintenance, manual recompute,
+diary+summary, weight+trend, configurable params, guest preview). `tach check`
+green, **114 backend tests green**, prod live, seed catalog (104) serving. Canon
+held **structurally** — but the only real gap vs Invocore/SmartWMS/süd-fenster was
+**no mechanical lock**: `make check` existed but was manual, nothing stopped drift.
+Closed that.
+
+- `.githooks/pre-commit` — VSA gate: (1) `tach check` must pass (runs in the
+  backend image via `docker run`, host has no python), (2) blocks a new
+  god-file `services.py` inside a slice, (3) blocks a new top-level package under
+  `app/` outside `core|modules|shared` (a slice escaping tach registration).
+- `.githooks/commit-msg` — blocks compromise phrases («оставляем навсегда»,
+  «feature а не debt», «good enough for now», …) that precede half-migrations.
+- Activated via `git config core.hooksPath .githooks`. Bypass only with
+  `VITAFORGE_VSA_LOOSE=1` (not canon).
+- **Verified it bites:** injected an illegal `foods → calibration` import (foods
+  is a leaf), hook failed with the exact tach violation; restored, tree clean.
+
+**Next:** real food data at scale — download OFF/USDA dump, run the ready
+importer, FTS instead of ILIKE. (Importers done; only seed is loaded so far.)
+
 ## 2026-06-24 — Guest preview slice (try-before-signup), tests, deploy
 
 Finished the half-built guest/public preview that was sitting uncommitted in the

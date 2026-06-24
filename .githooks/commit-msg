@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+#
+# VitaForge — commit-message canon gate.
+#
+# Blocks compromise/sugarcoating language that historically precedes
+# architecture drift (mirrors Invocore/SmartWMS canon-strict). The point is
+# not word policing — it is that these phrases mark a slice being left
+# half-migrated and relabelled as "fine".
+#
+# Bypass (НЕ канон):  VITAFORGE_VSA_LOOSE=1 git commit ...
+
+set -e
+
+[[ "${VITAFORGE_VSA_LOOSE:-0}" == "1" ]] && exit 0
+
+MSG_FILE="$1"
+MSG="$(cat "$MSG_FILE")"
+
+# Forbidden compromise phrases (case-insensitive).
+FORBIDDEN=(
+  "оставляем навсегда"
+  "оставим навсегда"
+  "пока оставим"
+  "временно оставим"
+  "это feature а не debt"
+  "feature а не debt"
+  "технический долг приемлем"
+  "канон потом"
+  "сгладим"
+  "не канон но ок"
+  "leave as-is forever"
+  "good enough for now"
+)
+
+FAIL=0
+for phrase in "${FORBIDDEN[@]}"; do
+  if echo "$MSG" | grep -iqF "$phrase"; then
+    echo "❌ commit-msg FAILED: запрещённая фраза «$phrase»."
+    FAIL=1
+  fi
+done
+
+if (( FAIL )); then
+  echo ""
+  echo "Канон без сглаживания. Перепиши сообщение или закрой долг по-настоящему."
+  exit 1
+fi
+exit 0

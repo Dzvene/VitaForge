@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+#
+# VitaForge — canonical VSA enforcement pre-commit hook.
+#
+# Mechanical lock (канон-стандарт, ср. Invocore/SmartWMS/süd-fenster):
+#   "memory без mechanical lock = рулетка" — границы держит gate, не дисциплина.
+#
+# Catches architecture drift before it lands:
+#   1. `tach check` must pass — module boundaries (10 slices, acyclic graph).
+#   2. No new god-file `services.py` collapsing a slice's logic into one blob.
+#   3. No new package directly under app/ outside the canonical set
+#      (a new top-level package = a slice that escaped tach registration).
+#
+# tach lives inside the backend image (host has no python). The hook runs it
+# there against the *working tree* (bind-mounted), matching `make check`.
+#
+# Setup after clone:  git config core.hooksPath .githooks
+# Bypass (НЕ канон):  VITAFORGE_VSA_LOOSE=1 git commit ...
+
+set -e
+
+if [[ "${VITAFORGE_VSA_LOOSE:-0}" == "1" ]]; then
+  echo "⚠️  VITAFORGE_VSA_LOOSE=1 — VSA gate bypassed. Канон без сглаживания. Точно?"
+  exit 0
+fi
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+FAIL=0
+
+# --- 1. No new god-file services.py inside a slice -------------------------
+NEW_GODFILE=$(git diff --cached --name-status \
+  | grep -E "^A\s+backend/app/modules/[^/]+/services\.py$" \
+  | awk '{print $2}' || true)
+if [[ -n "$NEW_GODFILE" ]]; then
+  echo "❌ Pre-commit FAILED: new god-file services.py in a slice:"
+  echo "$NEW_GODFILE" | sed 's/^/   /'
+  echo "   Канон: логика слайса в service.py/handlers, не в одном services.py-блобе."
+  FAIL=1
+fi
+
+# --- 2. No new package directly under app/ outside the canonical set -------
+ALLOWED="core|modules|shared|main\.py|__init__\.py"
+NEW_PKG=$(git diff --cached --name-status \
+  | grep -E "^A\s+backend/app/[^/]+/" \
+  | awk '{print $2}' \
+  | sed -E 's#^backend/app/([^/]+)/.*#\1#' \
+  | sort -u \
+  | grep -vE "^($ALLOWED)$" || true)
+if [[ -n "$NEW_PKG" ]]; then
+  echo "❌ Pre-commit FAILED: new top-level package(s) under app/ outside канон:"
+  echo "$NEW_PKG" | sed 's/^/   app\//'
+  echo "   Слайсы живут в app/modules/<slice>/ и регистрируются в tach.toml."
+  FAIL=1
+fi
+
+# --- 3. tach check (the boundary lock) -------------------------------------
+run_tach() {
+  if command -v tach >/dev/null 2>&1; then
+    ( cd "$REPO_ROOT/backend" && tach check )
+  elif command -v python >/dev/null 2>&1; then
+    ( cd "$REPO_ROOT/backend" && python -m tach check )
+  elif command -v docker >/dev/null 2>&1; then
+    docker run --rm -v "$REPO_ROOT/backend":/app -w /app vitaforge-backend tach check
+  else
+    echo "⚠️  tach unavailable (no python/tach/docker). Cannot enforce boundaries."
+    return 2
+  fi
+}
+
+echo "→ tach check (module boundaries)…"
+if ! run_tach; then
+  echo "❌ Pre-commit FAILED: tach check did not pass (boundary violation or cycle)."
+  echo "   Fix the cross-slice import or declare it in backend/tach.toml."
+  FAIL=1
+fi
+
+if (( FAIL )); then
+  echo ""
+  echo "Commit blocked. Канон без сглаживания."
+  exit 1
+fi
+
+echo "✅ VSA gate passed."
+exit 0
