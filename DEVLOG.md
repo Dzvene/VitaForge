@@ -4,6 +4,26 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-24 — Public landing page (the front door was a redirect)
+
+`/` was a client redirect — signed-in → `/dashboard`, everyone else → a bare
+`/login` form. A first-time visitor saw a login box with zero explanation of what
+the product is, and the guest `/try` calculator was unreachable (nothing linked
+to it). Fixed:
+
+- `app/page.tsx` is now a real landing: hero (calibration-first pitch), the
+  3-step method (estimate → log → real maintenance), a verifiable-facts strip
+  (450k foods / €0 / every number explained — no invented testimonials or user
+  counts, per the no-fake-social-proof rule), a feature grid (diary+barcode,
+  weight trend, calibration, coaching) and CTAs to `/try` and `/register`.
+  Signed-in visitors still bounce to `/dashboard`.
+- Reuses the existing design system (Button/`card`, brand/ink tokens, lucide,
+  copy voice from `/try`); product name kept as "Baseline" to match the rest of
+  the user-facing app. Content is server-rendered (good for SEO).
+- typecheck + `next lint` clean, 25 frontend tests green. Rebuilt + redeployed
+  `vitaforge-frontend`; landing live at https://vitaforge.matrix-capital.net (200,
+  SSR copy present, /try /register /login linked).
+
 ## 2026-06-24 — Real food catalog at scale (104 → 458k), streaming importer, relevance search
 
 The #1 release blocker: a calorie tracker with 104 seed foods is unusable. Closed
