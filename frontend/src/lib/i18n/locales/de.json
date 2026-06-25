@@ -510,5 +510,23 @@
     "dark": "Dunkel",
     "system": "System",
     "toggle": "Theme wechseln (jetzt: {{theme}})"
+  },
+  "siteFooter": {
+    "product": "Produkt",
+    "legal": "Rechtliches",
+    "tryCalculator": "Rechner ausprobieren",
+    "createAccount": "Konto erstellen",
+    "logIn": "Anmelden",
+    "privacy": "Datenschutz",
+    "terms": "Nutzungsbedingungen",
+    "cookies": "Cookies",
+    "impressum": "Impressum",
+    "blurb": "Kalorien- und Makro-Tracking mit Kalibrierung. Miss deinen echten Erhaltungsbedarf und bau dein Ziel auf Fakten. Kostenlos, ohne Werbung, ohne Paywall.",
+    "rights": "Alle Rechte vorbehalten.",
+    "madeWith": "Basiert auf der RP-/Israetel-Kalibrierungsmethode."
+  },
+  "legal": {
+    "backHome": "Zur Startseite",
+    "lastUpdated": "Zuletzt aktualisiert"
   }
 }

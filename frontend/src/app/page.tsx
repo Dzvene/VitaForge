@@ -19,6 +19,8 @@ import {
 import { useAuth } from "@/lib/store/auth";
 import { Button } from "@/components/ui/primitives";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { SiteFooter } from "@/components/site/SiteFooter";
 
 export default function Home() {
   const router = useRouter();
@@ -45,6 +47,7 @@ export default function Home() {
         </div>
         <nav className="flex items-center gap-2">
           <LanguageSwitcher />
+          <ThemeToggle />
           <Link href="/login">
             <Button variant="ghost" size="sm">
               {t("landing.header.login")}
@@ -172,25 +175,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="border-t border-line">
-        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-5 py-6 text-sm text-ink-faint sm:flex-row">
-          <div className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-brand-400" />
-            <span>{t("landing.footer.tagline")}</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/try" className="hover:text-ink">
-              {t("landing.footer.try")}
-            </Link>
-            <Link href="/login" className="hover:text-ink">
-              {t("landing.footer.login")}
-            </Link>
-            <Link href="/register" className="hover:text-ink">
-              {t("landing.footer.signup")}
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

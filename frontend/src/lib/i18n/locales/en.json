@@ -510,5 +510,23 @@
     "dark": "Dark",
     "system": "System",
     "toggle": "Switch theme (now: {{theme}})"
+  },
+  "siteFooter": {
+    "product": "Product",
+    "legal": "Legal",
+    "tryCalculator": "Try the calculator",
+    "createAccount": "Create an account",
+    "logIn": "Log in",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "cookies": "Cookies",
+    "impressum": "Imprint",
+    "blurb": "Calibration-first calorie & macro tracking. Measure your real maintenance, then build from facts. Free, no ads, no paywall.",
+    "rights": "All rights reserved.",
+    "madeWith": "Built on the RP / Israetel calibration method."
+  },
+  "legal": {
+    "backHome": "Back to home",
+    "lastUpdated": "Last updated"
   }
 }
