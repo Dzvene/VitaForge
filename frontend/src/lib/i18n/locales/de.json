@@ -81,19 +81,19 @@
       "titleLead": "Hör auf, deine Kalorien zu raten.",
       "titleHighlight": "Miss",
       "titleTail": "sie.",
-      "subtitle": "Jeder andere Tracker gibt dir eine Formel und hofft das Beste. Baseline erfasst dein Essen und Gewicht und berechnet aus dem Trend deinen echten Erhaltungsbedarf zurück — dein Ziel entsteht aus Fakten, nicht aus einer Schätzung.",
+      "subtitle": "Jeder andere Tracker gibt dir eine Formel und hofft das Beste. VitaForge erfasst dein Essen und Gewicht und berechnet aus dem Trend deinen echten Erhaltungsbedarf zurück — dein Ziel entsteht aus Fakten, nicht aus einer Schätzung.",
       "tryCta": "Ausprobieren — ohne Konto",
       "registerCta": "Kostenloses Konto erstellen",
       "noStrings": "Keine Werbung. Keine Paywall. Keine Kreditkarte."
     },
     "method": {
-      "title": "Andere Apps raten. Baseline misst.",
+      "title": "Andere Apps raten. VitaForge misst.",
       "step1Title": "Mit einer Schätzung starten",
       "step1Body": "Gib deine Daten ein und erhalte ein Start-Ziel für Kalorien & Makros aus der Standardformel — genau dort, wo die meisten Apps aufhören.",
       "step2Title": "Ein paar Wochen erfassen",
       "step2Body": "Erfasse, was du isst, und steig auf die Waage. Das tägliche Rauschen wird zu einem echten Gewichtstrend geglättet, statt zu einer einzelnen springenden Zahl.",
       "step3Title": "Deinen echten Erhaltungsbedarf erhalten",
-      "step3Body": "Baseline gleicht deine tatsächliche Zufuhr mit dem Trend ab und berechnet die Kalorien zurück, die dein Gewicht wirklich halten — und baut daraus dein Ziel."
+      "step3Body": "VitaForge gleicht deine tatsächliche Zufuhr mit dem Trend ab und berechnet die Kalorien zurück, die dein Gewicht wirklich halten — und baut daraus dein Ziel."
     },
     "facts": {
       "foodsValue": "450.000+",
@@ -101,7 +101,7 @@
       "priceValue": "0 €",
       "priceLabel": "für immer kostenlos — keine Werbung, kein Abo, kein Upsell",
       "methodValue": "Jede Zahl",
-      "methodLabel": "erklärt — Baseline zeigt die Methode, keine Blackbox"
+      "methodLabel": "erklärt — VitaForge zeigt die Methode, keine Blackbox"
     },
     "features": {
       "diaryTitle": "Ernährungstagebuch mit Barcode-Suche",
@@ -115,12 +115,12 @@
     },
     "cta": {
       "title": "Sieh deine Zahl in unter einer Minute",
-      "body": "Kein Konto zum Ausprobieren nötig. Starte den Rechner und erstelle dann ein kostenloses Konto, wenn Baseline deinen echten Erhaltungsbedarf messen soll.",
+      "body": "Kein Konto zum Ausprobieren nötig. Starte den Rechner und erstelle dann ein kostenloses Konto, wenn VitaForge deinen echten Erhaltungsbedarf messen soll.",
       "tryCta": "Rechner öffnen",
       "registerCta": "Kostenloses Konto erstellen"
     },
     "footer": {
-      "tagline": "Baseline — Ernährungstracking nach dem Kalibrierungsprinzip",
+      "tagline": "VitaForge — Ernährungstracking nach dem Kalibrierungsprinzip",
       "try": "Ausprobieren",
       "login": "Anmelden",
       "signup": "Registrieren"
@@ -147,7 +147,7 @@
     "calculate": "Mein Ziel berechnen",
     "explainBefore": "Das ist eine",
     "explainFormulaEstimate": "Formel-Schätzung",
-    "explainMiddle": "— ein Startwert aus deinen Daten ({{maintenance}} kcal Erhaltungsbedarf). Hier hören die meisten Apps auf. Baseline geht weiter: Tracke ein paar Wochen und es berechnet aus deinem Gewichtsverlauf deinen",
+    "explainMiddle": "— ein Startwert aus deinen Daten ({{maintenance}} kcal Erhaltungsbedarf). Hier hören die meisten Apps auf. VitaForge geht weiter: Tracke ein paar Wochen und es berechnet aus deinem Gewichtsverlauf deinen",
     "explainRealMaintenance": "echten Erhaltungsbedarf",
     "explainAfter": "zurück und baut das Ziel dann aus Fakten statt aus einer Formel auf.",
     "rateClampedNote": "Dein gewähltes Tempo wurde auf einen sicheren Bereich begrenzt.",
@@ -400,7 +400,7 @@
     "justCurious": "Nur neugierig?",
     "tryCalculator": "Rechner ausprobieren — ohne Konto",
     "haveAccount": "Hast du bereits ein Konto?",
-    "brand": "Baseline",
+    "brand": "VitaForge",
     "heroLead": "Hör auf, deine Kalorien zu raten.",
     "heroHighlight": "Kalibriere sie.",
     "heroFootnote": "Basierend auf der RP / Israetel Kalibrierungsmethode.",

@@ -1,4 +1,4 @@
-"""Baseline — FastAPI application entry."""
+"""VitaForge — FastAPI application entry."""
 
 import logging
 from contextlib import asynccontextmanager

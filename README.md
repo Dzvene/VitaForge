@@ -1,4 +1,4 @@
-# Baseline
+# VitaForge
 
 A personal calorie & macro tracker for weight control. Computes a daily calorie
 + macro target for your goal, logs what you eat, shows what's left for the day,
@@ -12,7 +12,7 @@ and tracks a smoothed weight trend.
   numbers blindly.
 - **Calibration-first.** Instead of building a deficit on a formula guess, it
   measures your real maintenance from your own intake + weight trend (the RP /
-  Israetel approach), then builds the goal from that. This is the namesake.
+  Israetel approach), then builds the goal from that. This is the core idea.
 
 ## Stack
 
@@ -62,7 +62,7 @@ forming a cycle.
 ```bash
 # 1. Postgres (docker; host port 5433 to avoid your local PG18)
 docker compose up -d db
-#    then set backend/.env: DATABASE_URL=...@localhost:5433/baseline
+#    then set backend/.env: DATABASE_URL=...@localhost:5433/vitaforge
 
 # 2. Backend
 cd backend

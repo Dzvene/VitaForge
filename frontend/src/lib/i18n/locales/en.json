@@ -81,19 +81,19 @@
       "titleLead": "Stop guessing your calories.",
       "titleHighlight": "Measure",
       "titleTail": "them.",
-      "subtitle": "Every other tracker hands you a formula and hopes for the best. Baseline logs your food and weight, then back-calculates your real maintenance from the trend — so your target is built from facts, not a guess.",
+      "subtitle": "Every other tracker hands you a formula and hopes for the best. VitaForge logs your food and weight, then back-calculates your real maintenance from the trend — so your target is built from facts, not a guess.",
       "tryCta": "Try it — no account",
       "registerCta": "Create a free account",
       "noStrings": "No ads. No paywall. No credit card."
     },
     "method": {
-      "title": "Most apps guess. Baseline measures.",
+      "title": "Most apps guess. VitaForge measures.",
       "step1Title": "Start with an estimate",
       "step1Body": "Enter your stats and get a starting calorie & macro target from the standard formula — the same one most apps stop at.",
       "step2Title": "Log a couple of weeks",
       "step2Body": "Track what you eat and step on the scale. Day-to-day noise is smoothed into a real weight trend, not a single jumpy number.",
       "step3Title": "Get your real maintenance",
-      "step3Body": "Baseline reads your actual intake against the trend and back-calculates the calories that truly hold your weight — then builds the goal from that."
+      "step3Body": "VitaForge reads your actual intake against the trend and back-calculates the calories that truly hold your weight — then builds the goal from that."
     },
     "facts": {
       "foodsValue": "450,000+",
@@ -101,7 +101,7 @@
       "priceValue": "€0",
       "priceLabel": "free forever — no ads, no subscription, no upsell",
       "methodValue": "Every number",
-      "methodLabel": "explained — Baseline shows the method, never a black box"
+      "methodLabel": "explained — VitaForge shows the method, never a black box"
     },
     "features": {
       "diaryTitle": "Food diary with barcode search",
@@ -115,12 +115,12 @@
     },
     "cta": {
       "title": "See your number in under a minute",
-      "body": "No sign-up to try. Run the calculator, then create a free account if you want Baseline to start measuring your real maintenance.",
+      "body": "No sign-up to try. Run the calculator, then create a free account if you want VitaForge to start measuring your real maintenance.",
       "tryCta": "Try the calculator",
       "registerCta": "Create a free account"
     },
     "footer": {
-      "tagline": "Baseline — calibration-first nutrition tracking",
+      "tagline": "VitaForge — calibration-first nutrition tracking",
       "try": "Try it",
       "login": "Log in",
       "signup": "Sign up"
@@ -147,7 +147,7 @@
     "calculate": "Calculate my target",
     "explainBefore": "This is a",
     "explainFormulaEstimate": "formula estimate",
-    "explainMiddle": "— a starting guess from your stats ({{maintenance}} kcal maintenance). It's where most apps stop. Baseline keeps going: log a couple of weeks and it back-calculates your",
+    "explainMiddle": "— a starting guess from your stats ({{maintenance}} kcal maintenance). It's where most apps stop. VitaForge keeps going: log a couple of weeks and it back-calculates your",
     "explainRealMaintenance": "real maintenance",
     "explainAfter": "from your weight trend, then builds the target from facts instead of a formula.",
     "rateClampedNote": "Your chosen rate was clamped to a safe range.",
@@ -400,7 +400,7 @@
     "justCurious": "Just curious?",
     "tryCalculator": "Try the calculator — no account",
     "haveAccount": "Already have an account?",
-    "brand": "Baseline",
+    "brand": "VitaForge",
     "heroLead": "Stop guessing your calories.",
     "heroHighlight": "Calibrate them.",
     "heroFootnote": "Built on the RP / Israetel calibration method.",

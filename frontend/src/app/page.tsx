@@ -41,7 +41,7 @@ export default function Home() {
           <div className="grid h-9 w-9 place-items-center rounded-xl bg-brand-500/15 ring-1 ring-brand-500/30">
             <Activity className="h-5 w-5 text-brand-400" />
           </div>
-          <span className="text-lg font-semibold tracking-tight">Baseline</span>
+          <span className="text-lg font-semibold tracking-tight">VitaForge</span>
         </div>
         <nav className="flex items-center gap-2">
           <LanguageSwitcher />

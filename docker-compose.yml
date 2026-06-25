@@ -2,18 +2,18 @@ services:
   db:
     image: postgres:18
     environment:
-      POSTGRES_USER: baseline
-      POSTGRES_PASSWORD: baseline
-      POSTGRES_DB: baseline
+      POSTGRES_USER: vitaforge
+      POSTGRES_PASSWORD: vitaforge
+      POSTGRES_DB: vitaforge
     ports:
       - "5433:5432"   # 5433 on host to avoid clashing with a local PG18
     volumes:
-      - baseline_pg:/var/lib/postgresql/data
+      - vitaforge_pg:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U baseline"]
+      test: ["CMD-SHELL", "pg_isready -U vitaforge"]
       interval: 5s
       timeout: 3s
       retries: 10
 
 volumes:
-  baseline_pg:
+  vitaforge_pg:

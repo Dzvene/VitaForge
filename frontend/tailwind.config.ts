@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Baseline design language — "graphite + steel".
+ * VitaForge design language — "graphite + steel".
  * Strict, athletic, dark. Near-black graphite canvas, layered cool-grey
  * surfaces, a steel-blue brand accent, and dedicated macro hues
  * (protein = blue, fat = gold, carbs = green). Numbers use tabular figures.

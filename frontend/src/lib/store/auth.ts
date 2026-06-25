@@ -25,7 +25,7 @@ export const useAuth = create<AuthState>()(
       clear: () => set({ accessToken: null, refreshToken: null, user: null }),
     }),
     {
-      name: "baseline-auth",
+      name: "vitaforge-auth",
       partialize: (s) => ({
         accessToken: s.accessToken,
         refreshToken: s.refreshToken,

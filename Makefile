@@ -1,4 +1,4 @@
-# Baseline — dev shortcuts. Run from the repo root.
+# VitaForge — dev shortcuts. Run from the repo root.
 # On Windows use Git Bash, or run the underlying commands directly.
 
 BE = backend
