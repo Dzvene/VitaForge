@@ -31,7 +31,8 @@
     "calories": "Kalorien",
     "protein": "Eiweiß",
     "fat": "Fett",
-    "carbs": "Kohlenhydrate"
+    "carbs": "Kohlenhydrate",
+    "dismiss": "Schließen"
   },
   "charts": {
     "remaining": "Übrig",
@@ -76,7 +77,10 @@
     }
   },
   "appShell": {
-    "serverUnreachable": "Server nicht erreichbar. Stelle sicher, dass das Backend läuft, und lade die Seite neu."
+    "serverUnreachable": "Server nicht erreichbar. Stelle sicher, dass das Backend läuft, und lade die Seite neu.",
+    "verifyBannerText": "Bestätige deine E-Mail, um dein Konto zu sichern.",
+    "verifyResend": "Erneut senden",
+    "verifyResent": "Bestätigungs-E-Mail gesendet — sieh in deinem Postfach nach."
   },
   "landing": {
     "header": {

@@ -31,7 +31,8 @@
     "calories": "Calories",
     "protein": "Protein",
     "fat": "Fat",
-    "carbs": "Carbs"
+    "carbs": "Carbs",
+    "dismiss": "Dismiss"
   },
   "charts": {
     "remaining": "Remaining",
@@ -76,7 +77,10 @@
     }
   },
   "appShell": {
-    "serverUnreachable": "Can't reach the server. Make sure the backend is running, then refresh."
+    "serverUnreachable": "Can't reach the server. Make sure the backend is running, then refresh.",
+    "verifyBannerText": "Confirm your email to secure your account.",
+    "verifyResend": "Resend",
+    "verifyResent": "Verification email sent — check your inbox."
   },
   "landing": {
     "header": {

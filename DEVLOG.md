@@ -4,6 +4,35 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-25 — UI audit fixes: mobile logout, settings overlap, verify banner
+
+Full-UI walkthrough (guest + authed + 390px mobile) turned up three concrete
+issues; fixed the cluster.
+
+- **No logout on mobile.** Logout + language lived only in the desktop sidebar
+  footer (`md:flex`), which is hidden on phones; the bottom-nav had neither, so
+  a mobile user was stranded in-session. Added a mobile top bar in `AppShell`
+  (`md:hidden`) carrying the brand, `LanguageSwitcher` and a logout button.
+  Verified: tapping it clears auth → /login.
+- **Settings "Save changes" overlapped "Recompute norm."** The sticky save CTA
+  was a transparent floating pill (`justify-end`) that covered ~155px of the
+  Recompute button (measured 3082px² overlap). Reworked into a solid full-width
+  sticky footer bar (bg + top border, bleeds to the page padding). Re-measured:
+  **0px² overlap at every scroll position**.
+- **Email verification had no in-app surface.** Added `VerifyEmailBanner` (shown
+  in `AppShell` while `user.email_verified` is false) — a slim bar with a
+  **Resend** action (`auth.resendVerification`) and a session-dismiss. This is
+  the only in-app way to re-trigger verification; before it only existed behind
+  the emailed link. Verified: resend → "email sent" confirmation.
+- i18n: `appShell.verify*` (3) + `common.dismiss`, all en/ru/de. tsc + eslint +
+  vitest(25) green. Frontend-only; deployed.
+
+Remaining UI nits logged for later: grams-only portions (no presets), no live
+kcal preview at chosen quantity, password-change for logged-in users, transient
+`/`→`/login` flash on the guest landing, desktop whitespace.
+
+---
+
 ## 2026-06-25 — Fix: coaching nags a brand-new account
 
 Manual UX walkthrough (register → onboarding → dashboard) surfaced a real bug: a

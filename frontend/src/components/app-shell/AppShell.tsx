@@ -17,6 +17,7 @@ import {
 import { useAuth } from "@/lib/store/auth";
 import { cn } from "@/lib/cn";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { VerifyEmailBanner } from "@/components/app-shell/VerifyEmailBanner";
 import type { ReactNode } from "react";
 
 interface NavItem {
@@ -105,6 +106,22 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Main */}
       <div className="flex min-w-0 flex-1 flex-col pb-24 md:pb-8">
+        {/* Top bar (mobile) — carries the language switch + logout that live in
+            the sidebar footer on desktop, so a phone user isn't stranded. */}
+        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-surface/95 px-3 py-2.5 backdrop-blur md:hidden">
+          <Brand />
+          <div className="flex items-center gap-1.5">
+            <LanguageSwitcher />
+            <button
+              onClick={logout}
+              aria-label={t("common.logOut")}
+              className="rounded-lg p-2 text-ink-muted hover:bg-surface-2 hover:text-danger"
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
+          </div>
+        </header>
+        <VerifyEmailBanner />
         <main className="flex-1 px-4 py-5 sm:px-6 lg:px-8">{children}</main>
       </div>
 

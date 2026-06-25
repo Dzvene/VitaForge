@@ -296,10 +296,15 @@ export default function SettingsPage() {
         )}
       </Card>
 
-      <div className="sticky bottom-20 z-10 flex justify-end md:bottom-4">
-        <Button size="lg" onClick={onSave} loading={save.isPending} className="shadow-glow">
-          {t("settings.saveChanges")}
-        </Button>
+      {/* Solid sticky footer bar (not a floating pill) so it can't transparently
+          overlap card buttons like "Recompute norm". Bleeds to the main padding
+          edges; sits above the mobile bottom-nav. */}
+      <div className="sticky bottom-20 z-10 -mx-4 mt-2 border-t border-line bg-surface/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 md:bottom-0 lg:-mx-8 lg:px-8">
+        <div className="flex justify-end">
+          <Button size="lg" onClick={onSave} loading={save.isPending} className="shadow-glow">
+            {t("settings.saveChanges")}
+          </Button>
+        </div>
       </div>
     </div>
   );
