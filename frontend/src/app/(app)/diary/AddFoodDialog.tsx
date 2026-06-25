@@ -12,6 +12,9 @@ import { Button, Field, Input, Segmented, Spinner } from "@/components/ui/primit
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
 
+// Common log amounts for foods without named portions (one-tap, still editable).
+const QUICK_GRAMS = [30, 50, 100, 150, 200, 250];
+
 function macroLine(f: FoodOut, t: TFunction) {
   return `${Math.round(f.kcal_100g)} ${t("common.kcal")} · P ${Math.round(f.protein_100g)} F ${Math.round(
     f.fat_100g,
@@ -321,6 +324,27 @@ function QuantityStep(props: {
       {mode === "grams" ? (
         <Field label={t("diary.addFood.amountGrams")}>
           <Input type="number" min={1} value={grams} onChange={(e) => props.setGrams(e.target.value)} autoFocus />
+          {/* One-tap common amounts — most catalog rows (USDA/OFF) carry no
+              named portions, so this kills the "type grams every time" friction. */}
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {QUICK_GRAMS.map((g) => {
+              const active = Number(grams) === g;
+              return (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => props.setGrams(String(g))}
+                  className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors ${
+                    active
+                      ? "border-brand-500/40 bg-brand-500/15 text-brand-400"
+                      : "border-line bg-surface-2 text-ink-muted hover:border-line-strong hover:text-ink"
+                  }`}
+                >
+                  {g} {t("common.grams")}
+                </button>
+              );
+            })}
+          </div>
         </Field>
       ) : (
         <div className="grid grid-cols-2 gap-3">

@@ -4,6 +4,29 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-25 — Quick-amount chips for logging (portion friction)
+
+Investigated the "grams-only, no portion presets" UX complaint. Finding: the
+named-portion picker (grams/portions toggle + portion select + **live kcal/macro
+preview**) was already built and working — but only the 154 curated staples
+carry portion data (`food_portions`); the 477k USDA/OFF bulk rows have none, so
+for almost everything you fell back to typing grams. (My earlier audit was
+partly wrong: live preview already worked; the gap is data coverage, not UI.)
+
+- Added one-tap **quick-amount chips** (30/50/100/150/200/250 g) under the grams
+  input in `AddFoodDialog`, shown for every food. Tapping sets the amount; the
+  active chip highlights; the existing live kcal/macro preview updates. Kills the
+  "type grams every time" friction for the bulk catalog without needing portion
+  data. Frontend-only, no new i18n (uses `common.grams`).
+- Verified in prod: chips render + 200 g → 122 kcal live for a milk row; API
+  still returns named portions for staples (`Молоко 3.2%` → cup 250 g), so the
+  richer toggle path is intact.
+
+Deeper portion coverage for real branded products would need serving sizes
+captured from the USDA/OFF dumps at import — deferred with the heavy re-import.
+
+---
+
 ## 2026-06-25 — UI audit fixes: mobile logout, settings overlap, verify banner
 
 Full-UI walkthrough (guest + authed + 390px mobile) turned up three concrete
