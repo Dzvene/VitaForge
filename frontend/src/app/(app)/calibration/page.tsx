@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CheckCircle2, FlaskConical, RefreshCw, SkipForward } from "lucide-react";
 import { calibration } from "@/lib/api/endpoints";
 import { qk, useCalibration } from "@/lib/api/hooks";
@@ -11,6 +12,7 @@ import { Badge, Button, Card, CardTitle, Skeleton } from "@/components/ui/primit
 import { useToast } from "@/components/ui/toast";
 
 export default function CalibrationPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const toast = useToast();
   const status = useCalibration();
@@ -25,23 +27,23 @@ export default function CalibrationPage() {
   const onResult = (okMsg: string) => (r: EstimateResult) => {
     setResult(r);
     invalidate();
-    toast(r.ok ? okMsg : r.reason || "Not enough data yet", r.ok ? "ok" : "info");
+    toast(r.ok ? okMsg : r.reason || t("calibration.notEnoughData"), r.ok ? "ok" : "info");
   };
-  const onErr = () => toast("Something went wrong", "error");
+  const onErr = () => toast(t("calibration.somethingWrong"), "error");
 
   const estimate = useMutation({
     mutationFn: calibration.estimate,
-    onSuccess: onResult("Calibrated — target switched to real maintenance"),
+    onSuccess: onResult(t("calibration.toastCalibrated")),
     onError: onErr,
   });
   const recalc = useMutation({
     mutationFn: calibration.recalc,
-    onSuccess: onResult("Recalculated from the latest week"),
+    onSuccess: onResult(t("calibration.toastRecalculated")),
     onError: onErr,
   });
   const skip = useMutation({
     mutationFn: calibration.skip,
-    onSuccess: onResult("Calibration skipped"),
+    onSuccess: onResult(t("calibration.toastSkipped")),
     onError: onErr,
   });
 
@@ -52,12 +54,9 @@ export default function CalibrationPage() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="label">Method</p>
-        <h1 className="text-2xl font-semibold tracking-tight">Calibration</h1>
-        <p className="mt-1 max-w-2xl text-sm text-ink-muted">
-          Instead of trusting a formula, we measure your real maintenance from what you actually ate and how your
-          weight trend moved — then build your goal from that.
-        </p>
+        <p className="label">{t("calibration.eyebrow")}</p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("calibration.title")}</h1>
+        <p className="mt-1 max-w-2xl text-sm text-ink-muted">{t("calibration.intro")}</p>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -66,14 +65,14 @@ export default function CalibrationPage() {
             right={
               done ? (
                 <Badge tone="ok">
-                  <CheckCircle2 className="h-3 w-3" /> Calibrated
+                  <CheckCircle2 className="h-3 w-3" /> {t("calibration.calibrated")}
                 </Badge>
               ) : (
-                <Badge tone="brand">In progress</Badge>
+                <Badge tone="brand">{t("calibration.inProgress")}</Badge>
               )
             }
           >
-            Baseline window
+            {t("calibration.baselineWindow")}
           </CardTitle>
 
           {status.isLoading || !s ? (
@@ -83,7 +82,7 @@ export default function CalibrationPage() {
               <div>
                 <div className="mb-2 flex items-baseline justify-between">
                   <span className="nums text-sm text-ink-muted">
-                    {s.clean_days_collected} / {s.window_days} clean days
+                    {t("calibration.cleanDaysCount", { collected: s.clean_days_collected, total: s.window_days })}
                   </span>
                   <span className="nums text-sm text-ink-faint">{pct}%</span>
                 </div>
@@ -91,8 +90,8 @@ export default function CalibrationPage() {
                   <div className="h-full rounded-full bg-gradient-to-r from-brand-500 to-accent transition-[width] duration-500" style={{ width: `${pct}%` }} />
                 </div>
                 <p className="mt-2 text-xs text-ink-faint">
-                  A clean day has both a food log and a weigh-in. {!done && s.days_remaining > 0
-                    ? `${s.days_remaining} more to go.`
+                  {t("calibration.cleanDayExplain")} {!done && s.days_remaining > 0
+                    ? t("calibration.daysRemaining", { count: s.days_remaining })
                     : ""}
                 </p>
               </div>
@@ -100,17 +99,17 @@ export default function CalibrationPage() {
               <div className="flex flex-wrap gap-2">
                 {!done && (
                   <Button onClick={() => estimate.mutate()} loading={estimate.isPending}>
-                    <FlaskConical className="h-4 w-4" /> Compute real maintenance
+                    <FlaskConical className="h-4 w-4" /> {t("calibration.computeBtn")}
                   </Button>
                 )}
                 {done && (
                   <Button onClick={() => recalc.mutate()} loading={recalc.isPending}>
-                    <RefreshCw className="h-4 w-4" /> Recalculate this week
+                    <RefreshCw className="h-4 w-4" /> {t("calibration.recalcBtn")}
                   </Button>
                 )}
                 {!done && (
                   <Button variant="ghost" onClick={() => skip.mutate()} loading={skip.isPending}>
-                    <SkipForward className="h-4 w-4" /> I know my norm
+                    <SkipForward className="h-4 w-4" /> {t("calibration.skipBtn")}
                   </Button>
                 )}
               </div>
@@ -119,28 +118,28 @@ export default function CalibrationPage() {
         </Card>
 
         <Card>
-          <CardTitle>Latest estimate</CardTitle>
+          <CardTitle>{t("calibration.latestEstimate")}</CardTitle>
           {result && result.ok ? (
             <dl className="space-y-3">
               {result.real_tdee != null && (
-                <Row label="Real maintenance" value={`${fmtKcal(result.real_tdee)} kcal`} />
+                <Row label={t("calibration.realMaintenance")} value={`${fmtKcal(result.real_tdee)} ${t("common.kcal")}`} />
               )}
               {result.target_calories != null && (
-                <Row label="New target" value={`${fmtKcal(result.target_calories)} kcal`} strong />
+                <Row label={t("calibration.newTarget")} value={`${fmtKcal(result.target_calories)} ${t("common.kcal")}`} strong />
               )}
               {result.avg_daily_intake != null && (
-                <Row label="Avg intake" value={`${fmtKcal(result.avg_daily_intake)} kcal`} />
+                <Row label={t("calibration.avgIntake")} value={`${fmtKcal(result.avg_daily_intake)} ${t("common.kcal")}`} />
               )}
               {result.trend_change_kg != null && (
-                <Row label="Trend change" value={fmtKgSigned(result.trend_change_kg)} />
+                <Row label={t("calibration.trendChange")} value={fmtKgSigned(result.trend_change_kg)} />
               )}
             </dl>
           ) : result && !result.ok ? (
             <p className="text-sm text-ink-muted">{result.reason}</p>
           ) : s?.last_real_tdee ? (
-            <Row label="Last real maintenance" value={`${fmtKcal(s.last_real_tdee)} kcal`} strong />
+            <Row label={t("calibration.lastRealMaintenance")} value={`${fmtKcal(s.last_real_tdee)} ${t("common.kcal")}`} strong />
           ) : (
-            <p className="text-sm text-ink-faint">Run a calculation to see your real numbers here.</p>
+            <p className="text-sm text-ink-faint">{t("calibration.runCalcHint")}</p>
           )}
         </Card>
       </div>

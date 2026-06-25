@@ -2,17 +2,18 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { ArrowLeft, Barcode, Heart, Plus, Search, Star } from "lucide-react";
 import { diary, foods } from "@/lib/api/endpoints";
 import { qk } from "@/lib/api/hooks";
-import { MEAL_LABELS } from "@/lib/format";
 import type { FoodOut, Meal } from "@/lib/api/types";
 import { Button, Field, Input, Segmented, Spinner } from "@/components/ui/primitives";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
 
-function macroLine(f: FoodOut) {
-  return `${Math.round(f.kcal_100g)} kcal · P ${Math.round(f.protein_100g)} F ${Math.round(
+function macroLine(f: FoodOut, t: TFunction) {
+  return `${Math.round(f.kcal_100g)} ${t("common.kcal")} · P ${Math.round(f.protein_100g)} F ${Math.round(
     f.fat_100g,
   )} C ${Math.round(f.carb_100g)} /100g`;
 }
@@ -30,6 +31,7 @@ export function AddFoodDialog({
   defaultMeal: Meal;
   onCreateCustom: () => void;
 }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const toast = useToast();
   const [tab, setTab] = useState<"search" | "recent" | "favorites">("recent");
@@ -44,7 +46,7 @@ export function AddFoodDialog({
       setBarcode("");
       pick(food);
     },
-    onError: () => toast("No product with that barcode", "error"),
+    onError: () => toast(t("diary.addFood.barcodeNotFound"), "error"),
   });
 
   // quantity step
@@ -79,11 +81,11 @@ export function AddFoodDialog({
       qc.invalidateQueries({ queryKey: qk.day(day) });
       qc.invalidateQueries({ queryKey: qk.guidance(day) });
       qc.invalidateQueries({ queryKey: qk.recent });
-      toast("Added to diary", "ok");
+      toast(t("diary.addFood.added"), "ok");
       reset();
       onClose();
     },
-    onError: () => toast("Could not add entry", "error"),
+    onError: () => toast(t("diary.addFood.addError"), "error"),
   });
 
   function reset() {
@@ -105,7 +107,7 @@ export function AddFoodDialog({
         reset();
         onClose();
       }}
-      title={selected ? selected.name : `Add to ${MEAL_LABELS[defaultMeal]}`}
+      title={selected ? selected.name : t("diary.addFood.titleAddTo", { meal: t("enums.meal." + defaultMeal) })}
     >
       {!selected ? (
         <div className="space-y-4">
@@ -113,9 +115,9 @@ export function AddFoodDialog({
             value={tab}
             onChange={setTab}
             options={[
-              { value: "recent", label: "Recent" },
-              { value: "favorites", label: "Favorites" },
-              { value: "search", label: "Search" },
+              { value: "recent", label: t("diary.addFood.tabRecent") },
+              { value: "favorites", label: t("diary.addFood.tabFavorites") },
+              { value: "search", label: t("common.search") },
             ]}
           />
 
@@ -131,14 +133,14 @@ export function AddFoodDialog({
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" />
                 <Input
                   className="pl-9"
-                  placeholder="Search foods…"
+                  placeholder={t("diary.addFood.searchPlaceholder")}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   autoFocus
                 />
               </div>
               <Button type="submit" variant="secondary">
-                Go
+                {t("diary.addFood.go")}
               </Button>
             </form>
           )}
@@ -156,14 +158,14 @@ export function AddFoodDialog({
                 <Barcode className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" />
                 <Input
                   className="pl-9"
-                  placeholder="Barcode number…"
+                  placeholder={t("diary.addFood.barcodePlaceholder")}
                   inputMode="numeric"
                   value={barcode}
                   onChange={(e) => setBarcode(e.target.value)}
                 />
               </div>
               <Button type="submit" variant="secondary" loading={lookup.isPending}>
-                Find
+                {t("diary.addFood.find")}
               </Button>
             </form>
           )}
@@ -184,7 +186,7 @@ export function AddFoodDialog({
                     <p className="truncate text-sm font-medium text-ink">{f.name}</p>
                     <p className="nums truncate text-xs text-ink-faint">
                       {f.brand ? `${f.brand} · ` : ""}
-                      {macroLine(f)}
+                      {macroLine(f, t)}
                     </p>
                   </div>
                   {f.source === "custom" && <Star className="h-3.5 w-3.5 text-ink-faint" />}
@@ -193,13 +195,13 @@ export function AddFoodDialog({
               ))
             ) : (
               <p className="py-8 text-center text-sm text-ink-faint">
-                {tab === "search" && !submitted ? "Type to search." : "Nothing here yet."}
+                {tab === "search" && !submitted ? t("diary.addFood.typeToSearch") : t("diary.addFood.nothingHere")}
               </p>
             )}
           </div>
 
           <Button variant="ghost" full onClick={onCreateCustom}>
-            <Plus className="h-4 w-4" /> Create a custom food
+            <Plus className="h-4 w-4" /> {t("diary.addFood.createCustom")}
           </Button>
         </div>
       ) : (
@@ -242,6 +244,7 @@ function QuantityStep(props: {
   adding: boolean;
   qc: ReturnType<typeof useQueryClient>;
 }) {
+  const { t } = useTranslation();
   const { food, mode, grams, portionId, count } = props;
   const toast = useToast();
 
@@ -257,25 +260,27 @@ function QuantityStep(props: {
     mutationFn: () => (isFav ? foods.removeFavorite(food.id) : foods.addFavorite(food.id)),
     onSuccess: () => {
       props.qc.invalidateQueries({ queryKey: ["foods", "favorites"] });
-      toast(isFav ? "Removed from favorites" : "Saved to favorites", "ok");
+      toast(isFav ? t("diary.addFood.favRemoved") : t("diary.addFood.favSaved"), "ok");
     },
-    onError: () => toast("Could not update favorites", "error"),
+    onError: () => toast(t("diary.addFood.favError"), "error"),
   });
 
   return (
     <div className="space-y-5">
       <button onClick={props.onBack} className="flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink">
-        <ArrowLeft className="h-4 w-4" /> Back
+        <ArrowLeft className="h-4 w-4" /> {t("diary.addFood.back")}
       </button>
 
       <div className="rounded-xl bg-surface-2 p-4">
         <div className="flex items-center justify-between">
-          <p className="nums text-2xl font-semibold">{kcal} kcal</p>
+          <p className="nums text-2xl font-semibold">
+            {kcal} {t("common.kcal")}
+          </p>
           <button
             onClick={() => fav.mutate()}
             disabled={fav.isPending}
             aria-pressed={isFav}
-            aria-label={isFav ? "Remove from favorites" : "Save to favorites"}
+            aria-label={isFav ? t("diary.addFood.removeFromFavorites") : t("diary.addFood.saveToFavorites")}
             className={`rounded-lg p-1.5 hover:bg-surface-3 ${
               isFav ? "text-danger" : "text-ink-muted hover:text-danger"
             }`}
@@ -285,19 +290,19 @@ function QuantityStep(props: {
         </div>
         <p className="nums mt-1 text-xs text-ink-faint">
           P {Math.round(food.protein_100g * factor)} · F {Math.round(food.fat_100g * factor)} · C{" "}
-          {Math.round(food.carb_100g * factor)} g
+          {Math.round(food.carb_100g * factor)} {t("common.grams")}
         </p>
       </div>
 
-      <Field label="Meal">
+      <Field label={t("diary.addFood.mealLabel")}>
         <Segmented
           value={props.meal}
           onChange={props.setMeal}
           options={[
-            { value: "breakfast", label: "B'fast" },
-            { value: "lunch", label: "Lunch" },
-            { value: "dinner", label: "Dinner" },
-            { value: "snack", label: "Snack" },
+            { value: "breakfast", label: t("diary.addFood.mealShort.breakfast") },
+            { value: "lunch", label: t("enums.meal.lunch") },
+            { value: "dinner", label: t("enums.meal.dinner") },
+            { value: "snack", label: t("enums.meal.snack") },
           ]}
         />
       </Field>
@@ -307,19 +312,19 @@ function QuantityStep(props: {
           value={mode}
           onChange={props.setMode}
           options={[
-            { value: "grams", label: "Grams" },
-            { value: "portion", label: "Portions" },
+            { value: "grams", label: t("diary.addFood.modeGrams") },
+            { value: "portion", label: t("diary.addFood.modePortions") },
           ]}
         />
       )}
 
       {mode === "grams" ? (
-        <Field label="Amount (grams)">
+        <Field label={t("diary.addFood.amountGrams")}>
           <Input type="number" min={1} value={grams} onChange={(e) => props.setGrams(e.target.value)} autoFocus />
         </Field>
       ) : (
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Portion">
+          <Field label={t("diary.addFood.portion")}>
             <select
               className="h-10 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm"
               value={portion?.id}
@@ -327,19 +332,21 @@ function QuantityStep(props: {
             >
               {food.portions.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.name} ({p.grams} g)
+                  {p.name} ({p.grams} {t("common.grams")})
                 </option>
               ))}
             </select>
           </Field>
-          <Field label="How many">
+          <Field label={t("diary.addFood.howMany")}>
             <Input type="number" step="0.5" min={0.5} value={count} onChange={(e) => props.setCount(e.target.value)} />
           </Field>
         </div>
       )}
 
       <Button full size="lg" loading={props.adding} onClick={props.onAdd} disabled={effGrams <= 0}>
-        Add {effGrams > 0 ? `· ${Math.round(effGrams)} g` : ""}
+        {effGrams > 0
+          ? t("diary.addFood.addWithGrams", { grams: Math.round(effGrams) })
+          : t("common.add")}
       </Button>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import {
   Activity,
   ArrowRight,
@@ -17,9 +18,11 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/store/auth";
 import { Button } from "@/components/ui/primitives";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function Home() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { accessToken, hydrated } = useAuth();
 
   // Signed-in visitors go straight to their dashboard; everyone else sees the
@@ -41,13 +44,14 @@ export default function Home() {
           <span className="text-lg font-semibold tracking-tight">Baseline</span>
         </div>
         <nav className="flex items-center gap-2">
+          <LanguageSwitcher />
           <Link href="/login">
             <Button variant="ghost" size="sm">
-              Log in
+              {t("landing.header.login")}
             </Button>
           </Link>
           <Link href="/register" className="hidden sm:block">
-            <Button size="sm">Get started</Button>
+            <Button size="sm">{t("landing.header.getStarted")}</Button>
           </Link>
         </nav>
       </header>
@@ -56,57 +60,56 @@ export default function Home() {
       <section className="mx-auto max-w-3xl px-5 pb-8 pt-12 text-center sm:pt-20">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface-2 px-3 py-1 text-xs text-ink-muted">
           <Sparkles className="h-3.5 w-3.5 text-brand-400" />
-          Calibration-first · free forever
+          {t("landing.hero.badge")}
         </span>
         <h1 className="mt-5 text-balance text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">
-          Stop guessing your calories. <span className="text-brand-400">Measure</span> them.
+          {t("landing.hero.titleLead")}{" "}
+          <span className="text-brand-400">{t("landing.hero.titleHighlight")}</span>{" "}
+          {t("landing.hero.titleTail")}
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-pretty text-base leading-relaxed text-ink-muted sm:text-lg">
-          Every other tracker hands you a formula and hopes for the best. Baseline logs your
-          food and weight, then back-calculates your{" "}
-          <span className="text-ink">real maintenance</span> from the trend — so your target is
-          built from facts, not a guess.
+          {t("landing.hero.subtitle")}
         </p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link href="/try" className="w-full sm:w-auto">
             <Button size="lg" full className="sm:w-auto sm:px-8">
               <Calculator className="h-4 w-4" />
-              Try it — no account
+              {t("landing.hero.tryCta")}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
           <Link href="/register" className="w-full sm:w-auto">
             <Button size="lg" variant="secondary" full className="sm:w-auto sm:px-8">
-              Create a free account
+              {t("landing.hero.registerCta")}
             </Button>
           </Link>
         </div>
-        <p className="mt-3 text-xs text-ink-faint">No ads. No paywall. No credit card.</p>
+        <p className="mt-3 text-xs text-ink-faint">{t("landing.hero.noStrings")}</p>
       </section>
 
       {/* How it's different — the method */}
       <section className="mx-auto max-w-5xl px-5 py-14">
         <h2 className="text-center text-2xl font-semibold tracking-tight">
-          Most apps guess. Baseline measures.
+          {t("landing.method.title")}
         </h2>
         <div className="mt-10 grid gap-4 md:grid-cols-3">
           <Step
             n={1}
             icon={<Calculator className="h-5 w-5 text-brand-400" />}
-            title="Start with an estimate"
-            body="Enter your stats and get a starting calorie & macro target from the standard formula — the same one most apps stop at."
+            title={t("landing.method.step1Title")}
+            body={t("landing.method.step1Body")}
           />
           <Step
             n={2}
             icon={<TrendingDown className="h-5 w-5 text-brand-400" />}
-            title="Log a couple of weeks"
-            body="Track what you eat and step on the scale. Day-to-day noise is smoothed into a real weight trend, not a single jumpy number."
+            title={t("landing.method.step2Title")}
+            body={t("landing.method.step2Body")}
           />
           <Step
             n={3}
             icon={<Gauge className="h-5 w-5 text-brand-400" />}
-            title="Get your real maintenance"
-            body="Baseline reads your actual intake against the trend and back-calculates the calories that truly hold your weight — then builds the goal from that."
+            title={t("landing.method.step3Title")}
+            body={t("landing.method.step3Body")}
           />
         </div>
       </section>
@@ -114,9 +117,9 @@ export default function Home() {
       {/* Verifiable facts */}
       <section className="mx-auto max-w-5xl px-5 pb-6">
         <div className="grid gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-3">
-          <Fact value="450,000+" label="foods with barcode lookup, from USDA FoodData Central" />
-          <Fact value="€0" label="free forever — no ads, no subscription, no upsell" />
-          <Fact value="Every number" label="explained — Baseline shows the method, never a black box" />
+          <Fact value={t("landing.facts.foodsValue")} label={t("landing.facts.foodsLabel")} />
+          <Fact value={t("landing.facts.priceValue")} label={t("landing.facts.priceLabel")} />
+          <Fact value={t("landing.facts.methodValue")} label={t("landing.facts.methodLabel")} />
         </div>
       </section>
 
@@ -125,23 +128,23 @@ export default function Home() {
         <div className="grid gap-4 sm:grid-cols-2">
           <Feature
             icon={<ScanBarcode className="h-5 w-5 text-brand-400" />}
-            title="Food diary with barcode search"
-            body="Search a real catalog of hundreds of thousands of foods, scan a barcode, save favourites, copy a whole day forward."
+            title={t("landing.features.diaryTitle")}
+            body={t("landing.features.diaryBody")}
           />
           <Feature
             icon={<LineChart className="h-5 w-5 text-brand-400" />}
-            title="Weight trend that ignores noise"
-            body="An exponential moving average turns the daily scale chaos into a clean line you can actually act on."
+            title={t("landing.features.trendTitle")}
+            body={t("landing.features.trendBody")}
           />
           <Feature
             icon={<Gauge className="h-5 w-5 text-brand-400" />}
-            title="Calibration engine"
-            body="The core of the product: your maintenance is measured from your own data and re-checked as you go, with a safe rate of change built in."
+            title={t("landing.features.calibrationTitle")}
+            body={t("landing.features.calibrationBody")}
           />
           <Feature
             icon={<MessageSquare className="h-5 w-5 text-brand-400" />}
-            title="Coaching that steers, not shames"
-            body="In-day guidance on hitting your protein and staying on target — and no blame after an overage, just the next right step."
+            title={t("landing.features.coachingTitle")}
+            body={t("landing.features.coachingBody")}
           />
         </div>
       </section>
@@ -150,24 +153,19 @@ export default function Home() {
       <section className="mx-auto max-w-3xl px-5 pb-20">
         <div className="card flex flex-col items-center gap-5 p-8 text-center sm:p-10">
           <BookOpen className="h-6 w-6 text-brand-400" />
-          <h2 className="text-2xl font-semibold tracking-tight">
-            See your number in under a minute
-          </h2>
-          <p className="max-w-md text-ink-muted">
-            No sign-up to try. Run the calculator, then create a free account if you want
-            Baseline to start measuring your real maintenance.
-          </p>
+          <h2 className="text-2xl font-semibold tracking-tight">{t("landing.cta.title")}</h2>
+          <p className="max-w-md text-ink-muted">{t("landing.cta.body")}</p>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link href="/try">
               <Button size="lg" className="px-8">
                 <Calculator className="h-4 w-4" />
-                Try the calculator
+                {t("landing.cta.tryCta")}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
             <Link href="/register">
               <Button size="lg" variant="secondary" className="px-8">
-                Create a free account
+                {t("landing.cta.registerCta")}
               </Button>
             </Link>
           </div>
@@ -178,17 +176,17 @@ export default function Home() {
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-5 py-6 text-sm text-ink-faint sm:flex-row">
           <div className="flex items-center gap-2">
             <Activity className="h-4 w-4 text-brand-400" />
-            <span>Baseline — calibration-first nutrition tracking</span>
+            <span>{t("landing.footer.tagline")}</span>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/try" className="hover:text-ink">
-              Try it
+              {t("landing.footer.try")}
             </Link>
             <Link href="/login" className="hover:text-ink">
-              Log in
+              {t("landing.footer.login")}
             </Link>
             <Link href="/register" className="hover:text-ink">
-              Sign up
+              {t("landing.footer.signup")}
             </Link>
           </div>
         </div>

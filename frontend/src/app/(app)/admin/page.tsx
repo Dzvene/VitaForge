@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Activity, Apple, Database, SlidersHorizontal, Users } from "lucide-react";
 import { admin } from "@/lib/api/endpoints";
 import { useAuth } from "@/lib/store/auth";
@@ -15,6 +16,7 @@ type Tab = "overview" | "users" | "foods" | "params";
 
 export default function AdminPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("overview");
 
@@ -27,18 +29,18 @@ export default function AdminPage() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="label">Owner</p>
-        <h1 className="text-2xl font-semibold tracking-tight">Admin</h1>
+        <p className="label">{t("admin.owner")}</p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("admin.title")}</h1>
       </header>
 
       <Segmented
         value={tab}
         onChange={setTab}
         options={[
-          { value: "overview", label: "Overview" },
-          { value: "users", label: "Users" },
-          { value: "foods", label: "Foods" },
-          { value: "params", label: "Parameters" },
+          { value: "overview", label: t("admin.tabs.overview") },
+          { value: "users", label: t("admin.tabs.users") },
+          { value: "foods", label: t("admin.tabs.foods") },
+          { value: "params", label: t("admin.tabs.params") },
         ]}
       />
 
@@ -51,17 +53,18 @@ export default function AdminPage() {
 }
 
 function Overview() {
+  const { t } = useTranslation();
   const stats = useQuery({ queryKey: ["admin", "stats"], queryFn: admin.stats });
   if (stats.isLoading || !stats.data) return <Skeleton className="h-32" />;
   const s = stats.data;
   const cells: { label: string; value: number; icon: typeof Users }[] = [
-    { label: "Users", value: s.users, icon: Users },
-    { label: "Active", value: s.active_users, icon: Activity },
-    { label: "Admins", value: s.admins, icon: Users },
-    { label: "Foods", value: s.foods, icon: Database },
-    { label: "Custom foods", value: s.custom_foods, icon: Apple },
-    { label: "Diary entries", value: s.diary_entries, icon: Apple },
-    { label: "Weigh-ins", value: s.weight_logs, icon: Activity },
+    { label: t("admin.overview.users"), value: s.users, icon: Users },
+    { label: t("admin.overview.active"), value: s.active_users, icon: Activity },
+    { label: t("admin.overview.admins"), value: s.admins, icon: Users },
+    { label: t("admin.overview.foods"), value: s.foods, icon: Database },
+    { label: t("admin.overview.customFoods"), value: s.custom_foods, icon: Apple },
+    { label: t("admin.overview.diaryEntries"), value: s.diary_entries, icon: Apple },
+    { label: t("admin.overview.weighIns"), value: s.weight_logs, icon: Activity },
   ];
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -77,6 +80,7 @@ function Overview() {
 }
 
 function ParamsPanel() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const toast = useToast();
   const params = useQuery({ queryKey: ["admin", "params"], queryFn: admin.getParams });
@@ -96,9 +100,9 @@ function ParamsPanel() {
     mutationFn: () => admin.setParams(draft),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "params"] });
-      toast("Parameters saved", "ok");
+      toast(t("admin.params.saved"), "ok");
     },
-    onError: () => toast("Save failed", "error"),
+    onError: () => toast(t("admin.params.saveFailed"), "error"),
   });
 
   if (params.isLoading) return <Skeleton className="h-64" />;
@@ -107,20 +111,20 @@ function ParamsPanel() {
 
   return (
     <Card>
-      <CardTitle right={<SlidersHorizontal className="h-4 w-4 text-brand-400" />}>App-level parameters (§6)</CardTitle>
+      <CardTitle right={<SlidersHorizontal className="h-4 w-4 text-brand-400" />}>{t("admin.params.title")}</CardTitle>
       <p className="mb-5 text-sm text-ink-muted">
-        Defaults for everyone. Per-user overrides still take precedence. Edit a value to override it app-wide.
+        {t("admin.params.subtitle")}
       </p>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Object.entries(draft).map(([k, v]) => (
-          <Field key={k} label={k.replace(/_/g, " ")} hint={overrideKeys.has(k) ? "overridden" : undefined}>
+          <Field key={k} label={k.replace(/_/g, " ")} hint={overrideKeys.has(k) ? t("admin.params.overridden") : undefined}>
             <Input type="number" step="any" value={v} onChange={(e) => setDraft((d) => ({ ...d, [k]: Number(e.target.value) }))} />
           </Field>
         ))}
       </div>
       <div className="mt-6 flex justify-end">
         <Button onClick={() => save.mutate()} loading={save.isPending}>
-          Save parameters
+          {t("admin.params.saveButton")}
         </Button>
       </div>
     </Card>

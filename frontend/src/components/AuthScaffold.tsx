@@ -2,12 +2,7 @@
 
 import { Activity, Check } from "lucide-react";
 import type { ReactNode } from "react";
-
-const POINTS = [
-  "Measure your real maintenance, then build the cut from facts",
-  "Smoothed weight trend — no panic over water weight",
-  "Every feature free. No ads, no paywall.",
-];
+import { useTranslation } from "react-i18next";
 
 export function AuthScaffold({
   title,
@@ -18,6 +13,8 @@ export function AuthScaffold({
   subtitle: string;
   children: ReactNode;
 }) {
+  const { t } = useTranslation();
+  const POINTS = [t("auth.point1"), t("auth.point2"), t("auth.point3")];
   return (
     <div className="grid min-h-dvh lg:grid-cols-2">
       {/* Brand panel */}
@@ -27,12 +24,12 @@ export function AuthScaffold({
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-500/15 ring-1 ring-brand-500/30">
             <Activity className="h-5 w-5 text-brand-400" />
           </div>
-          <span className="text-lg font-semibold tracking-tight">Baseline</span>
+          <span className="text-lg font-semibold tracking-tight">{t("auth.brand")}</span>
         </div>
         <div className="max-w-md">
           <h1 className="text-3xl font-semibold leading-tight tracking-tight">
-            Stop guessing your calories.
-            <span className="text-brand-400"> Calibrate them.</span>
+            {t("auth.heroLead")}
+            <span className="text-brand-400"> {t("auth.heroHighlight")}</span>
           </h1>
           <ul className="mt-8 space-y-3">
             {POINTS.map((p) => (
@@ -45,7 +42,7 @@ export function AuthScaffold({
             ))}
           </ul>
         </div>
-        <p className="text-xs text-ink-faint">Built on the RP / Israetel calibration method.</p>
+        <p className="text-xs text-ink-faint">{t("auth.heroFootnote")}</p>
       </div>
 
       {/* Form panel */}

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   addDays,
-  dayLabel,
   fmtG,
   fmtKcal,
   fmtKg,
@@ -9,6 +8,7 @@ import {
   isoDate,
   progress,
   ratio,
+  relativeDayKey,
 } from "@/lib/format";
 
 describe("format helpers", () => {
@@ -51,10 +51,11 @@ describe("date helpers", () => {
     expect(addDays("2026-01-01", -1)).toBe("2025-12-31");
   });
 
-  it("labels today / yesterday / tomorrow", () => {
+  it("keys today / yesterday / tomorrow, null otherwise", () => {
     const today = isoDate();
-    expect(dayLabel(today)).toBe("Today");
-    expect(dayLabel(addDays(today, -1))).toBe("Yesterday");
-    expect(dayLabel(addDays(today, 1))).toBe("Tomorrow");
+    expect(relativeDayKey(today)).toBe("today");
+    expect(relativeDayKey(addDays(today, -1))).toBe("yesterday");
+    expect(relativeDayKey(addDays(today, 1))).toBe("tomorrow");
+    expect(relativeDayKey(addDays(today, 5))).toBeNull();
   });
 });

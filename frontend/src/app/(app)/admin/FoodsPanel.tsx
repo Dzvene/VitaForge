@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { admin } from "@/lib/api/endpoints";
 import type { FoodCreate, FoodOut } from "@/lib/api/types";
@@ -21,6 +22,7 @@ const EMPTY: FoodCreate = {
 };
 
 export function FoodsPanel() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const toast = useToast();
   const [q, setQ] = useState("");
@@ -34,9 +36,9 @@ export function FoodsPanel() {
     mutationFn: (id: number) => admin.deleteFood(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "foods"] });
-      toast("Food deleted", "ok");
+      toast(t("admin.foods.deleted"), "ok");
     },
-    onError: () => toast("Delete failed", "error"),
+    onError: () => toast(t("admin.foods.deleteFailed"), "error"),
   });
 
   return (
@@ -50,10 +52,10 @@ export function FoodsPanel() {
           className="relative flex-1"
         >
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" />
-          <Input className="pl-9" placeholder="Search the catalog…" value={q} onChange={(e) => setQ(e.target.value)} />
+          <Input className="pl-9" placeholder={t("admin.foods.searchPlaceholder")} value={q} onChange={(e) => setQ(e.target.value)} />
         </form>
         <Button onClick={() => setCreating(true)}>
-          <Plus className="h-4 w-4" /> New food
+          <Plus className="h-4 w-4" /> {t("admin.foods.newFood")}
         </Button>
       </div>
 
@@ -69,7 +71,7 @@ export function FoodsPanel() {
                     <p className="truncate text-sm font-medium text-ink">{f.name}</p>
                     <p className="nums truncate text-xs text-ink-faint">
                       {f.brand ? `${f.brand} · ` : ""}
-                      {Math.round(f.kcal_100g)} kcal /100g
+                      {Math.round(f.kcal_100g)} {t("common.kcal")} /100g
                     </p>
                   </div>
                   <Badge tone="neutral">{f.source}</Badge>
@@ -82,7 +84,7 @@ export function FoodsPanel() {
                 </li>
               ))
             ) : (
-              <li className="px-4 py-8 text-center text-sm text-ink-faint">No foods found.</li>
+              <li className="px-4 py-8 text-center text-sm text-ink-faint">{t("admin.foods.empty")}</li>
             )}
           </ul>
         </Card>
@@ -91,18 +93,18 @@ export function FoodsPanel() {
       <FoodForm
         open={creating}
         onClose={() => setCreating(false)}
-        title="New catalog food"
+        title={t("admin.foods.newFoodTitle")}
         initial={EMPTY}
         onSubmit={async (body) => {
           await admin.createFood(body);
           qc.invalidateQueries({ queryKey: ["admin", "foods"] });
-          toast("Food created", "ok");
+          toast(t("admin.foods.created"), "ok");
         }}
       />
       <FoodForm
         open={editing !== null}
         onClose={() => setEditing(null)}
-        title="Edit food"
+        title={t("admin.foods.editFoodTitle")}
         initial={
           editing
             ? {
@@ -120,7 +122,7 @@ export function FoodsPanel() {
         onSubmit={async (body) => {
           if (editing) await admin.updateFood(editing.id, body);
           qc.invalidateQueries({ queryKey: ["admin", "foods"] });
-          toast("Food updated", "ok");
+          toast(t("admin.foods.updated"), "ok");
         }}
       />
     </div>
@@ -140,6 +142,7 @@ function FoodForm({
   initial: FoodCreate;
   onSubmit: (body: FoodCreate) => Promise<void>;
 }) {
+  const { t } = useTranslation();
   const [v, setV] = useState(initial);
   const [busy, setBusy] = useState(false);
   // Re-seed when the dialog opens for a different item.
@@ -167,28 +170,28 @@ function FoodForm({
         }}
         className="space-y-4"
       >
-        <Field label="Name">
+        <Field label={t("admin.foods.fields.name")}>
           <Input required value={v.name} onChange={(e) => setV((s) => ({ ...s, name: e.target.value }))} />
         </Field>
-        <Field label="Brand">
+        <Field label={t("admin.foods.fields.brand")}>
           <Input value={v.brand ?? ""} onChange={(e) => setV((s) => ({ ...s, brand: e.target.value || null }))} />
         </Field>
         <div className="grid grid-cols-4 gap-3">
-          <Field label="kcal">
+          <Field label={t("common.kcal")}>
             <Input type="number" value={v.kcal_100g} onChange={num("kcal_100g")} />
           </Field>
-          <Field label="Protein">
+          <Field label={t("common.protein")}>
             <Input type="number" value={v.protein_100g} onChange={num("protein_100g")} />
           </Field>
-          <Field label="Fat">
+          <Field label={t("common.fat")}>
             <Input type="number" value={v.fat_100g} onChange={num("fat_100g")} />
           </Field>
-          <Field label="Carbs">
+          <Field label={t("common.carbs")}>
             <Input type="number" value={v.carb_100g} onChange={num("carb_100g")} />
           </Field>
         </div>
         <Button type="submit" full size="lg" loading={busy} disabled={!v.name}>
-          Save
+          {t("common.save")}
         </Button>
       </form>
     </Dialog>

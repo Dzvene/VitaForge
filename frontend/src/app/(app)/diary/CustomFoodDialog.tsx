@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { foods } from "@/lib/api/endpoints";
 import { qk } from "@/lib/api/hooks";
 import type { FoodCreate } from "@/lib/api/types";
@@ -10,6 +11,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
 
 export function CustomFoodDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const toast = useToast();
   const [f, setF] = useState({ name: "", brand: "", kcal: "", protein: "", fat: "", carb: "" });
@@ -33,15 +35,15 @@ export function CustomFoodDialog({ open, onClose }: { open: boolean; onClose: ()
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.recent });
       qc.invalidateQueries({ queryKey: ["foods"] });
-      toast("Custom food created — find it in Search", "ok");
+      toast(t("diary.custom.created"), "ok");
       setF({ name: "", brand: "", kcal: "", protein: "", fat: "", carb: "" });
       onClose();
     },
-    onError: () => toast("Could not create food", "error"),
+    onError: () => toast(t("diary.custom.createError"), "error"),
   });
 
   return (
-    <Dialog open={open} onClose={onClose} title="New custom food">
+    <Dialog open={open} onClose={onClose} title={t("diary.custom.title")}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -49,29 +51,29 @@ export function CustomFoodDialog({ open, onClose }: { open: boolean; onClose: ()
         }}
         className="space-y-4"
       >
-        <Field label="Name">
-          <Input required value={f.name} onChange={set("name")} placeholder="e.g. Homemade granola" autoFocus />
+        <Field label={t("diary.custom.name")}>
+          <Input required value={f.name} onChange={set("name")} placeholder={t("diary.custom.namePlaceholder")} autoFocus />
         </Field>
-        <Field label="Brand (optional)">
+        <Field label={t("diary.custom.brandOptional")}>
           <Input value={f.brand} onChange={set("brand")} />
         </Field>
-        <p className="label pt-1">Per 100 g</p>
+        <p className="label pt-1">{t("diary.custom.per100g")}</p>
         <div className="grid grid-cols-4 gap-3">
-          <Field label="kcal">
+          <Field label={t("common.kcal")}>
             <Input type="number" required min={0} value={f.kcal} onChange={set("kcal")} />
           </Field>
-          <Field label="Protein">
+          <Field label={t("common.protein")}>
             <Input type="number" min={0} value={f.protein} onChange={set("protein")} />
           </Field>
-          <Field label="Fat">
+          <Field label={t("common.fat")}>
             <Input type="number" min={0} value={f.fat} onChange={set("fat")} />
           </Field>
-          <Field label="Carbs">
+          <Field label={t("common.carbs")}>
             <Input type="number" min={0} value={f.carb} onChange={set("carb")} />
           </Field>
         </div>
         <Button type="submit" full size="lg" loading={create.isPending} disabled={!f.name || !f.kcal}>
-          Create food
+          {t("diary.custom.createFood")}
         </Button>
       </form>
     </Dialog>

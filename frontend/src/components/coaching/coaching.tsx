@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronDown, GraduationCap, Lightbulb, ShieldAlert } from "lucide-react";
 import { coaching } from "@/lib/api/endpoints";
 import { qk, useHints, useWarnings } from "@/lib/api/hooks";
@@ -11,6 +12,7 @@ import { Badge, Button } from "@/components/ui/primitives";
 
 // §5.2 — active warnings that should auto-show, with accept / mute.
 export function WarningList() {
+  const { t } = useTranslation();
   const { data } = useWarnings();
   const qc = useQueryClient();
   const accept = useMutation({
@@ -35,10 +37,10 @@ export function WarningList() {
             <p className="mt-1 text-sm text-ink-muted">{w.message}</p>
             <div className="mt-3 flex gap-2">
               <Button size="sm" variant="secondary" onClick={() => accept.mutate(w.type)}>
-                Got it
+                {t("coaching.gotIt")}
               </Button>
               <Button size="sm" variant="ghost" onClick={() => dismiss.mutate(w.type)}>
-                Don&apos;t show again
+                {t("coaching.dontShowAgain")}
               </Button>
             </div>
           </div>
@@ -73,6 +75,7 @@ export function GuidanceList({ items }: { items: GuidanceItem[] }) {
 
 // §5.1 — passive hints, collapsible.
 export function HintsRail() {
+  const { t } = useTranslation();
   const { data } = useHints();
   const [open, setOpen] = useState<string | null>(null);
   if (!data?.length) return null;
@@ -81,9 +84,9 @@ export function HintsRail() {
     <div className="card p-5">
       <div className="mb-3 flex items-center gap-2">
         <GraduationCap className="h-4 w-4 text-brand-400" />
-        <h3 className="text-sm font-semibold text-ink">Why this method</h3>
+        <h3 className="text-sm font-semibold text-ink">{t("coaching.whyThisMethod")}</h3>
         <Badge tone="brand" className="ml-auto">
-          learn
+          {t("coaching.learn")}
         </Badge>
       </div>
       <div className="divide-y divide-line">

@@ -2,17 +2,21 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { nutrition, profile as profileApi } from "@/lib/api/endpoints";
 import { qk, useProfile, useTarget } from "@/lib/api/hooks";
-import { ACTIVITY_LABELS } from "@/lib/format";
 import type { ActivityLevel, GoalKind, ProfileUpsert, Sex } from "@/lib/api/types";
 import { Button, Card, CardTitle, Field, Input, Segmented, Select, Skeleton } from "@/components/ui/primitives";
 import { useToast } from "@/components/ui/toast";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAuth } from "@/lib/store/auth";
+
+const ACTIVITY_KEYS: ActivityLevel[] = ["sedentary", "light", "moderate", "high", "very_high"];
 
 type ProteinMode = "per_kg" | "abs";
 
 export default function SettingsPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const toast = useToast();
   const { user } = useAuth();
@@ -34,16 +38,16 @@ export default function SettingsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.profile });
       qc.invalidateQueries({ queryKey: qk.target });
-      toast("Saved", "ok");
+      toast(t("settings.toastSaved"), "ok");
     },
-    onError: () => toast("Could not save", "error"),
+    onError: () => toast(t("settings.toastSaveError"), "error"),
   });
 
   const recompute = useMutation({
     mutationFn: nutrition.recompute,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.target });
-      toast("Norm recomputed", "ok");
+      toast(t("settings.toastRecomputed"), "ok");
     },
   });
 
@@ -70,41 +74,47 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="label">Account</p>
-        <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
+        <p className="label">{t("settings.accountLabel")}</p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("settings.title")}</h1>
         <p className="mt-1 text-sm text-ink-faint">{user?.email}</p>
       </header>
 
+      <Card>
+        <CardTitle>{t("settings.languageTitle")}</CardTitle>
+        <p className="mb-4 text-sm text-ink-muted">{t("settings.languageHint")}</p>
+        <LanguageSwitcher variant="segmented" />
+      </Card>
+
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <CardTitle>Profile</CardTitle>
+          <CardTitle>{t("settings.profileTitle")}</CardTitle>
           <div className="space-y-4">
-            <Field label="Sex">
+            <Field label={t("settings.sex")}>
               <Segmented
                 value={form.sex}
                 onChange={(v: Sex) => set("sex", v)}
                 options={[
-                  { value: "male", label: "Male" },
-                  { value: "female", label: "Female" },
+                  { value: "male", label: t("settings.sexMale") },
+                  { value: "female", label: t("settings.sexFemale") },
                 ]}
               />
             </Field>
             <div className="grid grid-cols-3 gap-3">
-              <Field label="Age">
+              <Field label={t("settings.age")}>
                 <Input type="number" value={form.age} onChange={(e) => set("age", Number(e.target.value))} />
               </Field>
-              <Field label="Height (cm)">
+              <Field label={t("settings.heightCm")}>
                 <Input type="number" value={form.height_cm} onChange={(e) => set("height_cm", Number(e.target.value))} />
               </Field>
-              <Field label="Weight (kg)">
+              <Field label={t("settings.weightKg")}>
                 <Input type="number" step="0.1" value={form.current_weight_kg} onChange={(e) => set("current_weight_kg", Number(e.target.value))} />
               </Field>
             </div>
-            <Field label="Activity">
+            <Field label={t("settings.activity")}>
               <Select value={form.activity_level} onChange={(e) => set("activity_level", e.target.value as ActivityLevel)}>
-                {Object.entries(ACTIVITY_LABELS).map(([v, l]) => (
+                {ACTIVITY_KEYS.map((v) => (
                   <option key={v} value={v}>
-                    {l}
+                    {t("enums.activity." + v)}
                   </option>
                 ))}
               </Select>
@@ -113,21 +123,21 @@ export default function SettingsPage() {
         </Card>
 
         <Card>
-          <CardTitle>Goal</CardTitle>
+          <CardTitle>{t("settings.goalTitle")}</CardTitle>
           <div className="space-y-4">
-            <Field label="Direction">
+            <Field label={t("settings.direction")}>
               <Segmented
                 value={form.goal}
                 onChange={(v: GoalKind) => set("goal", v)}
                 options={[
-                  { value: "lose", label: "Lose fat" },
-                  { value: "maintain", label: "Maintain" },
-                  { value: "gain", label: "Build" },
+                  { value: "lose", label: t("enums.goal.lose") },
+                  { value: "maintain", label: t("enums.goal.maintain") },
+                  { value: "gain", label: t("enums.goal.gain") },
                 ]}
               />
             </Field>
             {form.goal !== "maintain" && (
-              <Field label="Rate (kg / week)" hint="Steep rates are clamped to a healthy maximum.">
+              <Field label={t("settings.rateKgPerWeek")} hint={t("settings.rateHint")}>
                 <Input
                   type="number"
                   step="0.05"
@@ -140,44 +150,44 @@ export default function SettingsPage() {
         </Card>
 
         <Card>
-          <CardTitle>Macros</CardTitle>
+          <CardTitle>{t("settings.macrosTitle")}</CardTitle>
           <div className="space-y-4">
-            <Field label="Protein target">
+            <Field label={t("settings.proteinTarget")}>
               <Segmented
                 value={proteinMode}
                 onChange={setProteinMode}
                 options={[
-                  { value: "per_kg", label: "g / kg" },
-                  { value: "abs", label: "Absolute g" },
+                  { value: "per_kg", label: t("settings.proteinPerKg") },
+                  { value: "abs", label: t("settings.proteinAbsolute") },
                 ]}
               />
             </Field>
             {proteinMode === "per_kg" ? (
-              <Field label="Protein (g / kg)" hint="Recommended 1.6–2.2 on a cut.">
+              <Field label={t("settings.proteinGPerKg")} hint={t("settings.proteinPerKgHint")}>
                 <Input
                   type="number"
                   step="0.1"
                   value={form.protein_g_per_kg ?? ""}
-                  placeholder="default 1.8"
+                  placeholder={t("settings.proteinPerKgPlaceholder")}
                   onChange={(e) => set("protein_g_per_kg", e.target.value ? Number(e.target.value) : null)}
                 />
               </Field>
             ) : (
-              <Field label="Protein (g / day)">
+              <Field label={t("settings.proteinGPerDay")}>
                 <Input
                   type="number"
                   value={form.protein_g_abs ?? ""}
-                  placeholder="e.g. 180"
+                  placeholder={t("settings.proteinAbsPlaceholder")}
                   onChange={(e) => set("protein_g_abs", e.target.value ? Number(e.target.value) : null)}
                 />
               </Field>
             )}
-            <Field label="Fat (g / kg)" hint="Floor is 0.8 g/kg.">
+            <Field label={t("settings.fatGPerKg")} hint={t("settings.fatHint")}>
               <Input
                 type="number"
                 step="0.1"
                 value={form.fat_g_per_kg ?? ""}
-                placeholder="default 0.9"
+                placeholder={t("settings.fatPlaceholder")}
                 onChange={(e) => set("fat_g_per_kg", e.target.value ? Number(e.target.value) : null)}
               />
             </Field>
@@ -185,27 +195,27 @@ export default function SettingsPage() {
         </Card>
 
         <Card>
-          <CardTitle>Current norm</CardTitle>
+          <CardTitle>{t("settings.currentNormTitle")}</CardTitle>
           {target.data ? (
             <div className="space-y-2 text-sm">
-              <Line k="Target" v={`${Math.round(target.data.target_calories)} kcal`} />
-              <Line k="Protein" v={`${Math.round(target.data.protein_g)} g`} />
-              <Line k="Fat" v={`${Math.round(target.data.fat_g)} g`} />
-              <Line k="Carbs" v={`${Math.round(target.data.carb_g)} g`} />
-              <Line k="Basis" v={target.data.maintenance_source === "calibrated" ? "calibrated" : "formula"} />
+              <Line k={t("settings.normTarget")} v={`${Math.round(target.data.target_calories)} ${t("common.kcal")}`} />
+              <Line k={t("settings.normProtein")} v={`${Math.round(target.data.protein_g)} ${t("settings.gramSuffix")}`} />
+              <Line k={t("settings.normFat")} v={`${Math.round(target.data.fat_g)} ${t("settings.gramSuffix")}`} />
+              <Line k={t("settings.normCarbs")} v={`${Math.round(target.data.carb_g)} ${t("settings.gramSuffix")}`} />
+              <Line k={t("settings.normBasis")} v={target.data.maintenance_source === "calibrated" ? t("settings.basisCalibrated") : t("settings.basisFormula")} />
             </div>
           ) : (
             <Skeleton className="h-24" />
           )}
           <Button variant="secondary" className="mt-4" full onClick={() => recompute.mutate()} loading={recompute.isPending}>
-            Recompute norm
+            {t("settings.recomputeNorm")}
           </Button>
         </Card>
       </div>
 
       <div className="sticky bottom-20 z-10 flex justify-end md:bottom-4">
         <Button size="lg" onClick={onSave} loading={save.isPending} className="shadow-glow">
-          Save changes
+          {t("settings.saveChanges")}
         </Button>
       </div>
     </div>

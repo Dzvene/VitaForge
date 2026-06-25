@@ -52,13 +52,22 @@ export function addDays(iso: string, days: number): string {
   return isoDate(dt);
 }
 
-/** Human label for a YYYY-MM-DD relative to today. */
-export function dayLabel(iso: string): string {
-  if (iso === isoDate()) return "Today";
-  if (iso === addDays(isoDate(), -1)) return "Yesterday";
-  if (iso === addDays(isoDate(), 1)) return "Tomorrow";
+/**
+ * Relative-day i18n key for a YYYY-MM-DD, or `null` when it's neither today,
+ * yesterday nor tomorrow (the caller then formats the absolute date). Pure —
+ * the translation happens in `useDayLabel` (see lib/i18n/useDayLabel).
+ */
+export function relativeDayKey(iso: string): "today" | "yesterday" | "tomorrow" | null {
+  if (iso === isoDate()) return "today";
+  if (iso === addDays(isoDate(), -1)) return "yesterday";
+  if (iso === addDays(isoDate(), 1)) return "tomorrow";
+  return null;
+}
+
+/** Locale-aware "Mon, 3 Jun" style label for a YYYY-MM-DD. */
+export function formatDayAbsolute(iso: string, locale: string): string {
   const [y, m, d] = iso.split("-").map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString(undefined, {
+  return new Date(y, m - 1, d).toLocaleDateString(locale, {
     weekday: "short",
     day: "numeric",
     month: "short",
@@ -66,23 +75,3 @@ export function dayLabel(iso: string): string {
 }
 
 export const MEALS = ["breakfast", "lunch", "dinner", "snack"] as const;
-export const MEAL_LABELS: Record<string, string> = {
-  breakfast: "Breakfast",
-  lunch: "Lunch",
-  dinner: "Dinner",
-  snack: "Snack",
-};
-
-export const ACTIVITY_LABELS: Record<string, string> = {
-  sedentary: "Sedentary",
-  light: "Light (1–3×/wk)",
-  moderate: "Moderate (3–5×/wk)",
-  high: "High (6–7×/wk)",
-  very_high: "Very high",
-};
-
-export const GOAL_LABELS: Record<string, string> = {
-  lose: "Lose fat",
-  maintain: "Maintain",
-  gain: "Build",
-};

@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Activity, ArrowRight, Info, Sparkles } from "lucide-react";
 import { preview, type PreviewProfile } from "@/lib/api/endpoints";
 import { ApiError } from "@/lib/api/client";
-import { ACTIVITY_LABELS } from "@/lib/format";
 import { fmtG, fmtKcal } from "@/lib/format";
 import type { ActivityLevel, GoalKind, Sex, TargetOut } from "@/lib/api/types";
 import { Button, Card, Field, Input, Segmented, Select } from "@/components/ui/primitives";
 
 export default function TryPage() {
+  const { t } = useTranslation();
   const [sex, setSex] = useState<Sex>("male");
   const [age, setAge] = useState("30");
   const [height, setHeight] = useState("180");
@@ -39,7 +40,7 @@ export default function TryPage() {
     try {
       setResult(await preview.nutrition(body));
     } catch (err) {
-      setError(err instanceof ApiError ? err.detail : "Could not compute — check your inputs");
+      setError(err instanceof ApiError ? err.detail : t("try.errorFallback"));
     } finally {
       setLoading(false);
     }
@@ -52,63 +53,61 @@ export default function TryPage() {
           <Activity className="h-5 w-5 text-brand-400" />
         </div>
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">Try it — no account needed</h1>
-          <p className="text-sm text-ink-muted">
-            Get a starting calorie &amp; macro target. Nothing is saved.
-          </p>
+          <h1 className="text-xl font-semibold tracking-tight">{t("try.title")}</h1>
+          <p className="text-sm text-ink-muted">{t("try.subtitle")}</p>
         </div>
       </div>
 
       <form onSubmit={submit} className="card space-y-5 p-6">
-        <Field label="Sex">
+        <Field label={t("try.sexLabel")}>
           <Segmented
             value={sex}
             onChange={setSex}
             options={[
-              { value: "male", label: "Male" },
-              { value: "female", label: "Female" },
+              { value: "male", label: t("try.sexMale") },
+              { value: "female", label: t("try.sexFemale") },
             ]}
           />
         </Field>
 
         <div className="grid grid-cols-3 gap-3">
-          <Field label="Age">
+          <Field label={t("try.ageLabel")}>
             <Input type="number" min={14} max={120} value={age} onChange={(e) => setAge(e.target.value)} />
           </Field>
-          <Field label="Height (cm)">
+          <Field label={t("try.heightLabel")}>
             <Input type="number" min={120} max={250} value={height} onChange={(e) => setHeight(e.target.value)} />
           </Field>
-          <Field label="Weight (kg)">
+          <Field label={t("try.weightLabel")}>
             <Input type="number" step="0.1" value={weight} onChange={(e) => setWeight(e.target.value)} />
           </Field>
         </div>
 
-        <Field label="Activity level">
+        <Field label={t("try.activityLabel")}>
           <Select value={activity} onChange={(e) => setActivity(e.target.value as ActivityLevel)}>
-            {Object.entries(ACTIVITY_LABELS).map(([v, l]) => (
+            {["sedentary", "light", "moderate", "high", "very_high"].map((v) => (
               <option key={v} value={v}>
-                {l}
+                {t("enums.activity." + v)}
               </option>
             ))}
           </Select>
         </Field>
 
-        <Field label="Goal">
+        <Field label={t("try.goalLabel")}>
           <Segmented
             value={goal}
             onChange={setGoal}
             options={[
-              { value: "lose", label: "Lose fat" },
-              { value: "maintain", label: "Maintain" },
-              { value: "gain", label: "Build" },
+              { value: "lose", label: t("try.goalLose") },
+              { value: "maintain", label: t("try.goalMaintain") },
+              { value: "gain", label: t("try.goalGain") },
             ]}
           />
         </Field>
 
         {goal !== "maintain" && (
           <Field
-            label={`Target rate (kg / week to ${goal === "lose" ? "lose" : "gain"})`}
-            hint="A steep rate gets clamped to a healthy range automatically."
+            label={goal === "lose" ? t("try.rateLabelLose") : t("try.rateLabelGain")}
+            hint={t("try.rateHint")}
           >
             <Input type="number" step="0.05" min={0} value={rate} onChange={(e) => setRate(e.target.value)} />
           </Field>
@@ -117,51 +116,46 @@ export default function TryPage() {
         {error && <p className="text-sm text-rose-400">{error}</p>}
 
         <Button type="submit" full size="lg" loading={loading}>
-          Calculate my target
+          {t("try.calculate")}
         </Button>
       </form>
 
       {result && (
         <Card className="mt-6 p-6">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <Metric label="Calories" value={`${fmtKcal(result.target_calories)} kcal`} accent />
-            <Metric label="Protein" value={fmtG(result.protein_g)} />
-            <Metric label="Fat" value={fmtG(result.fat_g)} />
-            <Metric label="Carbs" value={fmtG(result.carb_g)} />
+            <Metric label={t("common.calories")} value={`${fmtKcal(result.target_calories)} kcal`} accent />
+            <Metric label={t("common.protein")} value={fmtG(result.protein_g)} />
+            <Metric label={t("common.fat")} value={fmtG(result.fat_g)} />
+            <Metric label={t("common.carbs")} value={fmtG(result.carb_g)} />
           </div>
 
           <div className="mt-5 flex items-start gap-2 rounded-xl border border-line bg-surface-2 p-4 text-sm text-ink-muted">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-brand-400" />
             <p>
-              This is a <span className="text-ink">formula estimate</span> — a starting guess from
-              your stats ({fmtKcal(result.maintenance_kcal)} kcal maintenance). It&apos;s where most
-              apps stop. Baseline keeps going: log a couple of weeks and it back-calculates your{" "}
-              <span className="text-ink">real maintenance</span> from your weight trend, then builds
-              the target from facts instead of a formula.
-              {result.rate_clamped && (
-                <>
-                  {" "}
-                  Your chosen rate was clamped to a safe range.
-                </>
-              )}
+              {t("try.explainBefore")}{" "}
+              <span className="text-ink">{t("try.explainFormulaEstimate")}</span>{" "}
+              {t("try.explainMiddle", { maintenance: fmtKcal(result.maintenance_kcal) })}{" "}
+              <span className="text-ink">{t("try.explainRealMaintenance")}</span>{" "}
+              {t("try.explainAfter")}
+              {result.rate_clamped && <> {t("try.rateClampedNote")}</>}
             </p>
           </div>
 
           <Link href="/register" className="mt-5 block">
             <Button full size="lg" variant="primary">
               <Sparkles className="h-4 w-4" />
-              Create a free account to track it
+              {t("try.createAccountCta")}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
-          <p className="mt-2 text-center text-xs text-ink-muted">No ads. No paywall. Always free.</p>
+          <p className="mt-2 text-center text-xs text-ink-muted">{t("try.freeNote")}</p>
         </Card>
       )}
 
       <p className="mt-6 text-center text-sm text-ink-muted">
-        Already have an account?{" "}
+        {t("try.alreadyHaveAccount")}{" "}
         <Link href="/login" className="font-medium text-brand-400 hover:text-brand-500">
-          Log in
+          {t("try.logIn")}
         </Link>
       </p>
     </div>

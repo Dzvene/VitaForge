@@ -1,14 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import { Flame, Plus, TrendingDown } from "lucide-react";
 import { useCalibration, useDay, useGuidance, useTarget, useWeightSeries } from "@/lib/api/hooks";
 import { isoDate, fmtKcal, fmtKgSigned, fmtKg } from "@/lib/format";
+import { useDayLabel } from "@/lib/i18n/useDayLabel";
 import { Badge, Button, Card, CardTitle, Skeleton } from "@/components/ui/primitives";
 import { CalorieRing, MacroBar } from "@/components/ui/charts";
 import { GuidanceList, HintsRail, WarningList } from "@/components/coaching/coaching";
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
+  const dayLabel = useDayLabel();
   const today = isoDate();
   const target = useTarget();
   const day = useDay(today);
@@ -25,27 +29,29 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <header className="flex items-center justify-between">
         <div>
-          <p className="label">Today</p>
+          <p className="label">{t("dashboard.todayLabel")}</p>
           <h1 className="text-2xl font-semibold tracking-tight">
-            {new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}
+            {dayLabel(today)}
           </h1>
         </div>
         <Link href="/diary">
           <Button>
-            <Plus className="h-4 w-4" /> Log food
+            <Plus className="h-4 w-4" /> {t("dashboard.logFood")}
           </Button>
         </Link>
       </header>
 
       {calib.data?.phase === "calibrating" && (
         <div className="card-2 flex flex-wrap items-center gap-3 p-4">
-          <Badge tone="brand">Calibrating</Badge>
+          <Badge tone="brand">{t("dashboard.calibrating")}</Badge>
           <p className="text-sm text-ink-muted">
-            Your norm is preliminary. {calib.data.clean_days_collected}/{calib.data.window_days} clean days collected —
-            eat at maintenance and weigh daily.
+            {t("dashboard.calibratingNote", {
+              collected: calib.data.clean_days_collected,
+              window: calib.data.window_days,
+            })}
           </p>
           <Link href="/calibration" className="ml-auto text-sm font-medium text-brand-400 hover:text-brand-500">
-            View →
+            {t("dashboard.view")}
           </Link>
         </div>
       )}
@@ -70,9 +76,9 @@ export default function DashboardPage() {
               <div className="flex flex-col items-center gap-8 py-2 sm:flex-row sm:items-center sm:gap-10">
                 <CalorieRing eaten={summary.eaten.kcal} target={target.data.target_calories} />
                 <div className="w-full flex-1 space-y-5">
-                  <MacroBar kind="protein" label="Protein" eaten={summary.eaten.protein_g} target={target.data.protein_g} />
-                  <MacroBar kind="fat" label="Fat" eaten={summary.eaten.fat_g} target={target.data.fat_g} />
-                  <MacroBar kind="carb" label="Carbs" eaten={summary.eaten.carb_g} target={target.data.carb_g} />
+                  <MacroBar kind="protein" label={t("common.protein")} eaten={summary.eaten.protein_g} target={target.data.protein_g} />
+                  <MacroBar kind="fat" label={t("common.fat")} eaten={summary.eaten.fat_g} target={target.data.fat_g} />
+                  <MacroBar kind="carb" label={t("common.carbs")} eaten={summary.eaten.carb_g} target={target.data.carb_g} />
                 </div>
               </div>
             )
@@ -87,16 +93,18 @@ export default function DashboardPage() {
         {/* Side column */}
         <div className="space-y-6">
           <Card>
-            <CardTitle right={<Flame className="h-4 w-4 text-brand-400" />}>Maintenance</CardTitle>
+            <CardTitle right={<Flame className="h-4 w-4 text-brand-400" />}>{t("dashboard.maintenance")}</CardTitle>
             {target.data ? (
               <div>
                 <p className="nums text-3xl font-semibold">{fmtKcal(target.data.maintenance_kcal)}</p>
                 <p className="mt-1 text-xs text-ink-faint">
-                  kcal/day ·{" "}
-                  {target.data.maintenance_source === "calibrated" ? "from your data" : "formula estimate"}
+                  {t("dashboard.kcalPerDay")} ·{" "}
+                  {target.data.maintenance_source === "calibrated"
+                    ? t("dashboard.fromYourData")
+                    : t("dashboard.formulaEstimate")}
                 </p>
                 {target.data.rate_clamped && (
-                  <p className="mt-2 text-xs text-warn">Rate clamped to a healthy maximum.</p>
+                  <p className="mt-2 text-xs text-warn">{t("dashboard.rateClamped")}</p>
                 )}
               </div>
             ) : (
@@ -105,22 +113,24 @@ export default function DashboardPage() {
           </Card>
 
           <Card>
-            <CardTitle right={<TrendingDown className="h-4 w-4 text-brand-400" />}>Weight trend</CardTitle>
+            <CardTitle right={<TrendingDown className="h-4 w-4 text-brand-400" />}>{t("dashboard.weightTrend")}</CardTitle>
             {weight.isLoading ? (
               <Skeleton className="h-10" />
             ) : trend.length ? (
               <div>
                 <p className="nums text-3xl font-semibold">{fmtKg(trend[trend.length - 1].trend_kg)}</p>
                 <p className="mt-1 text-xs text-ink-faint">
-                  {trendChange !== null ? `${fmtKgSigned(trendChange)} over ${trend.length} days` : "smoothed trend"}
+                  {trendChange !== null
+                    ? t("dashboard.trendOverDays", { change: fmtKgSigned(trendChange), days: trend.length })
+                    : t("dashboard.smoothedTrend")}
                 </p>
                 <Link href="/weight" className="mt-3 inline-block text-sm font-medium text-brand-400 hover:text-brand-500">
-                  Open chart →
+                  {t("dashboard.openChart")}
                 </Link>
               </div>
             ) : (
               <Link href="/weight" className="text-sm font-medium text-brand-400 hover:text-brand-500">
-                Log your first weigh-in →
+                {t("dashboard.logFirstWeighIn")}
               </Link>
             )}
           </Card>

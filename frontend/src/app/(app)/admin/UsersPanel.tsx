@@ -1,11 +1,13 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { admin } from "@/lib/api/endpoints";
 import { Badge, Button, Card, Skeleton } from "@/components/ui/primitives";
 import { useToast } from "@/components/ui/toast";
 
 export function UsersPanel() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const toast = useToast();
   const users = useQuery({ queryKey: ["admin", "users"], queryFn: admin.users });
@@ -15,9 +17,9 @@ export function UsersPanel() {
       admin.patchUser(id, body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "users"] });
-      toast("User updated", "ok");
+      toast(t("admin.users.updated"), "ok");
     },
-    onError: () => toast("Update failed", "error"),
+    onError: () => toast(t("admin.users.updateFailed"), "error"),
   });
 
   if (users.isLoading) return <Skeleton className="h-48" />;
@@ -28,10 +30,10 @@ export function UsersPanel() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line text-left text-ink-faint">
-              <th className="px-4 py-3 font-medium">User</th>
-              <th className="px-4 py-3 font-medium">Role</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium text-right">Actions</th>
+              <th className="px-4 py-3 font-medium">{t("admin.users.columns.user")}</th>
+              <th className="px-4 py-3 font-medium">{t("admin.users.columns.role")}</th>
+              <th className="px-4 py-3 font-medium">{t("admin.users.columns.status")}</th>
+              <th className="px-4 py-3 font-medium text-right">{t("admin.users.columns.actions")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
@@ -42,10 +44,12 @@ export function UsersPanel() {
                   <p className="text-xs text-ink-faint">{u.email}</p>
                 </td>
                 <td className="px-4 py-3">
-                  <Badge tone={u.role === "admin" ? "brand" : "neutral"}>{u.role}</Badge>
+                  <Badge tone={u.role === "admin" ? "brand" : "neutral"}>
+                    {u.role === "admin" ? t("admin.users.role.admin") : t("admin.users.role.user")}
+                  </Badge>
                 </td>
                 <td className="px-4 py-3">
-                  <Badge tone={u.is_active ? "ok" : "danger"}>{u.is_active ? "active" : "disabled"}</Badge>
+                  <Badge tone={u.is_active ? "ok" : "danger"}>{u.is_active ? t("admin.users.status.active") : t("admin.users.status.disabled")}</Badge>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
@@ -54,14 +58,14 @@ export function UsersPanel() {
                       variant="secondary"
                       onClick={() => patch.mutate({ id: u.id, body: { role: u.role === "admin" ? "user" : "admin" } })}
                     >
-                      {u.role === "admin" ? "Make user" : "Make admin"}
+                      {u.role === "admin" ? t("admin.users.makeUser") : t("admin.users.makeAdmin")}
                     </Button>
                     <Button
                       size="sm"
                       variant={u.is_active ? "danger" : "secondary"}
                       onClick={() => patch.mutate({ id: u.id, body: { is_active: !u.is_active } })}
                     >
-                      {u.is_active ? "Disable" : "Enable"}
+                      {u.is_active ? t("admin.users.disable") : t("admin.users.enable")}
                     </Button>
                   </div>
                 </td>

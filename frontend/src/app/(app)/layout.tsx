@@ -2,6 +2,7 @@
 
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/lib/store/auth";
 import { useProfile } from "@/lib/api/hooks";
@@ -18,6 +19,7 @@ function FullSpinner() {
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const { accessToken, hydrated } = useAuth();
   const profile = useProfile();
 
@@ -39,7 +41,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     if (profile.error instanceof ApiError && profile.error.status === 404) return <FullSpinner />;
     return (
       <div className="grid min-h-dvh place-items-center px-6 text-center text-sm text-ink-muted">
-        Can&apos;t reach the server. Make sure the backend is running, then refresh.
+        {t("appShell.serverUnreachable")}
       </div>
     );
   }

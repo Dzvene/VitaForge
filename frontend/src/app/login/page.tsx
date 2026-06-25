@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { auth } from "@/lib/api/endpoints";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/lib/store/auth";
@@ -10,6 +11,7 @@ import { AuthScaffold } from "@/components/AuthScaffold";
 import { Button, Field, Input } from "@/components/ui/primitives";
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { setTokens, setUser } = useAuth();
   const [email, setEmail] = useState("");
@@ -28,15 +30,15 @@ export default function LoginPage() {
       setUser(me);
       router.replace("/dashboard");
     } catch (err) {
-      setError(err instanceof ApiError ? err.detail : "Something went wrong");
+      setError(err instanceof ApiError ? err.detail : t("error.generic"));
       setLoading(false);
     }
   };
 
   return (
-    <AuthScaffold title="Welcome back" subtitle="Log in to continue your plan.">
+    <AuthScaffold title={t("auth.loginTitle")} subtitle={t("auth.loginSubtitle")}>
       <form onSubmit={submit} className="space-y-4">
-        <Field label="Email">
+        <Field label={t("auth.email")}>
           <Input
             type="email"
             autoComplete="email"
@@ -46,7 +48,7 @@ export default function LoginPage() {
             placeholder="you@example.com"
           />
         </Field>
-        <Field label="Password" error={error ?? undefined}>
+        <Field label={t("auth.password")} error={error ?? undefined}>
           <Input
             type="password"
             autoComplete="current-password"
@@ -57,19 +59,19 @@ export default function LoginPage() {
           />
         </Field>
         <Button type="submit" full size="lg" loading={loading}>
-          Log in
+          {t("auth.logIn")}
         </Button>
       </form>
       <p className="mt-6 text-center text-sm text-ink-muted">
-        New here?{" "}
+        {t("auth.newHere")}{" "}
         <Link href="/register" className="font-medium text-brand-400 hover:text-brand-500">
-          Create an account
+          {t("auth.createAccountLink")}
         </Link>
       </p>
       <p className="mt-2 text-center text-sm text-ink-muted">
-        Just curious?{" "}
+        {t("auth.justCurious")}{" "}
         <Link href="/try" className="font-medium text-brand-400 hover:text-brand-500">
-          Try the calculator — no account
+          {t("auth.tryCalculator")}
         </Link>
       </p>
     </AuthScaffold>

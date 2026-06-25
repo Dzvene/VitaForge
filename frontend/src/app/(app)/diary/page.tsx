@@ -2,10 +2,12 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight, Copy, Plus, Trash2, UtensilsCrossed } from "lucide-react";
 import { diary } from "@/lib/api/endpoints";
 import { qk, useDay, useGuidance } from "@/lib/api/hooks";
-import { addDays, dayLabel, fmtG, fmtKcal, isoDate, MEALS, MEAL_LABELS } from "@/lib/format";
+import { addDays, fmtG, fmtKcal, isoDate, MEALS } from "@/lib/format";
+import { useDayLabel } from "@/lib/i18n/useDayLabel";
 import type { Meal } from "@/lib/api/types";
 import { Button, Card, EmptyState, Skeleton } from "@/components/ui/primitives";
 import { GuidanceList } from "@/components/coaching/coaching";
@@ -14,6 +16,8 @@ import { AddFoodDialog } from "./AddFoodDialog";
 import { CustomFoodDialog } from "./CustomFoodDialog";
 
 export default function DiaryPage() {
+  const { t } = useTranslation();
+  const dayLabel = useDayLabel();
   const qc = useQueryClient();
   const toast = useToast();
   const [day, setDay] = useState(isoDate());
@@ -28,7 +32,7 @@ export default function DiaryPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.day(day) });
       qc.invalidateQueries({ queryKey: qk.guidance(day) });
-      toast("Entry removed", "ok");
+      toast(t("diary.entryRemoved"), "ok");
     },
   });
 
@@ -37,7 +41,10 @@ export default function DiaryPage() {
     onSuccess: (r) => {
       qc.invalidateQueries({ queryKey: qk.day(day) });
       qc.invalidateQueries({ queryKey: qk.guidance(day) });
-      toast(r.copied ? `Copied ${r.copied} entries` : "Nothing to copy", r.copied ? "ok" : "info");
+      toast(
+        r.copied ? t("diary.copiedEntries", { count: r.copied }) : t("diary.nothingToCopy"),
+        r.copied ? "ok" : "info",
+      );
     },
   });
 
@@ -54,7 +61,7 @@ export default function DiaryPage() {
           <button
             onClick={() => setDay(addDays(day, -1))}
             className="rounded-lg border border-line bg-surface-2 p-2 text-ink-muted hover:text-ink"
-            aria-label="Previous day"
+            aria-label={t("diary.previousDay")}
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -65,13 +72,13 @@ export default function DiaryPage() {
           <button
             onClick={() => setDay(addDays(day, 1))}
             className="rounded-lg border border-line bg-surface-2 p-2 text-ink-muted hover:text-ink"
-            aria-label="Next day"
+            aria-label={t("diary.nextDay")}
           >
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>
         <Button variant="secondary" size="sm" onClick={() => copyYesterday.mutate()} loading={copyYesterday.isPending}>
-          <Copy className="h-4 w-4" /> Copy yesterday
+          <Copy className="h-4 w-4" /> {t("diary.copyYesterday")}
         </Button>
       </header>
 
@@ -79,10 +86,10 @@ export default function DiaryPage() {
       {eaten && target && (
         <div className="card-2 grid grid-cols-4 divide-x divide-line p-0 text-center">
           {[
-            ["Calories", `${fmtKcal(eaten.kcal)} / ${fmtKcal(target.calories)}`],
-            ["Protein", `${fmtG(eaten.protein_g)} / ${fmtG(target.protein_g)}`],
-            ["Fat", `${fmtG(eaten.fat_g)} / ${fmtG(target.fat_g)}`],
-            ["Carbs", `${fmtG(eaten.carb_g)} / ${fmtG(target.carb_g)}`],
+            [t("common.calories"), `${fmtKcal(eaten.kcal)} / ${fmtKcal(target.calories)}`],
+            [t("common.protein"), `${fmtG(eaten.protein_g)} / ${fmtG(target.protein_g)}`],
+            [t("common.fat"), `${fmtG(eaten.fat_g)} / ${fmtG(target.fat_g)}`],
+            [t("common.carbs"), `${fmtG(eaten.carb_g)} / ${fmtG(target.carb_g)}`],
           ].map(([k, v]) => (
             <div key={k} className="px-2 py-3">
               <p className="label">{k}</p>
@@ -108,15 +115,19 @@ export default function DiaryPage() {
             <Card key={meal}>
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-baseline gap-2">
-                  <h3 className="text-sm font-semibold">{MEAL_LABELS[meal]}</h3>
-                  {mealKcal > 0 && <span className="nums text-xs text-ink-faint">{fmtKcal(mealKcal)} kcal</span>}
+                  <h3 className="text-sm font-semibold">{t("enums.meal." + meal)}</h3>
+                  {mealKcal > 0 && (
+                    <span className="nums text-xs text-ink-faint">
+                      {fmtKcal(mealKcal)} {t("common.kcal")}
+                    </span>
+                  )}
                 </div>
                 <Button size="sm" variant="ghost" onClick={() => setAddMeal(meal)}>
-                  <Plus className="h-4 w-4" /> Add
+                  <Plus className="h-4 w-4" /> {t("common.add")}
                 </Button>
               </div>
               {items.length === 0 ? (
-                <p className="py-2 text-sm text-ink-faint">No items yet.</p>
+                <p className="py-2 text-sm text-ink-faint">{t("diary.noItemsYet")}</p>
               ) : (
                 <ul className="divide-y divide-line">
                   {items.map((e) => (
@@ -132,7 +143,7 @@ export default function DiaryPage() {
                       <button
                         onClick={() => remove.mutate(e.id)}
                         className="rounded-lg p-1.5 text-ink-faint hover:bg-surface-3 hover:text-danger"
-                        aria-label="Remove"
+                        aria-label={t("common.remove")}
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -148,11 +159,11 @@ export default function DiaryPage() {
       {entries.length === 0 && !summary.isLoading && (
         <EmptyState
           icon={<UtensilsCrossed className="h-7 w-7" />}
-          title="Nothing logged for this day"
-          hint="Add your first item, or copy yesterday."
+          title={t("diary.emptyTitle")}
+          hint={t("diary.emptyHint")}
           action={
             <Button onClick={() => setAddMeal("breakfast")}>
-              <Plus className="h-4 w-4" /> Log food
+              <Plus className="h-4 w-4" /> {t("diary.logFood")}
             </Button>
           }
         />

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import {
   Activity,
   BookOpen,
@@ -15,25 +16,27 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/store/auth";
 import { cn } from "@/lib/cn";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import type { ReactNode } from "react";
 
 interface NavItem {
   href: string;
-  label: string;
+  labelKey: string;
   icon: LucideIcon;
   admin?: boolean;
 }
 
 const NAV: NavItem[] = [
-  { href: "/dashboard", label: "Today", icon: LayoutDashboard },
-  { href: "/diary", label: "Diary", icon: BookOpen },
-  { href: "/weight", label: "Weight", icon: LineChart },
-  { href: "/calibration", label: "Calibration", icon: Sliders },
-  { href: "/settings", label: "Settings", icon: Settings },
-  { href: "/admin", label: "Admin", icon: Shield, admin: true },
+  { href: "/dashboard", labelKey: "nav.today", icon: LayoutDashboard },
+  { href: "/diary", labelKey: "nav.diary", icon: BookOpen },
+  { href: "/weight", labelKey: "nav.weight", icon: LineChart },
+  { href: "/calibration", labelKey: "nav.calibration", icon: Sliders },
+  { href: "/settings", labelKey: "nav.settings", icon: Settings },
+  { href: "/admin", labelKey: "nav.admin", icon: Shield, admin: true },
 ];
 
 function Brand() {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-2.5 px-2">
       <div className="grid h-9 w-9 place-items-center rounded-xl bg-brand-500/15 ring-1 ring-brand-500/30">
@@ -41,7 +44,7 @@ function Brand() {
       </div>
       <div className="leading-tight">
         <p className="text-sm font-semibold tracking-tight text-ink">Baseline</p>
-        <p className="text-[11px] text-ink-faint">calibrate · track · adapt</p>
+        <p className="text-[11px] text-ink-faint">{t("nav.tagline")}</p>
       </div>
     </div>
   );
@@ -50,6 +53,7 @@ function Brand() {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { t } = useTranslation();
   const { user, clear } = useAuth();
   const isAdmin = user?.role === "admin";
 
@@ -80,18 +84,19 @@ export function AppShell({ children }: { children: ReactNode }) {
                 )}
               >
                 <it.icon className={cn("h-[18px] w-[18px]", active && "text-brand-400")} />
-                {it.label}
+                {t(it.labelKey)}
               </Link>
             );
           })}
         </nav>
-        <div className="px-2">
+        <div className="space-y-2 px-2">
+          <LanguageSwitcher className="w-full [&>select]:w-full" />
           <div className="flex items-center justify-between rounded-xl bg-surface-2 px-3 py-2.5">
             <div className="min-w-0">
               <p className="truncate text-xs font-medium text-ink">{user?.full_name || user?.email}</p>
-              <p className="text-[11px] text-ink-faint">{isAdmin ? "Owner" : "Member"}</p>
+              <p className="text-[11px] text-ink-faint">{isAdmin ? t("nav.owner") : t("nav.member")}</p>
             </div>
-            <button onClick={logout} className="rounded-lg p-1.5 text-ink-muted hover:bg-surface-3 hover:text-danger" aria-label="Log out">
+            <button onClick={logout} className="rounded-lg p-1.5 text-ink-muted hover:bg-surface-3 hover:text-danger" aria-label={t("common.logOut")}>
               <LogOut className="h-4 w-4" />
             </button>
           </div>
@@ -117,7 +122,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               )}
             >
               <it.icon className="h-5 w-5" />
-              {it.label}
+              {t(it.labelKey)}
             </Link>
           );
         })}

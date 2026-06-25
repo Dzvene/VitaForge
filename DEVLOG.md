@@ -4,6 +4,33 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-25 — Multi-language UI: English / Russian / German (frontend)
+
+Full i18n of the web app. Pattern mirrors the proven sibling projects the user
+pointed at: **react-i18next + i18next-browser-languagedetector** like süd-fenster
+admin (frontend); the backend Accept-Language pattern from Invocore is the next
+step (coaching/error strings).
+
+- `lib/i18n/` — i18next init (en/ru/de, fallback en, `load: "languageOnly"`,
+  detector order localStorage `vf_lang` → navigator), `I18nProvider` (client,
+  keeps `<html lang>` in sync), `useDayLabel` hook for locale-aware relative/
+  absolute dates. `LanguageSwitcher` (inline select in landing header + app
+  sidebar; segmented in Settings).
+- `format.ts` enum label maps (meal/activity/goal) + `dayLabel` replaced by
+  shared `enums.*` keys + `relativeDayKey`/`formatDayAbsolute` so dates localize.
+- Every screen converted to `t(...)`: landing, try, auth (login/register/
+  scaffold), onboarding, error boundary, dashboard, diary (+ Add/Custom food
+  dialogs), weight, calibration, settings, admin (overview/foods/users), app
+  shell/nav. 17 translation namespaces, three locale JSON files kept key-parity.
+  Dynamic server-provided strings (coaching hint/warning text, food names) are
+  intentionally left to the backend.
+- The 7 screen conversions were fanned out to parallel subagents (disjoint
+  files), each returning an en/ru/de fragment; merged + placeholder-normalized
+  to i18next `{{var}}` syntax.
+- vitest setup now imports the i18n init so tests resolve real English copy.
+  typecheck + `next lint` clean, **25 frontend tests green**. Rebuilt + deployed;
+  verified live in all three languages (EN/RU/DE) on the landing.
+
 ## 2026-06-24 — Public landing page (the front door was a redirect)
 
 `/` was a client redirect — signed-in → `/dashboard`, everyone else → a bare

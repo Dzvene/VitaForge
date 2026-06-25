@@ -3,15 +3,18 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Activity, ArrowRight, Info } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { profile as profileApi } from "@/lib/api/endpoints";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/lib/store/auth";
-import { ACTIVITY_LABELS } from "@/lib/format";
 import type { ActivityLevel, GoalKind, ProfileUpsert, Sex } from "@/lib/api/types";
 import { Button, Field, Input, Segmented, Select } from "@/components/ui/primitives";
 import { useToast } from "@/components/ui/toast";
 
+const ACTIVITY_LEVELS: ActivityLevel[] = ["sedentary", "light", "moderate", "high", "very_high"];
+
 export default function OnboardingPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const toast = useToast();
   const { accessToken, hydrated } = useAuth();
@@ -43,10 +46,10 @@ export default function OnboardingPage() {
     };
     try {
       await profileApi.upsert(body);
-      toast("Profile saved — calibration starts now", "ok");
+      toast(t("onboarding.savedToast"), "ok");
       router.replace("/dashboard");
     } catch (err) {
-      toast(err instanceof ApiError ? err.detail : "Could not save", "error");
+      toast(err instanceof ApiError ? err.detail : t("onboarding.saveError"), "error");
       setLoading(false);
     }
   };
@@ -58,61 +61,61 @@ export default function OnboardingPage() {
           <Activity className="h-5 w-5 text-brand-400" />
         </div>
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">Set up your profile</h1>
-          <p className="text-sm text-ink-muted">We&apos;ll compute a starting norm — then refine it from real data.</p>
+          <h1 className="text-xl font-semibold tracking-tight">{t("onboarding.title")}</h1>
+          <p className="text-sm text-ink-muted">{t("onboarding.subtitle")}</p>
         </div>
       </div>
 
       <form onSubmit={submit} className="card space-y-5 p-6">
-        <Field label="Sex">
+        <Field label={t("onboarding.sex")}>
           <Segmented
             value={sex}
             onChange={setSex}
             options={[
-              { value: "male", label: "Male" },
-              { value: "female", label: "Female" },
+              { value: "male", label: t("onboarding.male") },
+              { value: "female", label: t("onboarding.female") },
             ]}
           />
         </Field>
 
         <div className="grid grid-cols-3 gap-3">
-          <Field label="Age">
+          <Field label={t("onboarding.age")}>
             <Input type="number" min={14} max={120} value={age} onChange={(e) => setAge(e.target.value)} />
           </Field>
-          <Field label="Height (cm)">
+          <Field label={t("onboarding.heightCm")}>
             <Input type="number" min={120} max={250} value={height} onChange={(e) => setHeight(e.target.value)} />
           </Field>
-          <Field label="Weight (kg)">
+          <Field label={t("onboarding.weightKg")}>
             <Input type="number" step="0.1" value={weight} onChange={(e) => setWeight(e.target.value)} />
           </Field>
         </div>
 
-        <Field label="Activity level">
+        <Field label={t("onboarding.activityLevel")}>
           <Select value={activity} onChange={(e) => setActivity(e.target.value as ActivityLevel)}>
-            {Object.entries(ACTIVITY_LABELS).map(([v, l]) => (
+            {ACTIVITY_LEVELS.map((v) => (
               <option key={v} value={v}>
-                {l}
+                {t("enums.activity." + v)}
               </option>
             ))}
           </Select>
         </Field>
 
-        <Field label="Goal">
+        <Field label={t("onboarding.goal")}>
           <Segmented
             value={goal}
             onChange={setGoal}
             options={[
-              { value: "lose", label: "Lose fat" },
-              { value: "maintain", label: "Maintain" },
-              { value: "gain", label: "Build" },
+              { value: "lose", label: t("enums.goal.lose") },
+              { value: "maintain", label: t("enums.goal.maintain") },
+              { value: "gain", label: t("enums.goal.gain") },
             ]}
           />
         </Field>
 
         {goal !== "maintain" && (
           <Field
-            label={`Target rate (kg / week to ${goal === "lose" ? "lose" : "gain"})`}
-            hint="A steep rate gets clamped to a healthy range automatically."
+            label={goal === "lose" ? t("onboarding.targetRateLose") : t("onboarding.targetRateGain")}
+            hint={t("onboarding.targetRateHint")}
           >
             <Input type="number" step="0.05" min={0} value={rate} onChange={(e) => setRate(e.target.value)} />
           </Field>
@@ -120,14 +123,11 @@ export default function OnboardingPage() {
 
         <div className="flex items-start gap-2.5 rounded-xl bg-surface-2 p-3.5 text-sm text-ink-muted">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-brand-400" />
-          <p>
-            You won&apos;t cut right away. For the first ~2 weeks you eat at maintenance and weigh daily so we can
-            measure your real burn — then the deficit is built on facts, not a formula.
-          </p>
+          <p>{t("onboarding.calibrationNote")}</p>
         </div>
 
         <Button type="submit" full size="lg" loading={loading}>
-          Start calibration <ArrowRight className="h-4 w-4" />
+          {t("onboarding.startCalibration")} <ArrowRight className="h-4 w-4" />
         </Button>
       </form>
     </div>
