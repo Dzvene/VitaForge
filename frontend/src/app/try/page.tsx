@@ -9,6 +9,7 @@ import { ApiError } from "@/lib/api/client";
 import { fmtG, fmtKcal } from "@/lib/format";
 import type { ActivityLevel, GoalKind, Sex, TargetOut } from "@/lib/api/types";
 import { Button, Card, Field, Input, Segmented, Select } from "@/components/ui/primitives";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function TryPage() {
   const { t } = useTranslation();
@@ -55,6 +56,9 @@ export default function TryPage() {
         <div>
           <h1 className="text-xl font-semibold tracking-tight">{t("try.title")}</h1>
           <p className="text-sm text-ink-muted">{t("try.subtitle")}</p>
+        </div>
+        <div className="ml-auto">
+          <LanguageSwitcher />
         </div>
       </div>
 
@@ -123,10 +127,10 @@ export default function TryPage() {
       {result && (
         <Card className="mt-6 p-6">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <Metric label={t("common.calories")} value={`${fmtKcal(result.target_calories)} kcal`} accent />
-            <Metric label={t("common.protein")} value={fmtG(result.protein_g)} />
-            <Metric label={t("common.fat")} value={fmtG(result.fat_g)} />
-            <Metric label={t("common.carbs")} value={fmtG(result.carb_g)} />
+            <Metric label={t("common.calories")} value={`${fmtKcal(result.target_calories)} ${t("common.kcal")}`} accent />
+            <Metric label={t("common.protein")} value={fmtG(result.protein_g, t("common.grams"))} />
+            <Metric label={t("common.fat")} value={fmtG(result.fat_g, t("common.grams"))} />
+            <Metric label={t("common.carbs")} value={fmtG(result.carb_g, t("common.grams"))} />
           </div>
 
           <div className="mt-5 flex items-start gap-2 rounded-xl border border-line bg-surface-2 p-4 text-sm text-ink-muted">

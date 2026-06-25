@@ -131,7 +131,7 @@ export default function CalibrationPage() {
                 <Row label={t("calibration.avgIntake")} value={`${fmtKcal(result.avg_daily_intake)} ${t("common.kcal")}`} />
               )}
               {result.trend_change_kg != null && (
-                <Row label={t("calibration.trendChange")} value={fmtKgSigned(result.trend_change_kg)} />
+                <Row label={t("calibration.trendChange")} value={fmtKgSigned(result.trend_change_kg, t("common.kg"))} />
               )}
             </dl>
           ) : result && !result.ok ? (

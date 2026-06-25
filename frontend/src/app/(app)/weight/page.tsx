@@ -92,7 +92,7 @@ export default function WeightPage() {
           {change !== null && (
             <Card>
               <CardTitle>{t("weight.sinceStart")}</CardTitle>
-              <p className="nums text-3xl font-semibold">{fmtKgSigned(change)}</p>
+              <p className="nums text-3xl font-semibold">{fmtKgSigned(change, t("common.kg"))}</p>
               <p className="mt-1 text-xs text-ink-faint">{t("weight.sinceStartHint", { count: points.length })}</p>
             </Card>
           )}
@@ -107,7 +107,7 @@ export default function WeightPage() {
               <li key={p.logged_on} className="flex items-center justify-between py-2.5 text-sm">
                 <span className="text-ink-muted">{dayLabel(p.logged_on)}</span>
                 <span className="nums">
-                  {fmtKg(p.weight_kg)} <span className="text-ink-faint">· {fmtKg(p.trend_kg)} {t("weight.trend")}</span>
+                  {fmtKg(p.weight_kg, t("common.kg"))} <span className="text-ink-faint">· {fmtKg(p.trend_kg, t("common.kg"))} {t("weight.trend")}</span>
                 </span>
               </li>
             ))}

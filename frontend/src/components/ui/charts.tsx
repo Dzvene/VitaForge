@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/cn";
 import { fmtKcal, fmtG, progress } from "@/lib/format";
 import type { WeightPoint } from "@/lib/api/types";
@@ -19,6 +20,7 @@ export function CalorieRing({
   size?: number;
   stroke?: number;
 }) {
+  const { t } = useTranslation();
   const gid = useId();
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
@@ -50,12 +52,12 @@ export function CalorieRing({
         />
       </svg>
       <div className="absolute flex flex-col items-center">
-        <span className="label">{over ? "Over by" : "Remaining"}</span>
+        <span className="label">{over ? t("charts.overBy") : t("charts.remaining")}</span>
         <span className={cn("nums text-4xl font-semibold", over ? "text-danger" : "text-ink")}>
           {fmtKcal(Math.abs(remaining))}
         </span>
         <span className="nums mt-0.5 text-xs text-ink-faint">
-          {fmtKcal(eaten)} / {fmtKcal(target)} kcal
+          {fmtKcal(eaten)} / {fmtKcal(target)} {t("common.kcal")}
         </span>
       </div>
     </div>
@@ -82,6 +84,8 @@ export function MacroBar({
   eaten: number;
   target: number;
 }) {
+  const { t } = useTranslation();
+  const g = t("common.grams");
   const frac = progress(eaten, target);
   const remaining = Math.max(0, target - eaten);
   const over = eaten > target;
@@ -90,7 +94,7 @@ export function MacroBar({
       <div className="mb-1.5 flex items-baseline justify-between">
         <span className="text-sm font-medium text-ink">{label}</span>
         <span className="nums text-xs text-ink-muted">
-          {fmtG(eaten)} <span className="text-ink-faint">/ {fmtG(target)}</span>
+          {fmtG(eaten, g)} <span className="text-ink-faint">/ {fmtG(target, g)}</span>
         </span>
       </div>
       <div className="h-2.5 overflow-hidden rounded-full bg-surface-3">
@@ -100,7 +104,9 @@ export function MacroBar({
         />
       </div>
       <div className="mt-1 text-right text-[11px] text-ink-faint">
-        {over ? `over by ${fmtG(eaten - target)}` : `${fmtG(remaining)} left`}
+        {over
+          ? t("charts.overByAmount", { amount: fmtG(eaten - target, g) })
+          : t("charts.leftAmount", { amount: fmtG(remaining, g) })}
       </div>
     </div>
   );
@@ -110,10 +116,11 @@ export function MacroBar({
 // Weight trend chart — raw points + smoothed trend line (spec §4.3).
 // ---------------------------------------------------------------------------
 export function TrendChart({ points, height = 200 }: { points: WeightPoint[]; height?: number }) {
+  const { t } = useTranslation();
   if (points.length < 2) {
     return (
       <div className="grid h-[200px] place-items-center text-sm text-ink-faint">
-        Log at least two days to see a trend.
+        {t("weight.trendMinHint")}
       </div>
     );
   }

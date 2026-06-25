@@ -27,10 +27,17 @@
     "kcal": "kcal",
     "grams": "g",
     "kg": "kg",
+    "per100g": "/100 g",
     "calories": "Kalorien",
     "protein": "Eiweiß",
     "fat": "Fett",
     "carbs": "Kohlenhydrate"
+  },
+  "charts": {
+    "remaining": "Übrig",
+    "overBy": "Drüber",
+    "leftAmount": "{{amount}} übrig",
+    "overByAmount": "{{amount}} drüber"
   },
   "nav": {
     "today": "Heute",
@@ -237,6 +244,7 @@
     "raw": "roh",
     "emptyTitle": "Noch keine Wägungen",
     "emptyHint": "Trage dein Morgengewicht ein, um den Trend zu starten.",
+    "trendMinHint": "Trage mindestens zwei Tage ein, um einen Trend zu sehen.",
     "logTitle": "Gewicht erfassen",
     "dateLabel": "Datum",
     "weightLabel": "Gewicht (kg)",

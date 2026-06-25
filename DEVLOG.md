@@ -4,6 +4,45 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-25 — Frontend i18n leak fixes (Phase 1 of a manual-QA sweep)
+
+A full manual click-through of every screen (login → onboarding → dashboard →
+diary → add-food → weight → calibration → settings → guest /try → landing)
+surfaced systemic i18n leaks, not isolated typos. Phase 1 closes the
+component-level ones:
+
+- **Hardcoded units / words** went through `t()`: `g`, `kg`, `kcal`, `/100g`,
+  "Remaining"/"Over by", "{{n}} left"/"over by {{n}}", and the
+  "Log at least two days to see a trend." empty state. `fmtG/fmtKg/fmtKgSigned`
+  now take an optional unit arg (English default keeps the pure unit tests
+  locale-free); every call site passes `t("common.grams"|"kg")`. New keys:
+  `common.per100g`, `charts.*`, `weight.trendMinHint` in en/ru/de.
+- **Raw key on screen**: the add-food meal toggle showed
+  `diary.addFood.mealShort.breakfast` (key never existed) — unified to the
+  existing `enums.meal.breakfast`.
+- **Hydration mismatch (#418)**: i18n was detecting the browser language at
+  import time, so the first client render disagreed with the server's `en`
+  markup. Now init is pinned to `en` (matches SSR) and detection moved into a
+  post-mount effect in `I18nProvider` (localStorage `vf_lang` → navigator),
+  with `<html lang>` + storage kept in sync on every `languageChanged`. Console
+  is clean on reload; no more #418.
+- **Guest pages had no language switcher** (/try, /login, /register) — added
+  via `AuthScaffold` (covers login+register) and the /try header.
+
+Verified live on the RU UI after redeploy: dashboard units/labels, coaching
+cards, "why this method", weight `кг`, add-food `Завтрак` + `/100 г`, switcher
+on guest pages, 0 console errors. typecheck + lint + 25 vitest all green.
+
+**Still open (next phases):** (2) backend content only re-localizes on the next
+fetch — switching language mid-session keeps already-loaded coaching/calibration
+copy in the old language until refetch; calibration soft-degrade strings
+("Not enough weigh-ins…") are still English server-side. (3) catalog is
+USDA-only — RU/DE food search returns nothing ("творог" → empty); needs OFF
+import + bilingual names. (4) no password reset / email verification / account
+deletion / data export / auth rate-limit.
+
+---
+
 ## 2026-06-25 — Backend i18n (Accept-Language) + mobile API hand-off
 
 Server-generated copy now localizes en/ru/de from the request, so the native

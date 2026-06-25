@@ -15,7 +15,7 @@ import { useToast } from "@/components/ui/toast";
 function macroLine(f: FoodOut, t: TFunction) {
   return `${Math.round(f.kcal_100g)} ${t("common.kcal")} · P ${Math.round(f.protein_100g)} F ${Math.round(
     f.fat_100g,
-  )} C ${Math.round(f.carb_100g)} /100g`;
+  )} C ${Math.round(f.carb_100g)} ${t("common.per100g")}`;
 }
 
 export function AddFoodDialog({
@@ -299,7 +299,7 @@ function QuantityStep(props: {
           value={props.meal}
           onChange={props.setMeal}
           options={[
-            { value: "breakfast", label: t("diary.addFood.mealShort.breakfast") },
+            { value: "breakfast", label: t("enums.meal.breakfast") },
             { value: "lunch", label: t("enums.meal.lunch") },
             { value: "dinner", label: t("enums.meal.dinner") },
             { value: "snack", label: t("enums.meal.snack") },

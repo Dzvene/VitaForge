@@ -7,21 +7,22 @@ export function fmtKcal(n: number): string {
     .replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 
-/** Grams, rounded, with unit. */
-export function fmtG(n: number): string {
-  return `${Math.round(n)} g`;
+/** Grams, rounded, with unit. The unit is i18n-supplied by callers (defaults
+ *  to "g" so pure unit tests stay locale-free). */
+export function fmtG(n: number, unit = "g"): string {
+  return `${Math.round(n)} ${unit}`;
 }
 
-/** One-decimal kg with unit. */
-export function fmtKg(n: number): string {
-  return `${n.toFixed(1)} kg`;
+/** One-decimal kg with unit (caller passes the localized unit). */
+export function fmtKg(n: number, unit = "kg"): string {
+  return `${n.toFixed(1)} ${unit}`;
 }
 
 /** Signed one-decimal kg (e.g. "+0.3 kg", "−1.2 kg"). */
-export function fmtKgSigned(n: number): string {
+export function fmtKgSigned(n: number, unit = "kg"): string {
   const s = n.toFixed(1);
-  if (n > 0) return `+${s} kg`;
-  return `${s.replace("-", "−")} kg`;
+  if (n > 0) return `+${s} ${unit}`;
+  return `${s.replace("-", "−")} ${unit}`;
 }
 
 /** Progress fraction of consumed/target, clamped to [0, 1] (for arcs/bars). */

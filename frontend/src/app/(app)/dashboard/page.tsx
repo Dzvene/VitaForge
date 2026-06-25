@@ -118,10 +118,10 @@ export default function DashboardPage() {
               <Skeleton className="h-10" />
             ) : trend.length ? (
               <div>
-                <p className="nums text-3xl font-semibold">{fmtKg(trend[trend.length - 1].trend_kg)}</p>
+                <p className="nums text-3xl font-semibold">{fmtKg(trend[trend.length - 1].trend_kg, t("common.kg"))}</p>
                 <p className="mt-1 text-xs text-ink-faint">
                   {trendChange !== null
-                    ? t("dashboard.trendOverDays", { change: fmtKgSigned(trendChange), days: trend.length })
+                    ? t("dashboard.trendOverDays", { change: fmtKgSigned(trendChange, t("common.kg")), days: trend.length })
                     : t("dashboard.smoothedTrend")}
                 </p>
                 <Link href="/weight" className="mt-3 inline-block text-sm font-medium text-brand-400 hover:text-brand-500">

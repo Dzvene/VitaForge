@@ -71,7 +71,7 @@ export function FoodsPanel() {
                     <p className="truncate text-sm font-medium text-ink">{f.name}</p>
                     <p className="nums truncate text-xs text-ink-faint">
                       {f.brand ? `${f.brand} · ` : ""}
-                      {Math.round(f.kcal_100g)} {t("common.kcal")} /100g
+                      {Math.round(f.kcal_100g)} {t("common.kcal")} {t("common.per100g")}
                     </p>
                   </div>
                   <Badge tone="neutral">{f.source}</Badge>

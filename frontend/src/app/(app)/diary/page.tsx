@@ -87,9 +87,9 @@ export default function DiaryPage() {
         <div className="card-2 grid grid-cols-4 divide-x divide-line p-0 text-center">
           {[
             [t("common.calories"), `${fmtKcal(eaten.kcal)} / ${fmtKcal(target.calories)}`],
-            [t("common.protein"), `${fmtG(eaten.protein_g)} / ${fmtG(target.protein_g)}`],
-            [t("common.fat"), `${fmtG(eaten.fat_g)} / ${fmtG(target.fat_g)}`],
-            [t("common.carbs"), `${fmtG(eaten.carb_g)} / ${fmtG(target.carb_g)}`],
+            [t("common.protein"), `${fmtG(eaten.protein_g, t("common.grams"))} / ${fmtG(target.protein_g, t("common.grams"))}`],
+            [t("common.fat"), `${fmtG(eaten.fat_g, t("common.grams"))} / ${fmtG(target.fat_g, t("common.grams"))}`],
+            [t("common.carbs"), `${fmtG(eaten.carb_g, t("common.grams"))} / ${fmtG(target.carb_g, t("common.grams"))}`],
           ].map(([k, v]) => (
             <div key={k} className="px-2 py-3">
               <p className="label">{k}</p>
@@ -135,7 +135,7 @@ export default function DiaryPage() {
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm text-ink">{e.food_name}</p>
                         <p className="nums text-xs text-ink-faint">
-                          {fmtG(e.grams)} · P {Math.round(e.nutrients.protein_g)} F {Math.round(e.nutrients.fat_g)} C{" "}
+                          {fmtG(e.grams, t("common.grams"))} · P {Math.round(e.nutrients.protein_g)} F {Math.round(e.nutrients.fat_g)} C{" "}
                           {Math.round(e.nutrients.carb_g)}
                         </p>
                       </div>

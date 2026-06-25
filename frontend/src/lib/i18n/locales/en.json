@@ -27,10 +27,17 @@
     "kcal": "kcal",
     "grams": "g",
     "kg": "kg",
+    "per100g": "/100g",
     "calories": "Calories",
     "protein": "Protein",
     "fat": "Fat",
     "carbs": "Carbs"
+  },
+  "charts": {
+    "remaining": "Remaining",
+    "overBy": "Over by",
+    "leftAmount": "{{amount}} left",
+    "overByAmount": "over by {{amount}}"
   },
   "nav": {
     "today": "Today",
@@ -237,6 +244,7 @@
     "raw": "raw",
     "emptyTitle": "No weigh-ins yet",
     "emptyHint": "Log your morning weight to start the trend.",
+    "trendMinHint": "Log at least two days to see a trend.",
     "logTitle": "Log weight",
     "dateLabel": "Date",
     "weightLabel": "Weight (kg)",
