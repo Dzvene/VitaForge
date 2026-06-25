@@ -57,6 +57,34 @@ class Settings(BaseSettings):
     LOGIN_RATE_WINDOW_SECONDS: int = 60  # ... per this window
     REGISTER_RATE_LIMIT: int = 5
     REGISTER_RATE_WINDOW_SECONDS: int = 300
+    # forgot-password / resend-verification: stricter (each one sends an email)
+    EMAIL_SEND_RATE_LIMIT: int = 5
+    EMAIL_SEND_RATE_WINDOW_SECONDS: int = 900
+
+    # ----- Email (SMTP) -----
+    # Provider-agnostic: when SMTP_HOST and SMTP_PASSWORD are both set, mail goes
+    # out over SMTP; otherwise it falls back to the console backend (logged +
+    # captured in an in-memory outbox for dev/tests). Mirrors Invocore's one.com
+    # setup — point these at a vitaforge@ mailbox to go live.
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 465
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_EMAIL: str = "no-reply@vitaforge.app"
+    SMTP_FROM_NAME: str = "VitaForge"
+    SMTP_USE_SSL: bool = True  # SSL on connect (465); False = STARTTLS (587)
+
+    @property
+    def email_enabled(self) -> bool:
+        """True when a real SMTP transport is configured."""
+        return bool(self.SMTP_HOST and self.SMTP_PASSWORD)
+
+    # Public base URL of the frontend — used to build links inside emails.
+    FRONTEND_BASE_URL: str = "http://localhost:3000"
+
+    # ----- Email token TTLs -----
+    EMAIL_VERIFICATION_TTL_HOURS: int = 48
+    PASSWORD_RESET_TTL_MINUTES: int = 60
 
     # ----- Food data import -----
     OFF_DUMP_PATH: str = ""   # Open Food Facts JSONL dump

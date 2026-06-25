@@ -58,6 +58,14 @@ export default function LoginPage() {
             placeholder="••••••••"
           />
         </Field>
+        <div className="text-right">
+          <Link
+            href="/forgot-password"
+            className="text-sm font-medium text-brand-400 hover:text-brand-500"
+          >
+            {t("auth.forgotLink")}
+          </Link>
+        </div>
         <Button type="submit" full size="lg" loading={loading}>
           {t("auth.logIn")}
         </Button>

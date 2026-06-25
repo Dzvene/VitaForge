@@ -53,6 +53,26 @@ export const auth = {
   login: (body: { email: string; password: string }) =>
     api<TokenPair>("/auth/login", { method: "POST", body, auth: false }),
   me: () => api<UserOut>("/auth/me"),
+  forgotPassword: (email: string) =>
+    api<{ status: string }>("/auth/forgot-password", {
+      method: "POST",
+      body: { email },
+      auth: false,
+    }),
+  resetPassword: (token: string, new_password: string) =>
+    api<{ status: string }>("/auth/reset-password", {
+      method: "POST",
+      body: { token, new_password },
+      auth: false,
+    }),
+  verifyEmail: (token: string) =>
+    api<{ status: string }>("/auth/verify-email", {
+      method: "POST",
+      body: { token },
+      auth: false,
+    }),
+  resendVerification: () =>
+    api<{ status: string }>("/auth/resend-verification", { method: "POST" }),
 };
 
 export const account = {

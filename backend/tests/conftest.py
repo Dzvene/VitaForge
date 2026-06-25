@@ -57,9 +57,10 @@ def _sqlite_pragmas(dbapi_conn, _record):
 async def _fresh_schema():
     # In-memory auth rate-limit counters are process-global; clear them so they
     # don't bleed across tests (every test logs in via fixtures).
-    from app.core import ratelimit
+    from app.core import email, ratelimit
 
     ratelimit.reset()
+    email.reset_outbox()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)

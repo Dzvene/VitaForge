@@ -4,6 +4,60 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-25 — Password reset + email verification (provider-agnostic)
+
+Closed the deferred auth debt. Built it provider-agnostic so it ships now and
+goes live the moment an SMTP mailbox is filled in — no code change.
+
+**Mailer (`app/core/email.py`)** — one `send_email` entry point picks a backend
+at call time: **SMTP** (stdlib `smtplib` in a worker thread, SSL/465 or
+STARTTLS/587) when `SMTP_HOST` + `SMTP_PASSWORD` are set; otherwise a **console**
+backend that logs the message and appends to an in-memory `OUTBOX` (what makes
+dev + the whole test suite runnable with no SMTP account). Sends are best-effort
+— a mail failure is logged, never raised, so registration / forgot-password
+never 500 because mail is down.
+
+**Tokens (`auth/models.py::EmailToken`)** — single-use, expiring, one table for
+both purposes. Only the SHA-256 hash of the emailed secret is stored (raw token
+never persisted); rows cascade-delete with the user. A new request of the same
+purpose voids the previous unused token. Migration `c3d4e5f6a7b8`.
+
+**Flows (auth slice):**
+- Registration now fires a verification email (best-effort).
+- `POST /auth/verify-email {token}` — flips `email_verified` + timestamp.
+- `POST /auth/resend-verification` (auth) — 409 if already verified.
+- `POST /auth/forgot-password {email}` — always 202, no account enumeration.
+- `POST /auth/reset-password {token, new_password}` — sets the hash, voids other
+  outstanding reset tokens. Both email endpoints throttled 5/15min per IP.
+
+**i18n** — email subjects/bodies + token errors localized en/ru/de via `tr()`
+(rendered in the request's Accept-Language). Emails carry a plain-text + minimal
+HTML part from the same translated lines.
+
+**Frontend** — `/forgot-password`, `/reset-password` (token from URL, Suspense),
+`/verify-email` (auto-verifies on mount, StrictMode-guarded). "Forgot password?"
+link on /login. 18 new i18n keys × 3 locales.
+
+**Config** — `SMTP_*`, `FRONTEND_BASE_URL`, token TTLs added to settings +
+`.env` (commented one.com recipe) + `.env.example`.
+
+**Tests** — `tests/test_email_auth.py`, 15 cases (verification flip, single-use,
+no-enumeration, reset changes password, superseding voids old link, rate limit).
+Backend **138 → 153 passed**, frontend 25, tach + ruff + tsc + eslint green.
+
+**Deploy** — rebuilt back+front; migration auto-applied on startup
+(`email_tokens` live). Smoke: endpoints return 202/422/401 as designed, three
+new pages 200, token pipeline verified end-to-end in prod (token row created,
+then cleaned).
+
+**Open:** SMTP not configured yet — until `SMTP_HOST`/`SMTP_PASSWORD` are set,
+mail is logged (console backend), not delivered. Owner must create a `vitaforge@`
+mailbox (one.com, like Invocore) and fill the `.env`. App INFO logs don't surface
+under uvicorn in prod, so the console fallback isn't a real delivery path — SMTP
+is the path.
+
+---
+
 ## 2026-06-25 — Account self-service + auth rate-limit (Phase 4, no-email parts)
 
 The manual-QA sweep flagged missing auth/GDPR basics. Per the owner's call we

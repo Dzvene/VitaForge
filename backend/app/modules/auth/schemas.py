@@ -26,6 +26,19 @@ class RefreshRequest(APIModel):
     refresh_token: str
 
 
+class ForgotPasswordRequest(APIModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(APIModel):
+    token: str = Field(min_length=8)
+    new_password: str = Field(min_length=8, max_length=128)
+
+
+class VerifyEmailRequest(APIModel):
+    token: str = Field(min_length=8)
+
+
 class UserOut(APIModel):
     id: int
     email: EmailStr

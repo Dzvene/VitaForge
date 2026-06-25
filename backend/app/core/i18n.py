@@ -240,6 +240,52 @@ MESSAGES: dict[str, dict[str, str]] = {
         "ru": "Калибровка пропущена — цель построена по оценке формулы",
         "de": "Kalibrierung übersprungen — Ziel basiert auf der Formelschätzung",
     },
+    # ---- transactional emails (password reset / verification) ----
+    "email.verify.subject": {
+        "en": "Confirm your email — VitaForge",
+        "ru": "Подтвердите вашу почту — VitaForge",
+        "de": "Bestätige deine E-Mail — VitaForge",
+    },
+    "email.verify.intro": {
+        "en": "Confirm this email address to finish setting up your VitaForge account.",
+        "ru": "Подтвердите этот адрес, чтобы завершить настройку аккаунта VitaForge.",
+        "de": "Bestätige diese E-Mail-Adresse, um die Einrichtung deines VitaForge-Kontos abzuschließen.",
+    },
+    "email.verify.action": {
+        "en": "Confirm email",
+        "ru": "Подтвердить почту",
+        "de": "E-Mail bestätigen",
+    },
+    "email.verify.ignore": {
+        "en": "If you didn't create a VitaForge account, you can safely ignore this email.",
+        "ru": "Если вы не создавали аккаунт VitaForge, просто проигнорируйте это письмо.",
+        "de": "Falls du kein VitaForge-Konto erstellt hast, kannst du diese E-Mail ignorieren.",
+    },
+    "email.reset.subject": {
+        "en": "Reset your VitaForge password",
+        "ru": "Сброс пароля VitaForge",
+        "de": "Setze dein VitaForge-Passwort zurück",
+    },
+    "email.reset.intro": {
+        "en": "We received a request to reset your password. This link is valid for {minutes} minutes.",
+        "ru": "Мы получили запрос на сброс пароля. Ссылка действительна {minutes} минут.",
+        "de": "Wir haben eine Anfrage zum Zurücksetzen deines Passworts erhalten. Dieser Link ist {minutes} Minuten gültig.",
+    },
+    "email.reset.action": {
+        "en": "Reset password",
+        "ru": "Сбросить пароль",
+        "de": "Passwort zurücksetzen",
+    },
+    "email.reset.ignore": {
+        "en": "If you didn't request this, your password is unchanged — you can ignore this email.",
+        "ru": "Если вы это не запрашивали, пароль не изменится — просто проигнорируйте письмо.",
+        "de": "Falls du das nicht angefordert hast, bleibt dein Passwort unverändert — ignoriere diese E-Mail einfach.",
+    },
+    "email.fallback_link": {
+        "en": "Or paste this link into your browser:",
+        "ru": "Или вставьте эту ссылку в браузер:",
+        "de": "Oder füge diesen Link in deinen Browser ein:",
+    },
     # ---- common errors (user-visible) ----
     "error.email_exists": {
         "en": "A user with this email already exists.",
@@ -260,5 +306,15 @@ MESSAGES: dict[str, dict[str, str]] = {
         "en": "Too many attempts. Please wait a moment and try again.",
         "ru": "Слишком много попыток. Подождите немного и попробуйте снова.",
         "de": "Zu viele Versuche. Bitte warte einen Moment und versuche es erneut.",
+    },
+    "error.invalid_or_expired_token": {
+        "en": "This link is invalid or has expired. Please request a new one.",
+        "ru": "Ссылка недействительна или устарела. Запросите новую.",
+        "de": "Dieser Link ist ungültig oder abgelaufen. Bitte fordere einen neuen an.",
+    },
+    "error.email_already_verified": {
+        "en": "This email is already verified.",
+        "ru": "Эта почта уже подтверждена.",
+        "de": "Diese E-Mail ist bereits bestätigt.",
     },
 }
