@@ -80,6 +80,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Locale middleware — sets the i18n ContextVar from the Accept-Language header
+# so coaching copy and user-visible errors return in the caller's language.
+from app.core.i18n import LocaleMiddleware  # noqa: E402
+
+app.add_middleware(LocaleMiddleware)
+
 # ---- Event subscribers (import before routers so subscribe() runs) ----
 from app.modules import calibration as _calibration  # noqa: E402, F401
 from app.modules import nutrition as _nutrition  # noqa: E402, F401  # noqa

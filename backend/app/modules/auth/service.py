@@ -3,6 +3,7 @@
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.i18n import tr
 from app.core.security import (
     create_access_token,
     create_refresh_token,
@@ -25,7 +26,7 @@ class AuthService:
             await self.db.execute(select(User.id).where(User.email == email))
         ).scalar_one_or_none()
         if exists is not None:
-            raise ConflictError("Email already registered")
+            raise ConflictError(tr("error.email_exists"))
 
         # First account to register becomes the owner/admin (spec §2).
         count = (await self.db.execute(select(func.count(User.id)))).scalar_one()
@@ -53,7 +54,7 @@ class AuthService:
         if user is None or not user.is_active or not verify_password(
             payload.password, user.password_hash
         ):
-            raise UnauthorizedError("Invalid email or password")
+            raise UnauthorizedError(tr("error.invalid_credentials"))
         return self._issue(user)
 
     async def refresh(self, refresh_token: str) -> TokenPair:

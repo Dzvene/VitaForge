@@ -31,7 +31,9 @@ from sqlalchemy import select
 
 from app.core.database import AsyncSessionLocal
 from app.modules.foods.models import Food
-from app.modules.identity.models import User  # noqa: F401 — register `users` so the foods FK resolves
+from app.modules.identity.models import (
+    User,  # noqa: F401 — register `users` so the foods FK resolves
+)
 
 _BATCH = 5000
 

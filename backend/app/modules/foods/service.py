@@ -7,6 +7,7 @@ depends on Open Food Facts / USDA uptime (spec §7).
 from sqlalchemy import case, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.i18n import tr
 from app.modules.foods.models import Food, FoodFavorite, FoodPortion
 from app.modules.foods.schemas import FoodCreate
 from app.shared.exceptions import NotFoundError
@@ -40,7 +41,7 @@ class FoodService:
             )
         ).scalars().first()
         if food is None:
-            raise NotFoundError("No product with that barcode")
+            raise NotFoundError(tr("error.barcode_not_found"))
         return food
 
     async def search(self, user_id: int | None, query: str, limit: int = 30) -> list[Food]:

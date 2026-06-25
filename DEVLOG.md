@@ -4,6 +4,30 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-25 — Backend i18n (Accept-Language) + mobile API hand-off
+
+Server-generated copy now localizes en/ru/de from the request, so the native
+apps (built on the Win/Mac instances — store accounts already paid) and the web
+share one contract. Pattern mirrors Invocore's backend i18n.
+
+- `app/core/i18n.py` — `current_locale` ContextVar, `parse_accept_language`,
+  `tr(key, **kwargs)` (fallback locale→en→key, `str.format` interpolation), and
+  `LocaleMiddleware` (sets the ContextVar per request). Registered in `main.py`.
+- `MESSAGES` holds en/ru/de for the full coaching surface (7 warnings, 5 hints,
+  5 in-day guidance lines — 2 interpolated) + the most user-visible errors
+  (email exists, invalid credentials, barcode not found).
+- `coaching/catalog.py` reduced to a key registry (`WARNING_TYPES`, `HINT_KEYS`);
+  text moved to i18n. `coaching/service.py`, `auth/service.py`, `foods/service.py`
+  resolve via `tr()`.
+- Frontend `lib/api/client.ts` sends `Accept-Language: <active lang>` on every
+  request, so backend copy follows the UI language picker.
+- `docs/MOBILE_API.md` — hand-off for the native instances: hosts, JWT flow +
+  TTLs, the Accept-Language requirement, route groups, onboarding sequence,
+  enums, and that `openapi.json` is the canonical DTO source.
+- 5 backend i18n tests (parse, tr fallback/interpolation, localized hints +
+  error end-to-end). Backend **124 tests green**, tach + ruff clean. Verified
+  live: errors and coaching hints return en/ru/de by Accept-Language.
+
 ## 2026-06-25 — Multi-language UI: English / Russian / German (frontend)
 
 Full i18n of the web app. Pattern mirrors the proven sibling projects the user

@@ -10,8 +10,9 @@ from datetime import date, timedelta
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.i18n import tr
 from app.core.params import Params
-from app.modules.coaching.catalog import HINTS, WARNINGS, WarningType
+from app.modules.coaching.catalog import HINT_KEYS, WARNING_TYPES, WarningType
 from app.modules.coaching.models import CoachingWarningState
 from app.modules.coaching.schemas import (
     DayGuidanceOut,
@@ -36,7 +37,14 @@ class CoachingService:
 
     # ---- hints (§5.1) ----
     def hints(self) -> list[HintOut]:
-        return [HintOut(key=h.key, title=h.title, body=h.body) for h in HINTS]
+        return [
+            HintOut(
+                key=k,
+                title=tr(f"coaching.hint.{k}.title"),
+                body=tr(f"coaching.hint.{k}.body"),
+            )
+            for k in HINT_KEYS
+        ]
 
     # ---- warning state ----
     async def _state(self, user_id: int, wtype: str) -> CoachingWarningState | None:
@@ -71,14 +79,14 @@ class CoachingService:
         return not (state is not None and state.accepted_count >= params.warning_accept_threshold)
 
     async def accept(self, user_id: int, wtype: str) -> None:
-        if wtype not in WARNINGS:
+        if wtype not in WARNING_TYPES:
             return
         state = await self._upsert_state(user_id, wtype)
         state.accepted_count += 1
         await self.db.commit()
 
     async def dismiss(self, user_id: int, wtype: str) -> None:
-        if wtype not in WARNINGS:
+        if wtype not in WARNING_TYPES:
             return
         state = await self._upsert_state(user_id, wtype)
         state.dismissed = True
@@ -124,13 +132,12 @@ class CoachingService:
 
         out: list[WarningOut] = []
         for wtype in triggered:
-            copy = WARNINGS[wtype]
             state = await self._state(user.id, wtype)
             out.append(
                 WarningOut(
                     type=wtype,
-                    title=copy.title,
-                    message=copy.message,
+                    title=tr(f"coaching.warning.{wtype}.title"),
+                    message=tr(f"coaching.warning.{wtype}.message"),
                     auto_show=self._auto_show(state, exp_days, params),
                 )
             )
@@ -150,14 +157,7 @@ class CoachingService:
 
         # §5.4 — overage first, supportive, no compensation talk.
         if eaten.kcal > t.calories * params.overage_ratio:
-            items.append(
-                GuidanceItem(
-                    kind="overage",
-                    message="Today came in above target — that's fine. No need to cut "
-                    "back tomorrow; just return to the usual plan. One day doesn't move "
-                    "the weekly trend.",
-                )
-            )
+            items.append(GuidanceItem(kind="overage", message=tr("coaching.guidance.overage")))
             return DayGuidanceOut(items=items)
 
         # §5.3 — dosed nudges, later in the day when the budget is mostly used.
@@ -166,29 +166,26 @@ class CoachingService:
                 items.append(
                     GuidanceItem(
                         kind="protein_low",
-                        message=f"About {round(rem.protein_g)} g of protein left — a "
-                        "lean source in your next meal would round the day out.",
+                        message=tr("coaching.guidance.protein_low", grams=round(rem.protein_g)),
                     )
                 )
             if rem.fat_g < 0.1 * t.fat_g:
                 items.append(
                     GuidanceItem(
                         kind="fat_high",
-                        message="Fat budget is nearly used up — maybe go lighter on "
-                        "fatty sources in what's left.",
+                        message=tr("coaching.guidance.fat_high"),
                     )
                 )
             if rem.carb_g > 0.3 * t.carb_g and rem.calories > 0:
                 items.append(
                     GuidanceItem(
                         kind="carb_room",
-                        message=f"Still room for ~{round(rem.carb_g)} g of carbs — handy "
-                        "around training.",
+                        message=tr("coaching.guidance.carb_room", grams=round(rem.carb_g)),
                     )
                 )
 
         if not items and abs(rem.calories) <= params.balanced_calorie_tolerance * t.calories:
             items.append(
-                GuidanceItem(kind="on_track", message="Day's looking balanced — nice work.")
+                GuidanceItem(kind="on_track", message=tr("coaching.guidance.on_track"))
             )
         return DayGuidanceOut(items=items)

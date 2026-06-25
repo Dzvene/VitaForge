@@ -1,4 +1,5 @@
 import { authStore } from "@/lib/store/auth";
+import i18n from "@/lib/i18n";
 import type { TokenPair } from "@/lib/api/types";
 
 export const API_BASE =
@@ -89,6 +90,8 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
   const send = async (): Promise<Response> => {
     const headers: Record<string, string> = {};
     if (body !== undefined) headers["Content-Type"] = "application/json";
+    // Localize server-generated copy (coaching, errors) to the active UI language.
+    headers["Accept-Language"] = i18n.resolvedLanguage || i18n.language || "en";
     if (auth) {
       const token = authStore.get().accessToken;
       if (token) headers["Authorization"] = `Bearer ${token}`;
