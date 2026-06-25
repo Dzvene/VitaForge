@@ -161,7 +161,13 @@
     "createAccountCta": "Kostenloses Konto erstellen und tracken",
     "freeNote": "Keine Werbung. Keine Paywall. Immer kostenlos.",
     "alreadyHaveAccount": "Schon ein Konto?",
-    "logIn": "Anmelden"
+    "logIn": "Anmelden",
+    "tabTarget": "Ziel",
+    "tabTrend": "Trend",
+    "tabCalibration": "Kalibrierung",
+    "tabTargetHint": "Mach aus deinen Daten ein Kalorien- und Makroziel.",
+    "tabTrendHint": "Sieh, wie der geglättete Trend das tägliche Gewichtsrauschen herausfiltert.",
+    "tabCalibrationHint": "Beobachte, wie dein echter Erhaltungsbedarf aus Zufuhr und Gewicht gemessen wird."
   },
   "dashboard": {
     "todayLabel": "Heute",
@@ -469,5 +475,28 @@
     "title": "Etwas ist schiefgelaufen",
     "body": "Dieser Bereich konnte nicht geladen werden. Du kannst es erneut versuchen — deine Daten sind sicher.",
     "tryAgain": "Erneut versuchen"
+  },
+  "tryTrend": {
+    "chartTitle": "Gewichtstrend",
+    "summary": "In diesen zwei Wochen bewegte sich der Trend um",
+    "summaryTail": "— das ist die echte Veränderung, ohne Rauschen.",
+    "needMore": "Füge mindestens zwei Wägungen hinzu, um den Trend zu sehen.",
+    "editTitle": "Deine Wägungen",
+    "editHint": "Das sind Beispiel-Morgenwägungen — ändere eine, und der Trend reagiert.",
+    "explain": "Wasser und Glykogen lassen die Waage täglich um 1–2 kg schwanken. Die geglättete Trendlinie zeigt, wohin dein Gewicht wirklich geht — kein Grund zur Panik wegen eines Morgens."
+  },
+  "tryCalib": {
+    "inputsTitle": "Zwei Wochen Daten",
+    "inputsHint": "Sag uns, was du gegessen hast und wie sich dein Gewicht bewegte — wir berechnen deinen echten Verbrauch.",
+    "avgIntakeLabel": "Durchschnittliche Zufuhr pro Tag",
+    "avgIntakeHint": "kcal pro Tag",
+    "changeLabel": "Gewichtsänderung über 2 Wochen",
+    "changeHint": "kg, minus = Verlust",
+    "realTdeeLabel": "Dein echter Erhaltungsbedarf",
+    "avgEaten": "Ø gegessen",
+    "trendChange": "Trendänderung",
+    "daysCounted": "Gezählte Tage",
+    "explain": "Wenn du so viel gegessen hast und sich dein Gewicht so bewegte, muss dein echter Verbrauch dieser sein. Diese gemessene Zahl — keine Formelschätzung — ist die Basis deines Ziels.",
+    "needData": "Gib deine zwei Wochen ein, um die Schätzung zu sehen."
   }
 }

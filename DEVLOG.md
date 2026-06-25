@@ -4,6 +4,32 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-25 — Guest UI for trend + calibration previews
+
+Closed the standing debt: the `/public/weight/trend` and
+`/public/calibration/preview` endpoints were wired in the API client but had no
+guest UI. `/try` is now a 3-tab demo so a visitor can feel all three
+calibration-first pillars before signing up.
+
+- **Restructured `/try`** into tabs (Target / Trend / Calibration) via the
+  existing `Segmented`. Extracted the old nutrition calculator into
+  `components/try/TargetDemo.tsx` (behaviour unchanged), added two new demos.
+- **TrendDemo** — a deterministic, SSR-safe two-week noisy weigh-in series
+  (prefilled, fully editable). Debounced `preview.weightTrend` recompute on every
+  edit; renders the same `TrendChart` as the authed app + latest trend + a
+  "since start" delta + the read-the-trend-not-the-scale explainer.
+- **CalibrationDemo** — two controls (avg daily intake, 2-week weight change)
+  generate a full 14-day intake+weight series and call
+  `preview.calibration`, surfacing the back-calculated **real maintenance**, avg
+  eaten, trend change and days counted, with the method explainer. Live in prod:
+  default inputs → 2477 kcal real TDEE.
+- **i18n** — 6 new `try.*` tab keys + `tryTrend.*` (7) + `tryCalib.*` (12),
+  all three locales en/ru/de.
+- Browser-verified all three tabs in RU (chart, latest trend −0.5 kg,
+  calibration 2477 kcal). tsc + eslint + vitest (25) green.
+
+---
+
 ## 2026-06-25 — Password reset + email verification (provider-agnostic)
 
 Closed the deferred auth debt. Built it provider-agnostic so it ships now and

@@ -161,7 +161,13 @@
     "createAccountCta": "Create a free account to track it",
     "freeNote": "No ads. No paywall. Always free.",
     "alreadyHaveAccount": "Already have an account?",
-    "logIn": "Log in"
+    "logIn": "Log in",
+    "tabTarget": "Target",
+    "tabTrend": "Trend",
+    "tabCalibration": "Calibration",
+    "tabTargetHint": "Turn your stats into a calorie & macro target.",
+    "tabTrendHint": "See how the smoothed trend cuts through daily weight noise.",
+    "tabCalibrationHint": "Watch your real maintenance get measured from intake + weight."
   },
   "dashboard": {
     "todayLabel": "Today",
@@ -469,5 +475,28 @@
     "title": "Something went wrong",
     "body": "That section failed to load. You can try again — your data is safe.",
     "tryAgain": "Try again"
+  },
+  "tryTrend": {
+    "chartTitle": "Weight trend",
+    "summary": "Over these two weeks the trend moved",
+    "summaryTail": "— that's the real change, noise removed.",
+    "needMore": "Add at least two weigh-ins to see the trend.",
+    "editTitle": "Your weigh-ins",
+    "editHint": "These are sample morning weigh-ins — edit any to see the trend react.",
+    "explain": "Water and glycogen swing the scale 1–2 kg a day. The smoothed trend line shows where your weight is actually going, so you don't panic over a single morning."
+  },
+  "tryCalib": {
+    "inputsTitle": "Two weeks of data",
+    "inputsHint": "Tell us what you ate and how your weight moved — we back out your real burn.",
+    "avgIntakeLabel": "Average daily intake",
+    "avgIntakeHint": "kcal you ate per day",
+    "changeLabel": "Weight change over 2 weeks",
+    "changeHint": "kg, minus for loss",
+    "realTdeeLabel": "Your real maintenance",
+    "avgEaten": "Avg eaten",
+    "trendChange": "Trend change",
+    "daysCounted": "Days counted",
+    "explain": "If you ate this much and your weight moved that way, your real burn must be this. That measured number — not a formula guess — is what we build your target from.",
+    "needData": "Enter your two weeks to see the estimate."
   }
 }
