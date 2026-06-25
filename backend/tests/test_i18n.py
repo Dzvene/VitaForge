@@ -52,6 +52,34 @@ async def test_hints_localized_via_accept_language(client, admin):
     assert "Warum" in de_titles
 
 
+def test_calibration_degrade_reasons_localized():
+    token = current_locale.set("ru")
+    try:
+        assert tr("calibration.degrade.no_data") == "Пока недостаточно взвешиваний или записей еды"
+        assert tr("calibration.degrade.missing_logs").startswith("Слишком много")
+        assert tr("calibration.skipped").startswith("Калибровка пропущена")
+    finally:
+        current_locale.reset(token)
+    # English default keeps the substring older tests rely on.
+    assert "food log" in tr("calibration.degrade.missing_logs")
+
+
+@pytest.mark.asyncio
+async def test_calibration_preview_reason_localized(client):
+    """Guest preview degrade reason follows Accept-Language (regression: was
+    hardcoded English, leaked into the RU/DE UI)."""
+    payload = {"weights": [{"logged_on": "2026-06-01", "weight_kg": 80}], "intake": []}
+    ru = await client.post(
+        "/public/calibration/preview", json=payload, headers={"Accept-Language": "ru"}
+    )
+    de = await client.post(
+        "/public/calibration/preview", json=payload, headers={"Accept-Language": "de"}
+    )
+    assert ru.status_code == de.status_code == 200
+    assert ru.json()["reason"] == "Пока недостаточно взвешиваний или записей еды"
+    assert de.json()["reason"] == "Noch nicht genug Wägungen oder Essenseinträge"
+
+
 @pytest.mark.asyncio
 async def test_error_localized_via_accept_language(client):
     # Duplicate registration → conflict, message in the requested language.

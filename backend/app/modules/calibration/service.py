@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.event_topics import CALIBRATION_COMPLETED
 from app.core.events import publish
+from app.core.i18n import tr
 from app.core.nutrition_math import real_tdee, trend_series
 from app.modules.calibration.models import CalibrationStatus
 from app.modules.calibration.schemas import CalibrationStatusOut, EstimateResult
@@ -83,14 +84,14 @@ class CalibrationService:
         missing_logs = span_days - len(intake)
         missing_weighs = span_days - len(weigh_logs)
         if len(weigh_logs) < 2 or not intake:
-            return EstimateResult(ok=False, reason="Not enough weigh-ins or food logs yet")
+            return EstimateResult(ok=False, reason=tr("calibration.degrade.no_data"))
         if missing_logs > params.max_missing_log_days:
             return EstimateResult(
-                ok=False, reason="Too many days without a food log — keep logging"
+                ok=False, reason=tr("calibration.degrade.missing_logs")
             )
         if missing_weighs > params.max_missing_weigh_days:
             return EstimateResult(
-                ok=False, reason="Too many days without a weigh-in — weigh daily"
+                ok=False, reason=tr("calibration.degrade.missing_weighs")
             )
 
         trends = trend_series([w.weight_kg for w in weigh_logs], params.trend_alpha)
@@ -150,7 +151,7 @@ class CalibrationService:
         await self.db.commit()
         return EstimateResult(
             ok=True,
-            reason="Calibration skipped — target built on the formula estimate",
+            reason=tr("calibration.skipped"),
             real_tdee=None,
             target_calories=target.target_calories,
         )

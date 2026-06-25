@@ -8,6 +8,7 @@ so the guest preview and the post-registration result agree.
 
 from __future__ import annotations
 
+from app.core.i18n import tr
 from app.core.nutrition_math import (
     Goal,
     Sex,
@@ -99,17 +100,17 @@ def preview_estimate(payload: CalibrationPreviewIn) -> EstimateResult:
     intake = {i.day: i.kcal for i in payload.intake}
 
     if not weighs or not intake:
-        return EstimateResult(ok=False, reason="Not enough weigh-ins or food logs yet")
+        return EstimateResult(ok=False, reason=tr("calibration.degrade.no_data"))
 
     span_days = (weighs[-1].logged_on - weighs[0].logged_on).days + 1
     missing_logs = span_days - len(intake)
     missing_weighs = span_days - len(weighs)
     if len(weighs) < 2:
-        return EstimateResult(ok=False, reason="Not enough weigh-ins or food logs yet")
+        return EstimateResult(ok=False, reason=tr("calibration.degrade.no_data"))
     if missing_logs > params.max_missing_log_days:
-        return EstimateResult(ok=False, reason="Too many days without a food log — keep logging")
+        return EstimateResult(ok=False, reason=tr("calibration.degrade.missing_logs"))
     if missing_weighs > params.max_missing_weigh_days:
-        return EstimateResult(ok=False, reason="Too many days without a weigh-in — weigh daily")
+        return EstimateResult(ok=False, reason=tr("calibration.degrade.missing_weighs"))
 
     trends = trend_series([w.weight_kg for w in weighs], params.trend_alpha)
     trend_change = trends[-1] - trends[0]

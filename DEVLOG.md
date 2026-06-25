@@ -4,6 +4,40 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-25 — i18n backend reactivity (Phase 2 of the manual-QA sweep)
+
+The leak found in Phase 1's verification: server-translated copy (coaching
+cards, "why this method" hints, calibration reasons) only re-localized on the
+next fetch, so switching language mid-session left it stuck in the old
+language until the query expired. Plus the calibration soft-degrade reasons
+were hardcoded English server-side, leaking into the RU/DE UI verbatim.
+
+- **Cache invalidation on language change**: a small `LocaleQuerySync`
+  component (mounted under QueryClientProvider) invalidates the `["coaching"]`
+  and `["calibration"]` query keys on every i18n `languageChanged`, so the
+  server copy refetches in the new language with no page reload.
+- **Calibration degrade reasons through `tr()`**: added
+  `calibration.degrade.{no_data,missing_logs,missing_weighs}` and
+  `calibration.skipped` to the backend message catalog (en/ru/de) and replaced
+  the four hardcoded literals in `calibration/service.py` plus the four guest
+  mirrors in `public/service.py`. English text is unchanged so prior
+  substring assertions still hold.
+- Regression tests: `tr()` unit check for the new keys + an end-to-end guest
+  `/public/calibration/preview` test asserting the RU and DE reason strings.
+
+Verified live after redeploy: RU→DE switch on the dashboard instantly
+re-localized the coaching cards and "why this method" (backend content), 0
+console errors; `GET …/calibration/preview` returns the localized reason per
+Accept-Language (en/ru/de checked via curl). Backend 126 tests + tach green;
+frontend typecheck + lint green.
+
+**Still open:** (3) catalog RU/DE — food search is USDA-only, "творог" returns
+nothing; needs OFF import + bilingual names. (4) auth/GDPR — password reset,
+email verification, account deletion, data export, auth rate-limit (Phase 4
+needs an email-sending decision before reset/verification can ship).
+
+---
+
 ## 2026-06-25 — Frontend i18n leak fixes (Phase 1 of a manual-QA sweep)
 
 A full manual click-through of every screen (login → onboarding → dashboard →

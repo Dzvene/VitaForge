@@ -219,6 +219,27 @@ MESSAGES: dict[str, dict[str, str]] = {
         "ru": "День выглядит сбалансированным — отличная работа.",
         "de": "Der Tag sieht ausgewogen aus — gut gemacht.",
     },
+    # ---- calibration estimate / degrade reasons (§4.3–4.4) ----
+    "calibration.degrade.no_data": {
+        "en": "Not enough weigh-ins or food logs yet",
+        "ru": "Пока недостаточно взвешиваний или записей еды",
+        "de": "Noch nicht genug Wägungen oder Essenseinträge",
+    },
+    "calibration.degrade.missing_logs": {
+        "en": "Too many days without a food log — keep logging",
+        "ru": "Слишком много дней без записи еды — продолжайте записывать",
+        "de": "Zu viele Tage ohne Essenseintrag — trage weiter ein",
+    },
+    "calibration.degrade.missing_weighs": {
+        "en": "Too many days without a weigh-in — weigh daily",
+        "ru": "Слишком много дней без взвешивания — взвешивайтесь ежедневно",
+        "de": "Zu viele Tage ohne Wägung — wäge dich täglich",
+    },
+    "calibration.skipped": {
+        "en": "Calibration skipped — target built on the formula estimate",
+        "ru": "Калибровка пропущена — цель построена по оценке формулы",
+        "de": "Kalibrierung übersprungen — Ziel basiert auf der Formelschätzung",
+    },
     # ---- common errors (user-visible) ----
     "error.email_exists": {
         "en": "A user with this email already exists.",
