@@ -37,7 +37,7 @@ export function CalorieRing({
             <stop offset="100%" className="text-accent" stopColor="currentColor" />
           </linearGradient>
         </defs>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" className="stroke-surface-3" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" className="stroke-line-strong" strokeWidth={stroke} />
         <circle
           cx={size / 2}
           cy={size / 2}

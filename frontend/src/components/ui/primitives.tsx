@@ -16,11 +16,12 @@ type Size = "sm" | "md" | "lg";
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-brand-500 text-white hover:bg-brand-400 active:bg-brand-600 shadow-[0_6px_20px_-8px_rgba(61,123,255,0.7)]",
+    "bg-brand-500 text-white hover:bg-brand-400 active:bg-brand-600 " +
+    "shadow-[0_4px_14px_-5px_rgb(var(--brand-500)/0.5)] hover:shadow-[0_6px_20px_-6px_rgb(var(--brand-500)/0.55)]",
   secondary:
-    "bg-surface-3 text-ink hover:bg-line border border-line-strong",
-  ghost: "text-ink-muted hover:text-ink hover:bg-surface-3",
-  danger: "bg-danger/15 text-danger hover:bg-danger/25 border border-danger/30",
+    "bg-surface text-ink hover:bg-surface-2 border border-line-strong shadow-card",
+  ghost: "text-ink-muted hover:text-ink hover:bg-surface-2",
+  danger: "bg-danger/12 text-danger hover:bg-danger/20 border border-danger/30",
 };
 const sizes: Record<Size, string> = {
   sm: "h-8 px-3 text-sm rounded-lg",
@@ -44,9 +45,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       disabled={disabled || loading}
       className={cn(
-        "inline-flex items-center justify-center gap-2 font-medium transition-colors",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60",
-        "disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex items-center justify-center gap-2 font-medium transition-all duration-150",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas",
+        "active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 disabled:active:translate-y-0",
         variants[variant],
         sizes[size],
         full && "w-full",
@@ -206,9 +207,9 @@ export function Segmented<T extends string>({
           key={o.value}
           onClick={() => onChange(o.value)}
           className={cn(
-            "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+            "rounded-lg px-3 py-1.5 text-sm font-medium transition-all",
             value === o.value
-              ? "bg-brand-500 text-white"
+              ? "bg-brand-500 text-white shadow-[0_2px_8px_-3px_rgb(var(--brand-500)/0.55)]"
               : "text-ink-muted hover:text-ink",
           )}
         >
