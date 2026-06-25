@@ -113,12 +113,17 @@ class CoachingService:
             if protein_per_kg < params.warn_protein_floor_ratio * params.protein_g_per_kg_min:
                 triggered.append(WarningType.LOW_PROTEIN)
 
-        # Logging / weighing regularity over the trailing week.
+        # Logging / weighing regularity over the trailing week. Only count the
+        # days the account has actually existed within that window: a brand-new
+        # user can't be "behind" on days they never had, so an empty dashboard
+        # must not nag from minute one (the empty-state CTAs guide the first
+        # log/weigh-in). A regularity nudge only makes sense once enough days
+        # have elapsed for a gap to be a gap.
         today = date.today()
         week_start = today - timedelta(days=6)
         intake = await self.diary.daily_calories(user.id, week_start, today)
         weigh_logs = await self.weight.raw_logs(user.id, since=week_start, until=today)
-        span = 7
+        span = min(7, exp_days + 1)
         if span - len(intake) >= params.warn_missing_log_days:
             triggered.append(WarningType.MISSED_LOGGING)
         if span - len(weigh_logs) >= params.warn_missing_weigh_days:

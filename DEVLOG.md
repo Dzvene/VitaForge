@@ -4,6 +4,29 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-25 — Fix: coaching nags a brand-new account
+
+Manual UX walkthrough (register → onboarding → dashboard) surfaced a real bug: a
+user who *just* registered, with zero logs, immediately saw two warnings —
+"missed_logging" and "irregular_weighing". They'd had no days to miss.
+
+- Root cause (`coaching/service.py`): the regularity check measured gaps over a
+  flat 7-day window (`span = 7`), so an empty trailing week always read as
+  `7 - 0 ≥ threshold`. Fixed to count only the days the account has actually
+  existed within the window: `span = min(7, exp_days + 1)`. Day-0 → span 1 <
+  threshold 2 → silent. The empty-state CTAs guide the first log instead.
+- Profile-based warnings (aggressive rate, low protein) are unaffected — they're
+  valid from day one.
+- Tests rewrote the old expectations (which *asserted* the buggy "brand-new user
+  → gap warnings" behaviour): now `test_logging_gaps_stay_silent_for_brand_new_account`
+  + `test_logging_gaps_warn_once_account_has_aged` (backdates created_at via the
+  DB to prove the nudge returns once gaps are real). Dismiss/accept de-escalation
+  tests age the account so the warning fires. Backend 153 → 155.
+- Verified in prod: fresh account + profile + no logs → `/coaching/warnings`
+  returns `[]`.
+
+---
+
 ## 2026-06-25 — Guest UI for trend + calibration previews
 
 Closed the standing debt: the `/public/weight/trend` and
