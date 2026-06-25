@@ -2,26 +2,86 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Theme tokens as RGB channel triplets (so Tailwind alpha modifiers work).
+ * :root = light (the default). .dark overrides for the dark theme. Components
+ * only reference semantic Tailwind tokens — never raw hex.
+ */
 :root {
-  --ring-track: #1c222d;
+  --canvas: 246 248 251;
+  --surface: 255 255 255;
+  --surface-2: 240 244 249;
+  --surface-3: 230 236 243;
+  --line: 226 232 240;
+  --line-strong: 203 213 225;
+  --ink: 21 30 43;
+  --ink-muted: 90 103 121;
+  --ink-faint: 143 156 173;
+  --brand-400: 91 161 255;
+  --brand-500: 43 124 240;
+  --brand-600: 29 101 211;
+  --brand-700: 26 84 175;
+  --accent: 13 165 180;
+  --macro-protein: 51 122 240;
+  --macro-fat: 198 134 11;
+  --macro-carb: 13 162 116;
+  --ok: 13 162 116;
+  --warn: 201 124 14;
+  --danger: 224 49 61;
+
+  --ring-track: rgb(230 236 243);
+  --shimmer: 21 30 43; /* dark shimmer over light skeletons */
+  --shadow-card: 0 1px 2px rgb(16 24 40 / 0.04), 0 8px 24px -14px rgb(16 24 40 / 0.16);
+  --shadow-card-lg: 0 6px 16px -4px rgb(16 24 40 / 0.1), 0 20px 44px -16px rgb(16 24 40 / 0.22);
+  --bg-tint-a: rgb(43 124 240 / 0.05);
+  --bg-tint-b: rgb(13 165 180 / 0.05);
+  color-scheme: light;
+}
+
+.dark {
+  --canvas: 10 12 16;
+  --surface: 17 20 27;
+  --surface-2: 22 27 36;
+  --surface-3: 28 34 45;
+  --line: 35 42 54;
+  --line-strong: 46 55 68;
+  --ink: 231 236 243;
+  --ink-muted: 151 161 178;
+  --ink-faint: 95 107 124;
+  --brand-400: 92 156 255;
+  --brand-500: 61 123 255;
+  --brand-600: 46 99 224;
+  --brand-700: 35 79 184;
+  --accent: 34 199 214;
+  --macro-protein: 79 141 253;
+  --macro-fat: 244 183 64;
+  --macro-carb: 52 211 154;
+  --ok: 52 211 154;
+  --warn: 245 166 35;
+  --danger: 255 92 99;
+
+  --ring-track: rgb(28 34 45);
+  --shimmer: 255 255 255; /* light shimmer over dark skeletons */
+  --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.03) inset, 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  --shadow-card-lg: 0 10px 34px -10px rgb(0 0 0 / 0.7);
+  --bg-tint-a: rgb(61 123 255 / 0.08);
+  --bg-tint-b: rgb(56 189 248 / 0.06);
+  color-scheme: dark;
 }
 
 @layer base {
-  html {
-    color-scheme: dark;
-  }
   body {
     @apply bg-canvas text-ink antialiased;
     background-image:
-      radial-gradient(900px 500px at 100% -10%, rgba(61, 123, 255, 0.08), transparent 60%),
-      radial-gradient(700px 400px at -10% 110%, rgba(56, 189, 248, 0.06), transparent 55%);
+      radial-gradient(900px 500px at 100% -10%, var(--bg-tint-a), transparent 60%),
+      radial-gradient(700px 400px at -10% 110%, var(--bg-tint-b), transparent 55%);
     background-attachment: fixed;
   }
   * {
     @apply border-line;
   }
   ::selection {
-    @apply bg-brand-500/30 text-ink;
+    @apply bg-brand-500/25 text-ink;
   }
   /* tabular numbers everywhere they matter most */
   .nums {
@@ -55,7 +115,13 @@
     @apply relative overflow-hidden rounded-md bg-surface-3;
   }
   .skeleton::after {
-    @apply absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/5 to-transparent;
+    @apply absolute inset-0 -translate-x-full animate-shimmer;
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgb(var(--shimmer) / 0.06),
+      transparent
+    );
     content: "";
   }
 }

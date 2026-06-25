@@ -4,6 +4,37 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-25 — Light-first theming (light default + dark/system toggle)
+
+Reworked the design system to be light by default with a dark/system toggle —
+the friendly, consumer-health look, with our own palette (kept the steel-blue
+brand, added a teal accent; macro hues tuned per theme).
+
+- **Tokens → CSS variables.** `tailwind.config.ts` semantic colors now resolve to
+  `rgb(var(--token) / <alpha-value>)`, so opacity modifiers still work. The
+  palette lives in `globals.css`: `:root` = light (default), `.dark` = the old
+  graphite values. Components only ever name semantic tokens, so flipping the
+  class re-themes the whole app — the sweep was tiny (the catalog was already
+  ~all semantic). Themed shadows + skeleton shimmer via vars too.
+- **No-flash.** Inline script in `app/layout.tsx` applies `.dark` from
+  `localStorage('vf_theme')` before first paint; light is the default so an
+  unset visitor never flashes. `suppressHydrationWarning` on `<html>`.
+- **Theme store + toggle.** `lib/theme.ts` (light/dark/system, persisted,
+  tracks OS changes in system mode). `ThemeToggle` (cycling icon button) wired
+  into the sidebar footer, mobile top bar, auth scaffold and /try header;
+  `ThemeSegmented` added to Settings beside Language.
+- **Charts re-themed.** `charts.tsx` hardcoded hex → Tailwind stroke/fill classes
+  + `currentColor` gradient stops, so the ring/trend follow the theme.
+- Verified in prod: login + full dashboard in both light and dark; toggle
+  persists; charts/ring/macro bars/banner all theme correctly. tsc + eslint +
+  vitest(25) green.
+
+Note: this is our own light theme in the standard health-app idiom (light
+surfaces, soft shadows, rounded cards) with VitaForge's own colors — not a copy
+of any specific product's design.
+
+---
+
 ## 2026-06-25 — Quick-amount chips for logging (portion friction)
 
 Investigated the "grams-only, no portion presets" UX complaint. Finding: the

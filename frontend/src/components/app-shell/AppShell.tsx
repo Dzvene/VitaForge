@@ -17,6 +17,7 @@ import {
 import { useAuth } from "@/lib/store/auth";
 import { cn } from "@/lib/cn";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { VerifyEmailBanner } from "@/components/app-shell/VerifyEmailBanner";
 import type { ReactNode } from "react";
 
@@ -91,7 +92,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           })}
         </nav>
         <div className="space-y-2 px-2">
-          <LanguageSwitcher className="w-full [&>select]:w-full" />
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher className="flex-1 [&>select]:w-full" />
+            <ThemeToggle />
+          </div>
           <div className="flex items-center justify-between rounded-xl bg-surface-2 px-3 py-2.5">
             <div className="min-w-0">
               <p className="truncate text-xs font-medium text-ink">{user?.full_name || user?.email}</p>
@@ -112,6 +116,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Brand />
           <div className="flex items-center gap-1.5">
             <LanguageSwitcher />
+            <ThemeToggle />
             <button
               onClick={logout}
               aria-label={t("common.logOut")}

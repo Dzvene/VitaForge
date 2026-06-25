@@ -16,15 +16,24 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0A0C10",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F6F8FB" },
+    { media: "(prefers-color-scheme: dark)", color: "#0A0C10" },
+  ],
   width: "device-width",
   initialScale: 1,
 };
 
+// Applies the saved theme before first paint (no light/dark flash). Light is the
+// default — the `.dark` class only gets added when the user chose dark (or
+// system + the OS is dark).
+const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('vf_theme')||'light';var m=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(t==='system'&&m)){document.documentElement.classList.add('dark');}}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} dark`}>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body className="font-sans">
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         <Providers>{children}</Providers>
       </body>
     </html>

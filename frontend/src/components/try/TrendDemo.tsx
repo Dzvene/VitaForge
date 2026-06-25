@@ -90,7 +90,7 @@ export function TrendDemo() {
         ) : (
           <p className="py-10 text-center text-sm text-ink-muted">{t("tryTrend.needMore")}</p>
         )}
-        {error && <p className="mt-2 text-center text-sm text-rose-400">{error}</p>}
+        {error && <p className="mt-2 text-center text-sm text-danger">{error}</p>}
       </Card>
 
       <Card className="p-6">

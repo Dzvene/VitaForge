@@ -4,6 +4,7 @@ import { Activity, Check } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function AuthScaffold({
   title,
@@ -48,8 +49,9 @@ export function AuthScaffold({
 
       {/* Form panel */}
       <div className="relative flex items-center justify-center p-6">
-        <div className="absolute right-4 top-4">
+        <div className="absolute right-4 top-4 flex items-center gap-2">
           <LanguageSwitcher />
+          <ThemeToggle />
         </div>
         <div className="w-full max-w-sm animate-fade-up">
           <div className="mb-7">

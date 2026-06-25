@@ -345,7 +345,9 @@
     "saveChanges": "Änderungen speichern",
     "toastSaved": "Gespeichert",
     "toastSaveError": "Konnte nicht gespeichert werden",
-    "toastRecomputed": "Norm neu berechnet"
+    "toastRecomputed": "Norm neu berechnet",
+    "themeTitle": "Theme",
+    "themeHint": "Hell, dunkel oder dem System folgen."
   },
   "admin": {
     "owner": "Inhaber",
@@ -502,5 +504,11 @@
     "daysCounted": "Gezählte Tage",
     "explain": "Wenn du so viel gegessen hast und sich dein Gewicht so bewegte, muss dein echter Verbrauch dieser sein. Diese gemessene Zahl — keine Formelschätzung — ist die Basis deines Ziels.",
     "needData": "Gib deine zwei Wochen ein, um die Schätzung zu sehen."
+  },
+  "theme": {
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System",
+    "toggle": "Theme wechseln (jetzt: {{theme}})"
   }
 }

@@ -5,6 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { ToastProvider } from "@/components/ui/toast";
 import { I18nProvider } from "@/lib/i18n/I18nProvider";
 import i18n from "@/lib/i18n";
+import { useTheme } from "@/lib/theme";
 
 /**
  * Refetch locale-dependent server copy when the UI language changes. Coaching
@@ -25,6 +26,17 @@ function LocaleQuerySync() {
   return null;
 }
 
+/** Sync the theme store from localStorage once on mount (the no-flash script in
+ *  the document head has already applied the class; this aligns the store state
+ *  so the toggle reflects the active theme). */
+function ThemeInit() {
+  const init = useTheme((s) => s.init);
+  useEffect(() => {
+    init();
+  }, [init]);
+  return null;
+}
+
 export function Providers({ children }: { children: ReactNode }) {
   const [client] = useState(
     () =>
@@ -41,6 +53,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={client}>
       <I18nProvider>
+        <ThemeInit />
         <LocaleQuerySync />
         <ToastProvider>{children}</ToastProvider>
       </I18nProvider>

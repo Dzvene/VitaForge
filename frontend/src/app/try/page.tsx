@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Activity } from "lucide-react";
 import { Segmented } from "@/components/ui/primitives";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { TargetDemo } from "@/components/try/TargetDemo";
 import { TrendDemo } from "@/components/try/TrendDemo";
 import { CalibrationDemo } from "@/components/try/CalibrationDemo";
@@ -26,8 +27,9 @@ export default function TryPage() {
           <h1 className="text-xl font-semibold tracking-tight">{t("try.title")}</h1>
           <p className="text-sm text-ink-muted">{t("try.subtitle")}</p>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
           <LanguageSwitcher />
+          <ThemeToggle />
         </div>
       </div>
 

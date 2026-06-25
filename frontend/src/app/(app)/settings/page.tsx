@@ -10,6 +10,7 @@ import type { ActivityLevel, GoalKind, ProfileUpsert, Sex } from "@/lib/api/type
 import { Button, Card, CardTitle, Field, Input, Segmented, Select, Skeleton } from "@/components/ui/primitives";
 import { useToast } from "@/components/ui/toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeSegmented } from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/store/auth";
 
 const ACTIVITY_KEYS: ActivityLevel[] = ["sedentary", "light", "moderate", "high", "very_high"];
@@ -106,11 +107,18 @@ export default function SettingsPage() {
         <p className="mt-1 text-sm text-ink-faint">{user?.email}</p>
       </header>
 
-      <Card>
-        <CardTitle>{t("settings.languageTitle")}</CardTitle>
-        <p className="mb-4 text-sm text-ink-muted">{t("settings.languageHint")}</p>
-        <LanguageSwitcher variant="segmented" />
-      </Card>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardTitle>{t("settings.languageTitle")}</CardTitle>
+          <p className="mb-4 text-sm text-ink-muted">{t("settings.languageHint")}</p>
+          <LanguageSwitcher variant="segmented" />
+        </Card>
+        <Card>
+          <CardTitle>{t("settings.themeTitle")}</CardTitle>
+          <p className="mb-4 text-sm text-ink-muted">{t("settings.themeHint")}</p>
+          <ThemeSegmented />
+        </Card>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

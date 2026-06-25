@@ -345,7 +345,9 @@
     "saveChanges": "Save changes",
     "toastSaved": "Saved",
     "toastSaveError": "Could not save",
-    "toastRecomputed": "Norm recomputed"
+    "toastRecomputed": "Norm recomputed",
+    "themeTitle": "Theme",
+    "themeHint": "Light, dark, or follow your system."
   },
   "admin": {
     "owner": "Owner",
@@ -502,5 +504,11 @@
     "daysCounted": "Days counted",
     "explain": "If you ate this much and your weight moved that way, your real burn must be this. That measured number — not a formula guess — is what we build your target from.",
     "needData": "Enter your two weeks to see the estimate."
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "toggle": "Switch theme (now: {{theme}})"
   }
 }

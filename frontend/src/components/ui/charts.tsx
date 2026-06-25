@@ -33,17 +33,18 @@ export function CalorieRing({
       <svg width={size} height={size} className="-rotate-90">
         <defs>
           <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#5C9CFF" />
-            <stop offset="100%" stopColor="#38BDF8" />
+            <stop offset="0%" className="text-brand-400" stopColor="currentColor" />
+            <stop offset="100%" className="text-accent" stopColor="currentColor" />
           </linearGradient>
         </defs>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--ring-track)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" className="stroke-surface-3" strokeWidth={stroke} />
         <circle
           cx={size / 2}
           cy={size / 2}
           r={r}
           fill="none"
-          stroke={over ? "#FF5C63" : `url(#${gid})`}
+          className={over ? "stroke-danger" : undefined}
+          stroke={over ? undefined : `url(#${gid})`}
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={c}
@@ -156,13 +157,13 @@ export function TrendChart({ points, height = 200 }: { points: WeightPoint[]; he
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Weight trend">
       <defs>
         <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#3D7BFF" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="#3D7BFF" stopOpacity="0" />
+          <stop offset="0%" className="text-brand-500" stopColor="currentColor" stopOpacity="0.22" />
+          <stop offset="100%" className="text-brand-500" stopColor="currentColor" stopOpacity="0" />
         </linearGradient>
       </defs>
       {ticks.map((t, i) => (
         <g key={i}>
-          <line x1={pad.left} x2={W - pad.right} y1={y(t)} y2={y(t)} stroke="#232A36" strokeDasharray="3 4" />
+          <line x1={pad.left} x2={W - pad.right} y1={y(t)} y2={y(t)} className="stroke-line" strokeDasharray="3 4" />
           <text x={8} y={y(t) + 4} className="fill-ink-faint" fontSize="10">
             {t.toFixed(1)}
           </text>
@@ -172,7 +173,7 @@ export function TrendChart({ points, height = 200 }: { points: WeightPoint[]; he
       {points.map((p, i) => (
         <circle key={i} cx={x(i)} cy={y(p.weight_kg)} r={2.4} className="fill-ink-faint" />
       ))}
-      <path d={trendPath} fill="none" stroke="#5C9CFF" strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
+      <path d={trendPath} fill="none" className="stroke-brand-400" strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
     </svg>
   );
 }

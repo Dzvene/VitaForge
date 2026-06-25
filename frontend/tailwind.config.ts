@@ -1,47 +1,55 @@
 import type { Config } from "tailwindcss";
 
 /**
- * VitaForge design language — "graphite + steel".
- * Strict, athletic, dark. Near-black graphite canvas, layered cool-grey
- * surfaces, a steel-blue brand accent, and dedicated macro hues
- * (protein = blue, fat = gold, carbs = green). Numbers use tabular figures.
+ * VitaForge design language — light-first, friendly, clean.
+ *
+ * Semantic colors are backed by CSS variables (RGB channel triplets so Tailwind
+ * opacity modifiers keep working: `bg-surface/60`). The palette lives in
+ * globals.css under `:root` (light, the default) and `.dark`. Switching the
+ * theme re-points the variables and recolors the whole app — components only
+ * ever name semantic tokens (surface / ink / line / brand / macro …).
+ *
+ * Accent is a teal that's ours; macro hues stay protein-blue / fat-gold /
+ * carb-green, tuned per theme for contrast.
  */
+const v = (name: string) => `rgb(var(--${name}) / <alpha-value>)`;
+
 const config: Config = {
   darkMode: "class",
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        canvas: "#0A0C10",
+        canvas: v("canvas"),
         surface: {
-          DEFAULT: "#11141B",
-          2: "#161B24",
-          3: "#1C222D",
+          DEFAULT: v("surface"),
+          2: v("surface-2"),
+          3: v("surface-3"),
         },
         line: {
-          DEFAULT: "#232A36",
-          strong: "#2E3744",
+          DEFAULT: v("line"),
+          strong: v("line-strong"),
         },
         brand: {
-          400: "#5C9CFF",
-          500: "#3D7BFF",
-          600: "#2E63E0",
-          700: "#234FB8",
+          400: v("brand-400"),
+          500: v("brand-500"),
+          600: v("brand-600"),
+          700: v("brand-700"),
         },
-        accent: "#38BDF8",
+        accent: v("accent"),
         ink: {
-          DEFAULT: "#E7ECF3",
-          muted: "#97A1B2",
-          faint: "#5F6B7C",
+          DEFAULT: v("ink"),
+          muted: v("ink-muted"),
+          faint: v("ink-faint"),
         },
         macro: {
-          protein: "#4F8DFD",
-          fat: "#F4B740",
-          carb: "#34D39A",
+          protein: v("macro-protein"),
+          fat: v("macro-fat"),
+          carb: v("macro-carb"),
         },
-        ok: "#34D39A",
-        warn: "#F5A623",
-        danger: "#FF5C63",
+        ok: v("ok"),
+        warn: v("warn"),
+        danger: v("danger"),
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
@@ -51,8 +59,10 @@ const config: Config = {
         "2xl": "1.125rem",
       },
       boxShadow: {
-        card: "0 1px 0 0 rgba(255,255,255,0.03) inset, 0 8px 24px -12px rgba(0,0,0,0.6)",
-        glow: "0 0 0 1px rgba(61,123,255,0.35), 0 8px 30px -8px rgba(61,123,255,0.45)",
+        // Soft, layered card shadow (defined per theme via vars in globals.css).
+        card: "var(--shadow-card)",
+        "card-lg": "var(--shadow-card-lg)",
+        glow: "0 0 0 1px rgb(var(--brand-500) / 0.35), 0 10px 32px -10px rgb(var(--brand-500) / 0.4)",
       },
       keyframes: {
         "fade-up": {

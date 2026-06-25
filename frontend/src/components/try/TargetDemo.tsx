@@ -103,7 +103,7 @@ export function TargetDemo() {
           </Field>
         )}
 
-        {error && <p className="text-sm text-rose-400">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
         <Button type="submit" full size="lg" loading={loading}>
           {t("try.calculate")}
