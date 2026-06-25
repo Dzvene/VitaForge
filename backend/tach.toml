@@ -103,3 +103,18 @@ depends_on = [
     "app.modules.diary",
     "app.modules.weight",
 ]
+
+# Account self-service (GDPR export + erase). Like `admin`, a deliberate hub:
+# "export/delete everything about me" must reach every slice that owns user data.
+[[modules]]
+path = "app.modules.account"
+depends_on = [
+    "app.modules.identity",
+    "app.modules.profile",
+    "app.modules.nutrition",
+    "app.modules.calibration",
+    "app.modules.weight",
+    "app.modules.diary",
+    "app.modules.foods",
+    "app.modules.coaching",
+]

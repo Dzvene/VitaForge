@@ -256,4 +256,9 @@ MESSAGES: dict[str, dict[str, str]] = {
         "ru": "Нет продукта с таким штрихкодом.",
         "de": "Kein Produkt mit diesem Barcode.",
     },
+    "error.too_many_requests": {
+        "en": "Too many attempts. Please wait a moment and try again.",
+        "ru": "Слишком много попыток. Подождите немного и попробуйте снова.",
+        "de": "Zu viele Versuche. Bitte warte einen Moment und versuche es erneut.",
+    },
 }

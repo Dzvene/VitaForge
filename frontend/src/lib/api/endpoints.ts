@@ -55,6 +55,12 @@ export const auth = {
   me: () => api<UserOut>("/auth/me"),
 };
 
+export const account = {
+  exportData: () => api<Record<string, unknown>>("/account/export"),
+  deleteAccount: (password: string) =>
+    api<void>("/account/delete", { method: "POST", body: { password } }),
+};
+
 // Guest preview — stateless, no token (backend `app.modules.public`).
 export const preview = {
   nutrition: (profile: PreviewProfile, maintenance_kcal?: number) =>

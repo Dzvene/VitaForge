@@ -2,8 +2,9 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { nutrition, profile as profileApi } from "@/lib/api/endpoints";
+import { account, nutrition, profile as profileApi } from "@/lib/api/endpoints";
 import { qk, useProfile, useTarget } from "@/lib/api/hooks";
 import type { ActivityLevel, GoalKind, ProfileUpsert, Sex } from "@/lib/api/types";
 import { Button, Card, CardTitle, Field, Input, Segmented, Select, Skeleton } from "@/components/ui/primitives";
@@ -19,12 +20,38 @@ export default function SettingsPage() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const toast = useToast();
-  const { user } = useAuth();
+  const router = useRouter();
+  const { user, clear } = useAuth();
   const profile = useProfile();
   const target = useTarget();
 
   const [form, setForm] = useState<ProfileUpsert | null>(null);
   const [proteinMode, setProteinMode] = useState<ProteinMode>("per_kg");
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+
+  const exportData = useMutation({
+    mutationFn: account.exportData,
+    onSuccess: (data) => {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "vitaforge-export.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    onError: () => toast(t("settings.exportError"), "error"),
+  });
+
+  const deleteAccount = useMutation({
+    mutationFn: () => account.deleteAccount(deletePassword),
+    onSuccess: () => {
+      clear();
+      router.replace("/login");
+    },
+    onError: () => toast(t("settings.deleteError"), "error"),
+  });
 
   useEffect(() => {
     if (profile.data && !form) {
@@ -212,6 +239,62 @@ export default function SettingsPage() {
           </Button>
         </Card>
       </div>
+
+      <Card>
+        <CardTitle>{t("settings.dataTitle")}</CardTitle>
+        <p className="mb-4 text-sm text-ink-muted">{t("settings.dataHint")}</p>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Button
+            variant="secondary"
+            onClick={() => exportData.mutate()}
+            loading={exportData.isPending}
+          >
+            {t("settings.exportBtn")}
+          </Button>
+          {!confirmingDelete ? (
+            <Button variant="ghost" className="text-danger" onClick={() => setConfirmingDelete(true)}>
+              {t("settings.deleteBtn")}
+            </Button>
+          ) : null}
+        </div>
+
+        {confirmingDelete && (
+          <div className="mt-4 rounded-xl border border-danger/40 bg-danger/5 p-4">
+            <p className="text-sm font-medium text-ink">{t("settings.deleteConfirmTitle")}</p>
+            <p className="mt-1 text-sm text-ink-muted">{t("settings.deleteConfirmHint")}</p>
+            <div className="mt-3">
+              <Field label={t("settings.deletePasswordLabel")}>
+                <Input
+                  type="password"
+                  autoComplete="current-password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder="••••••••"
+                />
+              </Field>
+            </div>
+            <div className="mt-3 flex gap-2">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setConfirmingDelete(false);
+                  setDeletePassword("");
+                }}
+              >
+                {t("settings.deleteCancel")}
+              </Button>
+              <Button
+                className="bg-danger text-white hover:bg-danger/90"
+                disabled={!deletePassword}
+                loading={deleteAccount.isPending}
+                onClick={() => deleteAccount.mutate()}
+              >
+                {t("settings.deleteConfirmBtn")}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Card>
 
       <div className="sticky bottom-20 z-10 flex justify-end md:bottom-4">
         <Button size="lg" onClick={onSave} loading={save.isPending} className="shadow-glow">

@@ -52,6 +52,12 @@ class Settings(BaseSettings):
     SENTRY_RELEASE: str = ""
     SENTRY_TRACES_SAMPLE_RATE: float = 0.0
 
+    # ----- Auth rate limiting (in-memory, per client IP) -----
+    LOGIN_RATE_LIMIT: int = 10        # max attempts ...
+    LOGIN_RATE_WINDOW_SECONDS: int = 60  # ... per this window
+    REGISTER_RATE_LIMIT: int = 5
+    REGISTER_RATE_WINDOW_SECONDS: int = 300
+
     # ----- Food data import -----
     OFF_DUMP_PATH: str = ""   # Open Food Facts JSONL dump
     USDA_DUMP_PATH: str = ""  # USDA FoodData Central CSV/JSON dump

@@ -4,6 +4,43 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-25 — Account self-service + auth rate-limit (Phase 4, no-email parts)
+
+The manual-QA sweep flagged missing auth/GDPR basics. Per the owner's call we
+shipped the parts that don't need email infrastructure; password reset + email
+verification stay deferred until an email-provider decision.
+
+- **GDPR data export** — `GET /account/export` returns a portable JSON snapshot
+  of everything the user owns (profile, nutrition target, calibration, weight
+  logs, diary, favorites, custom foods, coaching state). `password_hash` is
+  redacted. Rows are serialized generically from each table's columns.
+- **Account deletion** — `POST /account/delete` re-authenticates with the
+  password, then deletes the `User` row; every owned table drops via the
+  existing `ondelete=CASCADE` FKs. Verified a deleted email can re-register.
+- New `account` slice: a deliberate cross-slice hub (like `admin`), declared in
+  `tach.toml` with edges to the eight data-owning slices.
+- **Auth rate-limiting** — `app/core/ratelimit.py`, an in-memory sliding-window
+  limiter per client IP (single uvicorn worker, so process-local is correct;
+  reads X-Forwarded-For behind nginx). Login 10/60s, register 5/300s, config-
+  driven; returns 429 + Retry-After via the i18n'd `error.too_many_requests`.
+- **Settings UI** — a "Data & account" card: export (downloads
+  vitaforge-export.json) and a password-gated delete with a confirm panel;
+  on delete it clears the session and routes to /login. Full EN/RU/DE copy.
+- Tests: export shape + redaction, delete + cascade + re-register, wrong-
+  password rejected, login/register 429 bursts (limiter reset between tests in
+  conftest so counters don't bleed). Backend 138 tests + tach green; frontend
+  typecheck + lint + 25 vitest green.
+
+Verified live: `GET /account/export` (all sections, no password_hash), login
+brute-force → 9×401 then 429, and the Settings "Daten & Konto" card with the
+localized delete-confirm panel.
+
+**Deferred (needs an email provider):** password reset + email verification.
+The `email_verified` columns already exist; wiring them on is a follow-up once
+SMTP/Resend is chosen. Catalog OFF import (branded RU/DE) also still pending.
+
+---
+
 ## 2026-06-25 — Bilingual food catalog (Phase 3): RU/DE staple search
 
 The blocker behind "на русском нихуя не работает, начиная с добавления еды":

@@ -91,6 +91,7 @@ from app.modules import calibration as _calibration  # noqa: E402, F401
 from app.modules import nutrition as _nutrition  # noqa: E402, F401  # noqa
 
 # ---- Routers ----
+from app.modules.account.router import router as account_router  # noqa: E402
 from app.modules.admin.router import admin_router as admin_stats_router  # noqa: E402
 from app.modules.app_config.router import admin_router as app_params_admin_router  # noqa: E402
 from app.modules.auth.router import router as auth_router  # noqa: E402
@@ -111,6 +112,7 @@ api_v1 = settings.API_V1_PREFIX
 for r in (
     public_router,
     auth_router,
+    account_router,
     profile_router,
     nutrition_router,
     foods_router,
