@@ -4,6 +4,44 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-25 — Bilingual food catalog (Phase 3): RU/DE staple search
+
+The blocker behind "на русском нихуя не работает, начиная с добавления еды":
+the catalog was USDA-English only, so "творог"/"Quark" returned nothing — the
+diary was unusable for a RU/DE user out of the box. Chosen approach (over a
+tens-of-GB OFF dump on a 46 GB-free box): a curated bilingual staple seed.
+
+- **Schema**: `foods` gains `name_ru`, `name_de`, and a free-text `aliases`
+  bag (lowercased synonyms/transliterations). Migration `b2c3d4e5f6a7` adds the
+  columns + Postgres trigram GIN indexes on each (SQLite skips the index step).
+- **Search** now matches across `name`/`name_ru`/`name_de`/`aliases`; prefix
+  ranking considers the localized names too. NULL on the USDA rows → no-op
+  there, so nothing regresses for English search.
+- **Localized display**: `FoodOut.localized(food, locale)` shows the RU/DE name
+  when present (search/barcode/favorites/get), so the diary reads "Творог" /
+  "Quark" instead of the canonical English. Falls back to `name`.
+- **Seed**: `scripts/seed_staples_i18n.py` + `data/staples_i18n.json` — 99
+  everyday staples (dairy, grains, meat/fish, eggs, legumes, veg, fruit, nuts,
+  oils, a few RU/DE dishes) with EN/RU/DE names, synonyms, per-100g macros and
+  common portions. Idempotent upsert by (source="staple_i18n", name).
+- Tests: data sanity (Atwater fit), idempotency, and RU/DE/translit search +
+  localized-name regression. Backend 131 tests + tach green.
+
+Verified live after migrate+seed+redeploy: API "творог"/"Quark"/"гречка"/
+"Hähnchenbrust"/"молоко" all hit per Accept-Language with localized display
+names; in the diary UI (DE) "творог" → Quark/Magerquark/Quarktaschen.
+
+**Scope note:** 99 staples cover the common everyday searches, NOT a full
+catalog — branded/regional RU/DE products still need the OFF import (deferred,
+the streaming importer is ready but wants disk prep). Said plainly so this
+isn't mistaken for full coverage.
+
+**Still open:** (4) auth/GDPR — per the owner's call, do the no-email parts now
+(account deletion, data export, auth rate-limit); password reset + email
+verification wait on an email-provider decision.
+
+---
+
 ## 2026-06-25 — i18n backend reactivity (Phase 2 of the manual-QA sweep)
 
 The leak found in Phase 1's verification: server-translated copy (coaching

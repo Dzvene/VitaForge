@@ -6,7 +6,7 @@ their own products (source="custom", owner_user_id set). Nutrition is stored
 per 100 g, the canonical basis for all diary math.
 """
 
-from sqlalchemy import Float, ForeignKey, Index, String, UniqueConstraint
+from sqlalchemy import Float, ForeignKey, Index, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.shared.base_model import Base, TimestampMixin
@@ -20,6 +20,12 @@ class Food(Base, TimestampMixin):
     source: Mapped[str] = mapped_column(String(16), default="custom", nullable=False)
     barcode: Mapped[str | None] = mapped_column(String(32), index=True, nullable=True)
     name: Mapped[str] = mapped_column(String(512), nullable=False)
+    # Localized display names (set for the curated bilingual staples; NULL for
+    # the USDA bulk rows). Search matches across all of them + `aliases`.
+    name_ru: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    name_de: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    # Space-joined extra search terms / synonyms across languages, lowercased.
+    aliases: Mapped[str | None] = mapped_column(Text, nullable=True)
     brand: Mapped[str | None] = mapped_column(String(255), nullable=True)
     # NULL → shared DB product; set → a user's private custom product.
     owner_user_id: Mapped[int | None] = mapped_column(

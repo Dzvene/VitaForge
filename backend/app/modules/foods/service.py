@@ -48,16 +48,37 @@ class FoodService:
         q = query.strip()
         if not q:
             return []
+        # Match across the English name AND the curated RU/DE names + aliases, so
+        # "творог"/"Quark" find the same staple as "cottage cheese". The localized
+        # columns are NULL for the USDA bulk rows, so ILIKE just no-ops there.
+        like = f"%{q}%"
+        prefix = f"{q}%"
+        matches = or_(
+            Food.name.ilike(like),
+            Food.name_ru.ilike(like),
+            Food.name_de.ilike(like),
+            Food.aliases.ilike(like),
+        )
         # Relevance, not alphabetical (the catalog is ~2M rows; "chicken" must not
         # surface "Abc chicken brand X" before plain "Chicken"). Portable ordering
-        # that works on both Postgres (prod, with a trigram GIN index on name) and
-        # SQLite (tests): prefix match first, then generic foods (no brand) over
-        # branded, then the shorter / more canonical name.
-        prefix_first = case((Food.name.ilike(f"{q}%"), 0), else_=1)
+        # that works on both Postgres (prod, trigram GIN indexes) and SQLite
+        # (tests): prefix match first, then generic foods (no brand) over branded,
+        # then the shorter / more canonical name.
+        prefix_first = case(
+            (
+                or_(
+                    Food.name.ilike(prefix),
+                    Food.name_ru.ilike(prefix),
+                    Food.name_de.ilike(prefix),
+                ),
+                0,
+            ),
+            else_=1,
+        )
         generic_first = case((Food.brand.is_(None), 0), else_=1)
         stmt = (
             select(Food)
-            .where(self._visible(user_id), Food.name.ilike(f"%{q}%"))
+            .where(self._visible(user_id), matches)
             .order_by(prefix_first, generic_first, func.length(Food.name), Food.name)
             .limit(limit)
         )
