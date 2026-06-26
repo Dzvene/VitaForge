@@ -4,6 +4,31 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-26 — OFF catalog expansion (EU + RU)
+
+Grew the Open Food Facts slice from **18,490 → 64,710** (+46,220, all barcoded).
+
+First confirmed the old `DACH/RU`-only filter was exhausted, not partial: a full
+re-scan of the 12.4 GB dump did **3,000,000 lines, 0 new kept** — every match was
+already in the DB. A breakdown showed the old yield was name-driven (14,148 RU
+names, 3,156 DE names, only 1,199 by country alone), so re-running couldn't add
+anything.
+
+Broadened `scripts/import_off.py` `_KEEP_COUNTRIES` from 4 (DE/AT/CH/RU) to 16 —
+the EU markets whose products share German/Austrian shelves plus the
+Russian-speaking neighbours: FR, NL, BE, LU, PL, CZ, IT, ES, GB, UA, BY, KZ. The
+"or has a DE/RU name" rule and the kcal requirement are unchanged; dedup by
+(barcode|name) so the existing rows aren't doubled.
+
+Re-streamed the full dump (zero disk footprint, host gunzip → container insert):
+scanned 4,577,280 lines, inserted 46,220. The new rows are country-matched with
+native names (FR/PL/IT/…), so the DE/RU-named subset stays 18,490 and DE/RU text
+search isn't polluted — the win is **3× barcode coverage** for products actually
+sold in the EU. Smoke: guest "käse" → 30 results 0.29s; a fresh French product
+resolves by barcode in 0.03s. pg_trgm GIN holds. Catalog total ~523k.
+
+---
+
 ## 2026-06-26 — Admin foods/params CMS + SMTP attempt
 
 **Admin catalog + parameters (standalone console).** The standalone admin

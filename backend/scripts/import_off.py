@@ -1,11 +1,16 @@
-"""Import Open Food Facts — DACH/RU-relevant branded products, with localized names.
+"""Import Open Food Facts — EU + RU-relevant branded products, with localized names.
 
-The full OFF dump is ~12 GB gzipped / ~100 GB raw, and most of it is US/FR
-products that do nothing for a RU/DE user. This importer **streams** the JSONL
-(decompressed on the fly — never stored), keeps only products sold in
-Germany / Austria / Switzerland / Russia, and maps OFF's per-language name
-fields into our bilingual columns (`name_ru`/`name_de`/`aliases`) so the search
-we built actually pays off for branded items.
+The full OFF dump is ~12 GB gzipped / ~100 GB raw, and most of it is US products
+that do nothing for our users. This importer **streams** the JSONL (decompressed
+on the fly — never stored), keeps products sold in the European markets that
+actually share German/Austrian shelves plus the Russian-speaking neighbours
+(see ``_KEEP_COUNTRIES``) — or any product that carries a German/Russian name —
+and maps OFF's per-language name fields into our bilingual columns
+(`name_ru`/`name_de`/`aliases`) so the search we built pays off for branded items.
+
+Scope note (2026-06-26): the original DACH/RU-only filter topped out at ~18.5k
+matches (a full dump re-scan added 0 new). Broadened to the EU core + RU
+neighbours below to give real barcode coverage for products sold in Germany.
 
 Usage — stream straight from the dump with zero disk footprint:
 
@@ -40,12 +45,27 @@ _BATCH = 5000
 _SOURCE = "off"
 _MIN_FREE_BYTES = 4 * 1024**3  # abort if the partition drops below 4 GB free
 
-# Keep products sold in any of these (OFF `countries_tags`).
+# Keep products sold in any of these (OFF `countries_tags`). DACH + the EU
+# markets whose products commonly appear on German/Austrian shelves, plus the
+# Russian-speaking neighbours. Products outside this set still get kept if they
+# carry a German or Russian name (handled in `_map`).
 _KEEP_COUNTRIES = {
     "en:germany",
     "en:austria",
     "en:switzerland",
     "en:russia",
+    "en:france",
+    "en:netherlands",
+    "en:belgium",
+    "en:luxembourg",
+    "en:poland",
+    "en:czech-republic",
+    "en:italy",
+    "en:spain",
+    "en:united-kingdom",
+    "en:ukraine",
+    "en:belarus",
+    "en:kazakhstan",
 }
 
 
