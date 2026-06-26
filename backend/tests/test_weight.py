@@ -53,3 +53,37 @@ async def test_weight_out_of_range_rejected(client, admin):
 
 async def test_series_requires_auth(client):
     assert (await client.get("/weight/series")).status_code == 401
+
+
+async def test_series_points_have_ids(client, admin):
+    await client.put("/profile", json=PROFILE_BODY, headers=admin["headers"])
+    await _log(client, admin["headers"], date.today(), 80.0)
+    points = (await client.get("/weight/series", headers=admin["headers"])).json()["points"]
+    assert isinstance(points[0]["id"], int)
+
+
+async def test_delete_weight_entry(client, admin):
+    await client.put("/profile", json=PROFILE_BODY, headers=admin["headers"])
+    today = date.today()
+    await _log(client, admin["headers"], today, 80.0)
+    await _log(client, admin["headers"], today - timedelta(days=1), 80.5)
+    points = (await client.get("/weight/series", headers=admin["headers"])).json()["points"]
+    assert len(points) == 2
+
+    pid = points[0]["id"]
+    d = await client.delete(f"/weight/{pid}", headers=admin["headers"])
+    assert d.status_code == 204
+
+    after = (await client.get("/weight/series", headers=admin["headers"])).json()["points"]
+    assert len(after) == 1
+    assert all(p["id"] != pid for p in after)
+
+
+async def test_delete_weight_not_found(client, admin):
+    assert (await client.delete("/weight/99999", headers=admin["headers"])).status_code == 404
+
+
+async def test_cannot_delete_other_users_weight(client, admin, user):
+    await _log(client, admin["headers"], date.today(), 80.0)
+    pid = (await client.get("/weight/series", headers=admin["headers"])).json()["points"][0]["id"]
+    assert (await client.delete(f"/weight/{pid}", headers=user["headers"])).status_code == 404

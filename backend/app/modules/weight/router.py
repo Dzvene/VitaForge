@@ -20,3 +20,8 @@ async def weight_series(user: CurrentUser, db: DbSession) -> WeightSeries:
     """Raw points + smoothed trend line (§4.3). Plot both; judge progress by trend."""
     params = await ProfileService(db).effective_params(user.id)
     return await WeightService(db).series(user.id, params)
+
+
+@router.delete("/{log_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_weight(log_id: int, user: CurrentUser, db: DbSession) -> None:
+    await WeightService(db).delete(user.id, log_id)

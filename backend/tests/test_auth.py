@@ -97,3 +97,28 @@ async def _admin_headers(client):
         "/auth/login", json={"email": "owner@vitaforge.app", "password": "Sup3rSecret!"}
     )
     return {"Authorization": f"Bearer {login.json()['access_token']}"}
+
+
+async def test_update_full_name(client, admin):
+    r = await client.patch("/auth/me", json={"full_name": "Renamed Owner"}, headers=admin["headers"])
+    assert r.status_code == 200, r.text
+    assert r.json()["full_name"] == "Renamed Owner"
+    me = (await client.get("/auth/me", headers=admin["headers"])).json()
+    assert me["full_name"] == "Renamed Owner"
+
+
+async def test_update_email_resets_verification(client, admin):
+    r = await client.patch("/auth/me", json={"email": "moved@vitaforge.app"}, headers=admin["headers"])
+    assert r.status_code == 200, r.text
+    assert r.json()["email"] == "moved@vitaforge.app"
+    assert r.json()["email_verified"] is False
+
+
+async def test_update_email_conflict(client, admin, user):
+    # `user` is member@vitaforge.app; the owner can't take it.
+    r = await client.patch("/auth/me", json={"email": "member@vitaforge.app"}, headers=admin["headers"])
+    assert r.status_code == 409
+
+
+async def test_update_me_requires_auth(client):
+    assert (await client.patch("/auth/me", json={"full_name": "x"})).status_code == 401

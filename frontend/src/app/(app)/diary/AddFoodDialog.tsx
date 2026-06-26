@@ -15,6 +15,8 @@ import { useToast } from "@/components/ui/toast";
 
 // Common log amounts for foods without named portions (one-tap, still editable).
 const QUICK_GRAMS = [30, 50, 100, 150, 200, 250];
+// One-tap portion counts (mirror of QUICK_GRAMS for the named-portion path).
+const QUICK_COUNTS = [0.5, 1, 1.5, 2, 3];
 
 function macroLine(f: FoodOut, t: TFunction) {
   return `${Math.round(f.kcal_100g)} ${t("common.kcal")} · P ${Math.round(f.protein_100g)} F ${Math.round(
@@ -418,6 +420,25 @@ function QuantityStep(props: {
           </Field>
           <Field label={t("diary.addFood.howMany")}>
             <Input type="number" step="0.5" min={0.5} value={count} onChange={(e) => props.setCount(e.target.value)} />
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {QUICK_COUNTS.map((c) => {
+                const active = Number(count) === c;
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => props.setCount(String(c))}
+                    className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors ${
+                      active
+                        ? "border-brand-500/40 bg-brand-500/15 text-brand-400"
+                        : "border-line bg-surface-2 text-ink-muted hover:border-line-strong hover:text-ink"
+                    }`}
+                  >
+                    ×{c}
+                  </button>
+                );
+              })}
+            </div>
           </Field>
         </div>
       )}

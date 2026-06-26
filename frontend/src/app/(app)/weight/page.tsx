@@ -10,7 +10,7 @@ import { useDayLabel } from "@/lib/i18n/useDayLabel";
 import { Button, Card, CardTitle, EmptyState, Field, Input, Skeleton } from "@/components/ui/primitives";
 import { TrendChart } from "@/components/ui/charts";
 import { useToast } from "@/components/ui/toast";
-import { Scale } from "lucide-react";
+import { Pencil, Scale, Trash2 } from "lucide-react";
 
 export default function WeightPage() {
   const { t } = useTranslation();
@@ -31,6 +31,22 @@ export default function WeightPage() {
     },
     onError: () => toast(t("weight.toastError"), "error"),
   });
+
+  const remove = useMutation({
+    mutationFn: (id: number) => weightApi.remove(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.weight });
+      qc.invalidateQueries({ queryKey: qk.calibration });
+      toast(t("weight.entryRemoved"), "ok");
+    },
+    onError: () => toast(t("weight.toastError"), "error"),
+  });
+
+  const editEntry = (loggedOn: string, weightKg: number) => {
+    setDate(loggedOn);
+    setKg(String(weightKg));
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const points = series.data?.points ?? [];
   const latest = points[points.length - 1];
@@ -109,11 +125,27 @@ export default function WeightPage() {
           <CardTitle>{t("weight.recentEntries")}</CardTitle>
           <ul className="divide-y divide-line">
             {[...points].reverse().slice(0, 10).map((p) => (
-              <li key={p.logged_on} className="flex items-center justify-between py-2.5 text-sm">
+              <li key={p.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
                 <span className="text-ink-muted">{dayLabel(p.logged_on)}</span>
-                <span className="nums">
-                  {fmtKg(p.weight_kg, t("common.kg"))} <span className="text-ink-faint">· {fmtKg(p.trend_kg, t("common.kg"))} {t("weight.trend")}</span>
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="nums">
+                    {fmtKg(p.weight_kg, t("common.kg"))} <span className="text-ink-faint">· {fmtKg(p.trend_kg, t("common.kg"))} {t("weight.trend")}</span>
+                  </span>
+                  <button
+                    onClick={() => editEntry(p.logged_on, p.weight_kg)}
+                    className="rounded-lg p-1.5 text-ink-faint hover:bg-surface-3 hover:text-brand"
+                    aria-label={t("common.edit")}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => remove.mutate(p.id)}
+                    className="rounded-lg p-1.5 text-ink-faint hover:bg-surface-3 hover:text-danger"
+                    aria-label={t("common.remove")}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

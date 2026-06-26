@@ -22,7 +22,12 @@ from app.modules.auth.models import (
     PURPOSE_PASSWORD_RESET,
     EmailToken,
 )
-from app.modules.auth.schemas import LoginRequest, RegisterRequest, TokenPair
+from app.modules.auth.schemas import (
+    LoginRequest,
+    RegisterRequest,
+    TokenPair,
+    UpdateProfileRequest,
+)
 from app.modules.identity.models import User
 from app.shared.exceptions import ConflictError, UnauthorizedError, ValidationError
 
@@ -164,6 +169,33 @@ class AuthService:
         if user.email_verified:
             raise ConflictError(tr("error.email_already_verified"))
         await self._issue_verification(user)
+
+    async def update_profile(self, user: User, payload: UpdateProfileRequest) -> User:
+        """Edit display name and/or email for the signed-in user. Changing the
+        email resets verification and sends a fresh link to the new address."""
+        fields = payload.model_fields_set
+        email_changed = False
+        if "full_name" in fields:
+            user.full_name = payload.full_name or None
+        if "email" in fields and payload.email:
+            new_email = payload.email.lower()
+            if new_email != user.email:
+                clash = (
+                    await self.db.execute(
+                        select(User).where(User.email == new_email, User.id != user.id)
+                    )
+                ).scalar_one_or_none()
+                if clash is not None:
+                    raise ConflictError("That email is already in use.")
+                user.email = new_email
+                user.email_verified = False
+                user.email_verified_at = None
+                email_changed = True
+        await self.db.commit()
+        await self.db.refresh(user)
+        if email_changed:
+            await self._issue_verification(user)
+        return user
 
     async def forgot_password(self, email: str) -> None:
         """Email a reset link if the account exists. Always silent (no enumeration)."""

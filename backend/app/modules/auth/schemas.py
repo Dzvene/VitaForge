@@ -44,6 +44,14 @@ class ChangePasswordRequest(APIModel):
     new_password: str = Field(min_length=8, max_length=128)
 
 
+class UpdateProfileRequest(APIModel):
+    """Self-service edit of the account's display name and/or email. Only the
+    fields actually sent are changed (PATCH semantics via model_fields_set)."""
+
+    full_name: str | None = Field(default=None, max_length=255)
+    email: EmailStr | None = None
+
+
 class UserOut(APIModel):
     id: int
     email: EmailStr

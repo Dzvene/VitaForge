@@ -4,6 +4,38 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-26 — Web UI gaps: edit diary entry, edit/delete weight, account details
+
+Closed the three real web gaps from the UI audit (the rest of the web was
+already complete). Each is a thin backend endpoint + UI, tested + deployed.
+
+- **Edit a diary entry's amount.** `PATCH /diary/{id}` (`DiaryUpdateIn{grams}`,
+  user-scoped, switches the row to manual grams, republishes DIARY_CHANGED). UI:
+  a pencil on each row opens an inline grams editor (Enter/Esc, live recompute).
+  Previously the only fix for a wrong portion was delete + re-add.
+- **Delete / edit a weigh-in.** `WeightPoint` now carries its `id`;
+  `DELETE /weight/{id}` removes a stray point (trend + calibration recompute off
+  the rest). UI: each recent-entry row gets edit (prefills the form → re-log
+  overwrites that day) + delete. A typo'd weight used to be unfixable and
+  silently skewed the EMA trend the whole method rests on.
+- **Edit name / email.** `PATCH /auth/me` (`UpdateProfileRequest`, PATCH
+  semantics via `model_fields_set`). Email change checks uniqueness (409), resets
+  `email_verified`, and sends a fresh verification link. UI: an "Account details"
+  card in Settings.
+- **(polish) Portion-mode quick-chips.** The add-food portion path got ×0.5/1/
+  1.5/2/3 one-tap counts, matching the grams quick-chips.
+
+Backend: **213 tests** green (+12: diary edit ×4, weight delete ×4, profile
+edit ×4), tach + ruff clean. Fixed a test-isolation bug: the reminders test now
+pins `VAPID_PRIVATE_KEY_B64=""` in conftest so a real key in `.env` can't flip
+`push_enabled`. i18n en/ru/de for all new copy. Deployed backend + frontend.
+**Verified on prod**: API e2e (diary 100→250 g = 950 kcal, weight delete leaves
+1, email change → verified=false) and a live browser pass (RU) — added Oats,
+edited 100→250 g (246→615 kcal, meal total + macros recomputed), removed it; the
+Account details card renders prefilled.
+
+---
+
 ## 2026-06-26 — Mobile: trends + recipes screens (both platforms)
 
 Rounded out the core product surface on iOS and Android.

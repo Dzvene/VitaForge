@@ -13,6 +13,7 @@ class WeightLogIn(APIModel):
 
 
 class WeightPoint(APIModel):
+    id: int                # underlying log row id (for edit/delete)
     logged_on: date
     weight_kg: float       # raw measurement
     trend_kg: float        # smoothed EMA trend (§4.3)

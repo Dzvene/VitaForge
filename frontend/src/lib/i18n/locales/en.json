@@ -252,7 +252,9 @@
       "brandOptional": "Brand (optional)",
       "per100g": "Per 100 g",
       "createFood": "Create food"
-    }
+    },
+    "entryUpdated": "Entry updated",
+    "entryUpdateError": "Couldn't update the entry"
   },
   "weight": {
     "eyebrow": "Body weight",
@@ -272,7 +274,8 @@
     "sinceStartHint": "by trend, over {{count}} days",
     "recentEntries": "Recent entries",
     "toastLogged": "Weight logged",
-    "toastError": "Could not log weight"
+    "toastError": "Could not log weight",
+    "entryRemoved": "Weigh-in removed"
   },
   "recipes": {
     "eyebrow": "Meals",
@@ -467,6 +470,16 @@
       "testError": "Couldn't send the test notification.",
       "unsupported": "Your browser doesn't support push notifications.",
       "serverDisabled": "Push delivery isn't configured on the server yet — your schedule is saved and will work once it's enabled."
+    },
+    "account": {
+      "title": "Account details",
+      "hint": "Your display name and sign-in email.",
+      "nameLabel": "Name",
+      "namePlaceholder": "Your name",
+      "emailLabel": "Email",
+      "emailReverify": "Changing your email signs you out of verification — we'll send a new confirmation link.",
+      "saved": "Account updated",
+      "error": "Couldn't update your account"
     }
   },
   "admin": {

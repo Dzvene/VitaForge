@@ -13,6 +13,7 @@ from app.modules.auth.schemas import (
     RegisterRequest,
     ResetPasswordRequest,
     TokenPair,
+    UpdateProfileRequest,
     UserOut,
     VerifyEmailRequest,
 )
@@ -55,6 +56,16 @@ async def refresh(payload: RefreshRequest, db: DbSession) -> TokenPair:
 @router.get("/me", response_model=UserOut)
 async def me(user: CurrentUser) -> UserOut:
     return UserOut.model_validate(user)
+
+
+@router.patch("/me", response_model=UserOut)
+async def update_me(
+    payload: UpdateProfileRequest, user: CurrentUser, db: DbSession
+) -> UserOut:
+    """Edit the signed-in user's name and/or email. Changing the email resets
+    verification and sends a fresh confirmation link to the new address."""
+    updated = await AuthService(db).update_profile(user, payload)
+    return UserOut.model_validate(updated)
 
 
 @router.post(

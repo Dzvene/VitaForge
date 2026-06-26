@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ChevronRight, Copy, Plus, Trash2, UtensilsCrossed } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Copy, Pencil, Plus, Trash2, UtensilsCrossed, X } from "lucide-react";
 import { diary } from "@/lib/api/endpoints";
 import { qk, useDay, useGuidance } from "@/lib/api/hooks";
 import { addDays, fmtG, fmtKcal, isoDate, MEALS } from "@/lib/format";
@@ -23,6 +23,7 @@ export default function DiaryPage() {
   const [day, setDay] = useState(isoDate());
   const [addMeal, setAddMeal] = useState<Meal | null>(null);
   const [customOpen, setCustomOpen] = useState(false);
+  const [editing, setEditing] = useState<{ id: number; grams: string } | null>(null);
 
   const summary = useDay(day);
   const guidance = useGuidance(day);
@@ -35,6 +36,24 @@ export default function DiaryPage() {
       toast(t("diary.entryRemoved"), "ok");
     },
   });
+
+  const update = useMutation({
+    mutationFn: ({ id, grams }: { id: number; grams: number }) => diary.update(id, grams),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.day(day) });
+      qc.invalidateQueries({ queryKey: qk.guidance(day) });
+      setEditing(null);
+      toast(t("diary.entryUpdated"), "ok");
+    },
+    onError: () => toast(t("diary.entryUpdateError"), "error"),
+  });
+
+  const saveEdit = () => {
+    if (!editing) return;
+    const grams = Number(editing.grams);
+    if (!Number.isFinite(grams) || grams <= 0) return;
+    update.mutate({ id: editing.id, grams });
+  };
 
   const copyYesterday = useMutation({
     mutationFn: () => diary.copy(addDays(day, -1), day),
@@ -139,14 +158,56 @@ export default function DiaryPage() {
                           {Math.round(e.nutrients.carb_g)}
                         </p>
                       </div>
-                      <span className="nums text-sm font-medium text-ink">{fmtKcal(e.nutrients.kcal)}</span>
-                      <button
-                        onClick={() => remove.mutate(e.id)}
-                        className="rounded-lg p-1.5 text-ink-faint hover:bg-surface-3 hover:text-danger"
-                        aria-label={t("common.remove")}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      {editing?.id === e.id ? (
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="number"
+                            inputMode="decimal"
+                            autoFocus
+                            value={editing.grams}
+                            onChange={(ev) => setEditing({ id: e.id, grams: ev.target.value })}
+                            onKeyDown={(ev) => {
+                              if (ev.key === "Enter") saveEdit();
+                              if (ev.key === "Escape") setEditing(null);
+                            }}
+                            className="nums w-20 rounded-lg border border-line bg-surface px-2 py-1 text-sm"
+                          />
+                          <span className="text-xs text-ink-faint">{t("common.grams")}</span>
+                          <button
+                            onClick={saveEdit}
+                            disabled={update.isPending}
+                            className="rounded-lg p-1.5 text-ink-faint hover:bg-surface-3 hover:text-brand"
+                            aria-label={t("common.save")}
+                          >
+                            <Check className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => setEditing(null)}
+                            className="rounded-lg p-1.5 text-ink-faint hover:bg-surface-3"
+                            aria-label={t("common.cancel")}
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="nums text-sm font-medium text-ink">{fmtKcal(e.nutrients.kcal)}</span>
+                          <button
+                            onClick={() => setEditing({ id: e.id, grams: String(Math.round(e.grams)) })}
+                            className="rounded-lg p-1.5 text-ink-faint hover:bg-surface-3 hover:text-brand"
+                            aria-label={t("common.edit")}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => remove.mutate(e.id)}
+                            className="rounded-lg p-1.5 text-ink-faint hover:bg-surface-3 hover:text-danger"
+                            aria-label={t("common.remove")}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </>
+                      )}
                     </li>
                   ))}
                 </ul>

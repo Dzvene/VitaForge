@@ -252,7 +252,9 @@
       "brandOptional": "Marke (optional)",
       "per100g": "Pro 100 g",
       "createFood": "Lebensmittel erstellen"
-    }
+    },
+    "entryUpdated": "Eintrag aktualisiert",
+    "entryUpdateError": "Eintrag konnte nicht aktualisiert werden"
   },
   "weight": {
     "eyebrow": "Körpergewicht",
@@ -272,7 +274,8 @@
     "sinceStartHint": "nach Trend, über {{count}} Tage",
     "recentEntries": "Letzte Einträge",
     "toastLogged": "Gewicht erfasst",
-    "toastError": "Gewicht konnte nicht erfasst werden"
+    "toastError": "Gewicht konnte nicht erfasst werden",
+    "entryRemoved": "Wiegen entfernt"
   },
   "recipes": {
     "eyebrow": "Mahlzeiten",
@@ -467,6 +470,16 @@
       "testError": "Testbenachrichtigung konnte nicht gesendet werden.",
       "unsupported": "Dein Browser unterstützt keine Push-Benachrichtigungen.",
       "serverDisabled": "Die Push-Zustellung ist auf dem Server noch nicht eingerichtet — dein Zeitplan ist gespeichert und funktioniert, sobald sie aktiviert ist."
+    },
+    "account": {
+      "title": "Kontodaten",
+      "hint": "Dein Anzeigename und die Login-E-Mail.",
+      "nameLabel": "Name",
+      "namePlaceholder": "Dein Name",
+      "emailLabel": "E-Mail",
+      "emailReverify": "Eine E-Mail-Änderung setzt die Bestätigung zurück — wir senden einen neuen Link.",
+      "saved": "Konto aktualisiert",
+      "error": "Konto konnte nicht aktualisiert werden"
     }
   },
   "admin": {

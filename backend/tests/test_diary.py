@@ -144,3 +144,54 @@ async def test_log_unknown_food_404(client, admin):
         headers=admin["headers"],
     )
     assert r.status_code == 404
+
+
+async def test_update_entry_grams(client, admin):
+    await client.put("/profile", json=PROFILE_BODY, headers=admin["headers"])
+    food = await _food(client, admin["headers"])
+    add = await client.post(
+        "/diary",
+        json={"entry_date": TODAY, "meal": "lunch", "food_id": food["id"], "grams": 100},
+        headers=admin["headers"],
+    )
+    entry_id = add.json()["id"]
+    assert add.json()["nutrients"]["kcal"] == 120  # 100 g of 120 kcal/100g
+
+    upd = await client.patch(f"/diary/{entry_id}", json={"grams": 250}, headers=admin["headers"])
+    assert upd.status_code == 200, upd.text
+    assert upd.json()["grams"] == 250
+    assert upd.json()["nutrients"]["kcal"] == 300
+
+    summary = (await client.get(f"/diary/{TODAY}", headers=admin["headers"])).json()
+    assert summary["eaten"]["kcal"] == 300
+    assert len(summary["entries"]) == 1  # edited in place, not duplicated
+
+
+async def test_update_entry_not_found(client, admin):
+    r = await client.patch("/diary/99999", json={"grams": 100}, headers=admin["headers"])
+    assert r.status_code == 404
+
+
+async def test_cannot_update_other_users_entry(client, admin, user):
+    await client.put("/profile", json=PROFILE_BODY, headers=admin["headers"])
+    food = await _food(client, admin["headers"])
+    add = await client.post(
+        "/diary",
+        json={"entry_date": TODAY, "meal": "lunch", "food_id": food["id"], "grams": 100},
+        headers=admin["headers"],
+    )
+    eid = add.json()["id"]
+    r = await client.patch(f"/diary/{eid}", json={"grams": 200}, headers=user["headers"])
+    assert r.status_code == 404
+
+
+async def test_update_entry_grams_validation(client, admin):
+    await client.put("/profile", json=PROFILE_BODY, headers=admin["headers"])
+    food = await _food(client, admin["headers"])
+    add = await client.post(
+        "/diary",
+        json={"entry_date": TODAY, "meal": "lunch", "food_id": food["id"], "grams": 100},
+        headers=admin["headers"],
+    )
+    eid = add.json()["id"]
+    assert (await client.patch(f"/diary/{eid}", json={"grams": 0}, headers=admin["headers"])).status_code == 422

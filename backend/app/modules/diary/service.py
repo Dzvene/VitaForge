@@ -89,6 +89,26 @@ class DiaryService:
             publish(DIARY_CHANGED, user_id=user_id, entry_date=d)
         return len(items)
 
+    async def update(self, user_id: int, entry_id: int, grams: float) -> DiaryEntry:
+        """Correct an entry's amount. Switches it to manual grams (drops any named
+        portion link) so the new figure is exactly what the user typed."""
+        entry = (
+            await self.db.execute(
+                select(DiaryEntry).where(
+                    DiaryEntry.id == entry_id, DiaryEntry.user_id == user_id
+                )
+            )
+        ).scalar_one_or_none()
+        if entry is None:
+            raise NotFoundError("Diary entry not found")
+        entry.grams = grams
+        entry.portion_id = None
+        entry.portion_count = None
+        await self.db.commit()
+        await self.db.refresh(entry)
+        publish(DIARY_CHANGED, user_id=user_id, entry_date=entry.entry_date)
+        return entry
+
     async def delete(self, user_id: int, entry_id: int) -> None:
         entry = (
             await self.db.execute(

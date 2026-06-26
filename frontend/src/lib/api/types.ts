@@ -127,6 +127,7 @@ export interface DaySummary {
 
 // ----- weight -----
 export interface WeightPoint {
+  id: number;
   logged_on: string;
   weight_kg: number;
   trend_kg: number;

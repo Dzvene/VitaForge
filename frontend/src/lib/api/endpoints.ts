@@ -85,6 +85,8 @@ export const auth = {
       method: "POST",
       body: { current_password, new_password },
     }),
+  updateProfile: (body: { full_name?: string | null; email?: string }) =>
+    api<UserOut>("/auth/me", { method: "PATCH", body }),
 };
 
 // Public legal/policy documents — localized server-side via Accept-Language.
@@ -143,6 +145,8 @@ export const foods = {
 export const diary = {
   day: (day: string) => api<DaySummary>(`/diary/${day}`),
   add: (body: DiaryAddIn) => api<DiaryEntryOut>("/diary", { method: "POST", body }),
+  update: (id: number, grams: number) =>
+    api<DiaryEntryOut>(`/diary/${id}`, { method: "PATCH", body: { grams } }),
   remove: (id: number) => api<void>(`/diary/${id}`, { method: "DELETE" }),
   recentFoods: () => api<FoodOut[]>("/diary/recent-foods"),
   copy: (src: string, dst: string) =>
@@ -164,6 +168,7 @@ export const weight = {
   log: (body: { logged_on: string; weight_kg: number }) =>
     api<void>("/weight", { method: "POST", body }),
   series: () => api<WeightSeries>("/weight/series"),
+  remove: (id: number) => api<void>(`/weight/${id}`, { method: "DELETE" }),
 };
 
 export const analytics = {

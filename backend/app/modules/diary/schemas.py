@@ -28,6 +28,13 @@ class DiaryAddIn(APIModel):
         return self
 
 
+class DiaryUpdateIn(APIModel):
+    """Edit an existing entry's amount. Grams-only: re-picking a named portion is
+    rare enough to re-add for; correcting the grams is the common case."""
+
+    grams: float = Field(gt=0, le=5000)
+
+
 class Nutrients(APIModel):
     kcal: float
     protein_g: float

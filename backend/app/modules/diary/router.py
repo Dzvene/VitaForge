@@ -5,9 +5,10 @@ from datetime import date
 from fastapi import APIRouter, status
 
 from app.core.deps import CurrentUser, DbSession
-from app.modules.diary.schemas import DaySummary, DiaryAddIn, DiaryEntryOut
+from app.modules.diary.schemas import DaySummary, DiaryAddIn, DiaryEntryOut, DiaryUpdateIn
 from app.modules.diary.service import DiaryService
 from app.modules.foods.schemas import FoodOut
+from app.shared.exceptions import NotFoundError
 
 router = APIRouter(prefix="/diary", tags=["diary"])
 
@@ -19,6 +20,18 @@ async def add_entry(payload: DiaryAddIn, user: CurrentUser, db: DbSession) -> Di
     # day summary endpoint is the canonical read. Re-fetch the day for the row.
     summary = await DiaryService(db).day_summary(user.id, payload.entry_date)
     return summary.entries[-1]
+
+
+@router.patch("/{entry_id}", response_model=DiaryEntryOut)
+async def update_entry(
+    entry_id: int, payload: DiaryUpdateIn, user: CurrentUser, db: DbSession
+) -> DiaryEntryOut:
+    entry = await DiaryService(db).update(user.id, entry_id, payload.grams)
+    summary = await DiaryService(db).day_summary(user.id, entry.entry_date)
+    row = next((e for e in summary.entries if e.id == entry_id), None)
+    if row is None:
+        raise NotFoundError("Diary entry not found")
+    return row
 
 
 @router.delete("/{entry_id}", status_code=status.HTTP_204_NO_CONTENT)

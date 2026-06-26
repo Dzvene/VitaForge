@@ -277,6 +277,8 @@ export default function SettingsPage() {
         </Card>
       </div>
 
+      <AccountDetailsCard />
+
       <ChangePasswordCard />
 
       <RemindersCard />
@@ -362,6 +364,58 @@ export default function SettingsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function AccountDetailsCard() {
+  const { t } = useTranslation();
+  const toast = useToast();
+  const { user, setUser } = useAuth();
+  const [name, setName] = useState(user?.full_name ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
+  const [error, setError] = useState<string | null>(null);
+
+  const emailChanged = email.trim().toLowerCase() !== (user?.email ?? "").toLowerCase();
+  const nameChanged = (name.trim() || null) !== (user?.full_name ?? null);
+  const dirty = emailChanged || nameChanged;
+
+  const save = useMutation({
+    mutationFn: () =>
+      auth.updateProfile({
+        full_name: name.trim() || null,
+        ...(emailChanged ? { email: email.trim() } : {}),
+      }),
+    onSuccess: (u) => {
+      setUser(u);
+      setError(null);
+      toast(t("settings.account.saved"), "ok");
+    },
+    onError: (err) =>
+      setError(err instanceof ApiError ? err.detail : t("settings.account.error")),
+  });
+
+  return (
+    <Card>
+      <CardTitle>{t("settings.account.title")}</CardTitle>
+      <p className="mb-4 text-sm text-ink-muted">{t("settings.account.hint")}</p>
+      <div className="grid max-w-md gap-4">
+        <Field label={t("settings.account.nameLabel")}>
+          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("settings.account.namePlaceholder")} />
+        </Field>
+        <Field
+          label={t("settings.account.emailLabel")}
+          hint={emailChanged ? t("settings.account.emailReverify") : undefined}
+        >
+          <Input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        </Field>
+        {error && <p className="text-sm text-danger">{error}</p>}
+        <div>
+          <Button onClick={() => save.mutate()} loading={save.isPending} disabled={!dirty || !email.trim()}>
+            {t("common.save")}
+          </Button>
+        </div>
+      </div>
+    </Card>
   );
 }
 

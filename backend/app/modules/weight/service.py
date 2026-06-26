@@ -11,6 +11,7 @@ from app.core.nutrition_math import trend_series
 from app.core.params import Params
 from app.modules.weight.models import WeightLog
 from app.modules.weight.schemas import WeightLogIn, WeightPoint, WeightSeries
+from app.shared.exceptions import NotFoundError
 
 
 class WeightService:
@@ -38,6 +39,21 @@ class WeightService:
         publish(WEIGHT_LOGGED, user_id=user_id, logged_on=payload.logged_on)
         return existing
 
+    async def delete(self, user_id: int, log_id: int) -> None:
+        """Remove a single weigh-in (e.g. a typo). The trend + calibration
+        recompute off the remaining points."""
+        log = (
+            await self.db.execute(
+                select(WeightLog).where(WeightLog.id == log_id, WeightLog.user_id == user_id)
+            )
+        ).scalar_one_or_none()
+        if log is None:
+            raise NotFoundError("Weight entry not found")
+        logged_on = log.logged_on
+        await self.db.delete(log)
+        await self.db.commit()
+        publish(WEIGHT_LOGGED, user_id=user_id, logged_on=logged_on)
+
     async def raw_logs(
         self, user_id: int, since: date | None = None, until: date | None = None
     ) -> list[WeightLog]:
@@ -52,7 +68,9 @@ class WeightService:
         logs = await self.raw_logs(user_id)
         trends = trend_series([log.weight_kg for log in logs], params.trend_alpha)
         points = [
-            WeightPoint(logged_on=log.logged_on, weight_kg=log.weight_kg, trend_kg=round(t, 2))
+            WeightPoint(
+                id=log.id, logged_on=log.logged_on, weight_kg=log.weight_kg, trend_kg=round(t, 2)
+            )
             for log, t in zip(logs, trends, strict=True)
         ]
         return WeightSeries(points=points, latest_trend_kg=points[-1].trend_kg if points else None)
