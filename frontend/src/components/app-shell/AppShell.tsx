@@ -7,6 +7,7 @@ import {
   Activity,
   BarChart3,
   BookOpen,
+  ChefHat,
   LayoutDashboard,
   LineChart,
   LogOut,
@@ -32,6 +33,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { href: "/dashboard", labelKey: "nav.today", icon: LayoutDashboard },
   { href: "/diary", labelKey: "nav.diary", icon: BookOpen },
+  { href: "/recipes", labelKey: "nav.recipes", icon: ChefHat },
   { href: "/weight", labelKey: "nav.weight", icon: LineChart },
   { href: "/trends", labelKey: "nav.trends", icon: BarChart3 },
   { href: "/calibration", labelKey: "nav.calibration", icon: Sliders },

@@ -14,9 +14,12 @@ import type {
   GoalKind,
   Hint,
   LegalContentOut,
+  Meal,
   ParamsView,
   ProfileOut,
   ProfileUpsert,
+  RecipeCreate,
+  RecipeOut,
   Sex,
   TargetOut,
   TokenPair,
@@ -140,6 +143,17 @@ export const diary = {
   recentFoods: () => api<FoodOut[]>("/diary/recent-foods"),
   copy: (src: string, dst: string) =>
     api<{ copied: number }>("/diary/copy", { method: "POST", query: { src, dst } }),
+};
+
+export const recipes = {
+  list: () => api<RecipeOut[]>("/recipes"),
+  get: (id: number) => api<RecipeOut>(`/recipes/${id}`),
+  create: (body: RecipeCreate) => api<RecipeOut>("/recipes", { method: "POST", body }),
+  update: (id: number, body: RecipeCreate) =>
+    api<RecipeOut>(`/recipes/${id}`, { method: "PUT", body }),
+  remove: (id: number) => api<void>(`/recipes/${id}`, { method: "DELETE" }),
+  log: (id: number, body: { entry_date: string; meal: Meal }) =>
+    api<{ added: number }>(`/recipes/${id}/log`, { method: "POST", body }),
 };
 
 export const weight = {

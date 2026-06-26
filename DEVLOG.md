@@ -4,6 +4,36 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-26 — Recipes / meals (log a whole meal in one tap)
+
+List item #5. Compose foods you eat together into a named recipe, then log the
+whole thing in one tap.
+
+**Backend — new `recipes` slice** (tach: `depends_on = [foods, diary]`).
+`recipes` + `recipe_components` tables (migration `f6a7b8c9d0e1`, per-user,
+cascade on user + food delete). CRUD at `/recipes` with server-computed totals,
+plus `POST /recipes/{id}/log` which **expands the recipe into one diary entry
+per component** for a (date, meal) — so diary, day summary and analytics keep
+working unchanged. Added `DiaryService.add_batch` (one commit + one DIARY_CHANGED
+per day) and `FoodService.get_many` (bulk visibility-checked fetch). 8 tests
+(187 total), tach green. (Footgun fixed: a method named `list` shadowed the
+builtin in a later annotation → `from __future__ import annotations`.)
+
+**Frontend**: a `/recipes` page (cards with totals + components, create/edit in a
+dialog with a food-search picker + per-component grams + live total, delete) and
+a **Recipes tab in the diary's Add-food dialog** — tap a saved recipe to log it
+straight into the open meal. Nav entry; i18n en/ru/de (523 keys, parity).
+tsc/eslint/vitest(25) green.
+
+Verified e2e on prod (RU): created "Porridge" (Oats 80 g + Milk 200 g → 424 kcal),
+saw it on /recipes, opened Diary → Add → Recipes → tapped it → two breakfast
+entries appeared totalling 424 kcal; deleted the account (recipe cascade-cleaned,
+0 rows).
+
+Still open from the list: CSV export (small), reminders (SMTP-blocked).
+
+---
+
 ## 2026-06-26 — Goal weight + ETA projection
 
 Completes list item #2. The Trends pace card showed rate-vs-plan but couldn't

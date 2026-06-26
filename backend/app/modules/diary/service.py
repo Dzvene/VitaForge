@@ -63,6 +63,32 @@ class DiaryService:
         publish(DIARY_CHANGED, user_id=user_id, entry_date=payload.entry_date)
         return entry
 
+    async def add_batch(self, user_id: int, items: list[DiaryAddIn]) -> int:
+        """Add several entries at once (e.g. logging a recipe) — one commit, one
+        DIARY_CHANGED per affected day instead of per entry."""
+        if not items:
+            return 0
+        dates: set[date] = set()
+        for payload in items:
+            food = await self.foods.get(user_id, payload.food_id)
+            grams = await self._resolve_grams(food, payload)
+            self.db.add(
+                DiaryEntry(
+                    user_id=user_id,
+                    entry_date=payload.entry_date,
+                    meal=payload.meal,
+                    food_id=food.id,
+                    grams=grams,
+                    portion_id=payload.portion_id,
+                    portion_count=payload.portion_count,
+                )
+            )
+            dates.add(payload.entry_date)
+        await self.db.commit()
+        for d in dates:
+            publish(DIARY_CHANGED, user_id=user_id, entry_date=d)
+        return len(items)
+
     async def delete(self, user_id: int, entry_id: int) -> None:
         entry = (
             await self.db.execute(

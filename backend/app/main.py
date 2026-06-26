@@ -109,6 +109,7 @@ from app.modules.nutrition import subscribers as _nut_subs  # noqa: E402, F401
 from app.modules.nutrition.router import router as nutrition_router  # noqa: E402
 from app.modules.profile.router import router as profile_router  # noqa: E402
 from app.modules.public.router import router as public_router  # noqa: E402
+from app.modules.recipes.router import router as recipes_router  # noqa: E402
 from app.modules.weight.router import router as weight_router  # noqa: E402
 
 api_v1 = settings.API_V1_PREFIX
@@ -121,6 +122,7 @@ for r in (
     nutrition_router,
     foods_router,
     diary_router,
+    recipes_router,
     weight_router,
     calibration_router,
     coaching_router,

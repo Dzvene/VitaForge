@@ -34,6 +34,17 @@ class FoodService:
             raise NotFoundError("Food not found")
         return food
 
+    async def get_many(self, user_id: int | None, ids: list[int]) -> dict[int, Food]:
+        """Visible foods for the given ids, keyed by id (bulk — used by recipes)."""
+        if not ids:
+            return {}
+        rows = (
+            await self.db.execute(
+                select(Food).where(Food.id.in_(set(ids)), self._visible(user_id))
+            )
+        ).scalars().all()
+        return {f.id: f for f in rows}
+
     async def by_barcode(self, user_id: int | None, barcode: str) -> Food:
         food = (
             await self.db.execute(

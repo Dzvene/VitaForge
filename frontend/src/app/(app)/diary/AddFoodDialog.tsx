@@ -4,10 +4,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { ArrowLeft, Barcode, Heart, Plus, Search, Star } from "lucide-react";
-import { diary, foods } from "@/lib/api/endpoints";
+import Link from "next/link";
+import { ArrowLeft, Barcode, ChefHat, Heart, Plus, Search, Star } from "lucide-react";
+import { diary, foods, recipes } from "@/lib/api/endpoints";
 import { qk } from "@/lib/api/hooks";
-import type { FoodOut, Meal } from "@/lib/api/types";
+import type { FoodOut, Meal, RecipeOut } from "@/lib/api/types";
 import { Button, Field, Input, Segmented, Spinner } from "@/components/ui/primitives";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
@@ -37,7 +38,7 @@ export function AddFoodDialog({
   const { t } = useTranslation();
   const qc = useQueryClient();
   const toast = useToast();
-  const [tab, setTab] = useState<"search" | "recent" | "favorites">("recent");
+  const [tab, setTab] = useState<"search" | "recent" | "favorites" | "recipes">("recent");
   const [query, setQuery] = useState("");
   const [submitted, setSubmitted] = useState("");
   const [barcode, setBarcode] = useState("");
@@ -66,6 +67,19 @@ export function AddFoodDialog({
   });
   const recent = useQuery({ queryKey: qk.recent, queryFn: diary.recentFoods, enabled: tab === "recent" });
   const favorites = useQuery({ queryKey: ["foods", "favorites"], queryFn: foods.favorites, enabled: tab === "favorites" });
+  const recipeList = useQuery({ queryKey: qk.recipes, queryFn: recipes.list, enabled: tab === "recipes" });
+
+  const logRecipe = useMutation({
+    mutationFn: (id: number) => recipes.log(id, { entry_date: day, meal: defaultMeal }),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: qk.day(day) });
+      qc.invalidateQueries({ queryKey: qk.guidance(day) });
+      qc.invalidateQueries({ queryKey: qk.recent });
+      toast(t("recipes.loggedToast", { count: res.added }), "ok");
+      onClose();
+    },
+    onError: () => toast(t("diary.addFood.addError"), "error"),
+  });
 
   const list = tab === "search" ? search.data : tab === "recent" ? recent.data : favorites.data;
   const loading = tab === "search" ? search.isFetching : tab === "recent" ? recent.isLoading : favorites.isLoading;
@@ -120,6 +134,7 @@ export function AddFoodDialog({
             options={[
               { value: "recent", label: t("diary.addFood.tabRecent") },
               { value: "favorites", label: t("diary.addFood.tabFavorites") },
+              { value: "recipes", label: t("diary.addFood.tabRecipes") },
               { value: "search", label: t("common.search") },
             ]}
           />
@@ -173,39 +188,79 @@ export function AddFoodDialog({
             </form>
           )}
 
-          <div className="max-h-[46vh] space-y-1.5 overflow-y-auto">
-            {loading ? (
-              <div className="grid place-items-center py-8">
-                <Spinner />
-              </div>
-            ) : list && list.length > 0 ? (
-              list.map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => pick(f)}
-                  className="flex w-full items-center gap-3 rounded-xl border border-line bg-surface-2 px-3.5 py-3 text-left transition-colors hover:border-line-strong hover:bg-surface-3"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-ink">{f.name}</p>
-                    <p className="nums truncate text-xs text-ink-faint">
-                      {f.brand ? `${f.brand} · ` : ""}
-                      {macroLine(f, t)}
-                    </p>
+          {tab === "recipes" ? (
+            <>
+              <div className="max-h-[46vh] space-y-1.5 overflow-y-auto">
+                {recipeList.isLoading ? (
+                  <div className="grid place-items-center py-8">
+                    <Spinner />
                   </div>
-                  {f.source === "custom" && <Star className="h-3.5 w-3.5 text-ink-faint" />}
-                  <Plus className="h-4 w-4 text-brand-400" />
-                </button>
-              ))
-            ) : (
-              <p className="py-8 text-center text-sm text-ink-faint">
-                {tab === "search" && !submitted ? t("diary.addFood.typeToSearch") : t("diary.addFood.nothingHere")}
-              </p>
-            )}
-          </div>
+                ) : recipeList.data && recipeList.data.length > 0 ? (
+                  recipeList.data.map((r: RecipeOut) => (
+                    <button
+                      key={r.id}
+                      onClick={() => logRecipe.mutate(r.id)}
+                      disabled={logRecipe.isPending}
+                      className="flex w-full items-center gap-3 rounded-xl border border-line bg-surface-2 px-3.5 py-3 text-left transition-colors hover:border-line-strong hover:bg-surface-3 disabled:opacity-50"
+                    >
+                      <ChefHat className="h-4 w-4 shrink-0 text-brand-400" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-ink">{r.name}</p>
+                        <p className="nums truncate text-xs text-ink-faint">
+                          {Math.round(r.totals.kcal)} {t("common.kcal")} ·{" "}
+                          {t("recipes.itemCount", { count: r.components.length })}
+                        </p>
+                      </div>
+                      <Plus className="h-4 w-4 text-brand-400" />
+                    </button>
+                  ))
+                ) : (
+                  <p className="py-8 text-center text-sm text-ink-faint">{t("recipes.emptyTitle")}</p>
+                )}
+              </div>
+              <Link href="/recipes">
+                <Button variant="ghost" full>
+                  <ChefHat className="h-4 w-4" /> {t("recipes.manage")}
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <div className="max-h-[46vh] space-y-1.5 overflow-y-auto">
+                {loading ? (
+                  <div className="grid place-items-center py-8">
+                    <Spinner />
+                  </div>
+                ) : list && list.length > 0 ? (
+                  list.map((f) => (
+                    <button
+                      key={f.id}
+                      onClick={() => pick(f)}
+                      className="flex w-full items-center gap-3 rounded-xl border border-line bg-surface-2 px-3.5 py-3 text-left transition-colors hover:border-line-strong hover:bg-surface-3"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-ink">{f.name}</p>
+                        <p className="nums truncate text-xs text-ink-faint">
+                          {f.brand ? `${f.brand} · ` : ""}
+                          {macroLine(f, t)}
+                        </p>
+                      </div>
+                      {f.source === "custom" && <Star className="h-3.5 w-3.5 text-ink-faint" />}
+                      <Plus className="h-4 w-4 text-brand-400" />
+                    </button>
+                  ))
+                ) : (
+                  <p className="py-8 text-center text-sm text-ink-faint">
+                    {tab === "search" && !submitted ? t("diary.addFood.typeToSearch") : t("diary.addFood.nothingHere")}
+                  </p>
+                )}
+              </div>
 
-          <Button variant="ghost" full onClick={onCreateCustom}>
-            <Plus className="h-4 w-4" /> {t("diary.addFood.createCustom")}
-          </Button>
+              <Button variant="ghost" full onClick={onCreateCustom}>
+                <Plus className="h-4 w-4" /> {t("diary.addFood.createCustom")}
+              </Button>
+            </>
+          )}
         </div>
       ) : (
         <QuantityStep

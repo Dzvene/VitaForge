@@ -8,6 +8,7 @@ import {
   diary,
   nutrition,
   profile,
+  recipes,
   weight,
 } from "@/lib/api/endpoints";
 
@@ -22,10 +23,14 @@ export const qk = {
   hints: ["coaching", "hints"] as const,
   recent: ["diary", "recent"] as const,
   trends: ["analytics", "trends"] as const,
+  recipes: ["recipes"] as const,
 };
 
 export const useTrends = () =>
   useQuery({ queryKey: qk.trends, queryFn: analytics.trends });
+
+export const useRecipes = () =>
+  useQuery({ queryKey: qk.recipes, queryFn: recipes.list });
 
 export const useProfile = () =>
   useQuery({ queryKey: qk.profile, queryFn: profile.get, retry: false });

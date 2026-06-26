@@ -265,3 +265,23 @@ export interface TrendsOut {
   pace: PaceOut | null;
   goal: GoalOut;
 }
+export interface RecipeComponentIn {
+  food_id: number;
+  grams: number;
+}
+export interface RecipeComponentOut {
+  food_id: number;
+  food_name: string;
+  grams: number;
+  nutrients: Nutrients;
+}
+export interface RecipeOut {
+  id: number;
+  name: string;
+  totals: Nutrients;
+  components: RecipeComponentOut[];
+}
+export interface RecipeCreate {
+  name: string;
+  components: RecipeComponentIn[];
+}
