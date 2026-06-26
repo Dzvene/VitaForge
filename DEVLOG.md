@@ -4,6 +4,35 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-26 — Separate admin console + landing hero preview
+
+**Admin console** — a standalone Next.js app on its own subdomain
+`admin-vitaforge.matrix-capital.net`, matching the pattern the other projects
+use (separate from the app). Reuses VitaForge's exact design system (copied
+tailwind tokens + globals + theme), so it's the same light-first look with a
+dark toggle.
+
+- `admin/` — lean Next.js 15 (no react-query/i18n; plain fetch + zustand theme).
+  Admin-gated login (the `/auth/me` role must be `admin`, else bounced),
+  sidebar shell + mobile top/bottom bars.
+- Overview: platform stats from `GET /admin/stats`. Users: list/search +
+  promote/demote + enable/disable via `PATCH /admin/users/{id}` (existing
+  backend endpoints — no backend changes needed).
+- Infra: admin service on `127.0.0.1:3631` in docker-compose; nginx vhost +
+  LE cert for the subdomain (wildcard DNS already resolved it). Backend
+  `CORS_ORIGINS` extended to allow the admin origin (the first sign it was
+  needed: `/auth/me` preflight blocked → login bounced).
+- Verified live: login gate, overview (Foods 476,744 etc.), users table.
+
+**Landing hero** got a framed product preview (the calorie ring + macro bars in
+a glowing card) under the copy — a real product snapshot beats a stock photo for
+a tracker and it's 100% ours (no image licensing).
+
+Next: admin foods/params management, and optional DB-backed legal content so the
+admin can edit the policy pages.
+
+---
+
 ## 2026-06-25 — Light-first theming (light default + dark/system toggle)
 
 Reworked the design system to be light by default with a dark/system toggle —
