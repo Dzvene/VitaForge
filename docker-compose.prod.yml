@@ -49,5 +49,17 @@ services:
     depends_on:
       - backend
 
+  admin:
+    build:
+      context: ./admin
+      args:
+        NEXT_PUBLIC_API_BASE: https://api-vitaforge.matrix-capital.net/api/v1
+    container_name: vitaforge-admin
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3631:3000"
+    depends_on:
+      - backend
+
 volumes:
   vitaforge_pgdata:
