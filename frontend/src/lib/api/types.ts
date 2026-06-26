@@ -211,3 +211,45 @@ export interface LegalContentOut {
   sections: LegalSectionOut[];
   customized: boolean;
 }
+export interface MacroAverages {
+  kcal: number;
+  protein_g: number;
+  fat_g: number;
+  carb_g: number;
+}
+export interface PeriodSummary {
+  range: string;
+  start: string;
+  end: string;
+  days_total: number;
+  days_logged: number;
+  logging_adherence_pct: number;
+  avg: MacroAverages | null;
+  on_target_days: number;
+  on_target_pct: number | null;
+  avg_kcal_delta: number | null;
+  weight_change_kg: number | null;
+  weekly_rate_kg: number | null;
+}
+export interface IntakePoint {
+  day: string;
+  logged: boolean;
+  kcal: number | null;
+  protein_g: number | null;
+}
+export interface PaceOut {
+  goal: string;
+  target_rate_kg_per_week: number;
+  actual_rate_kg_per_week: number | null;
+  on_pace_pct: number | null;
+}
+export interface TrendsOut {
+  target_kcal: number;
+  target_protein_g: number;
+  target_fat_g: number;
+  target_carb_g: number;
+  week: PeriodSummary;
+  month: PeriodSummary;
+  daily: IntakePoint[];
+  pace: PaceOut | null;
+}

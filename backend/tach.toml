@@ -72,6 +72,16 @@ depends_on = []
 path = "app.modules.legal"
 depends_on = []
 
+# Trends/insights — read-only aggregation over diary + weight + nutrition data.
+[[modules]]
+path = "app.modules.analytics"
+depends_on = [
+    "app.modules.diary",
+    "app.modules.weight",
+    "app.modules.nutrition",
+    "app.modules.profile",
+]
+
 [[modules]]
 path = "app.modules.weight"
 depends_on = ["app.modules.profile"]

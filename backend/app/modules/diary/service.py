@@ -174,6 +174,39 @@ class DiaryService:
             ).kcal
         return totals
 
+    async def daily_totals(
+        self, user_id: int, start: date, end: date
+    ) -> dict[date, Nutrients]:
+        """Full per-day nutrient totals over [start, end] (used by analytics).
+
+        Only days with at least one entry appear — callers treat absent days as
+        "not logged" rather than zero, so averages stay honest."""
+        stmt = (
+            select(DiaryEntry, Food)
+            .join(Food, Food.id == DiaryEntry.food_id)
+            .where(
+                DiaryEntry.user_id == user_id,
+                DiaryEntry.entry_date >= start,
+                DiaryEntry.entry_date <= end,
+            )
+        )
+        totals: dict[date, Nutrients] = {}
+        for entry, food in (await self.db.execute(stmt)).all():
+            n = _nutrients_for(food, entry.grams)
+            cur = totals.get(entry.entry_date)
+            if cur is None:
+                totals[entry.entry_date] = Nutrients(
+                    kcal=n.kcal, protein_g=n.protein_g, fat_g=n.fat_g, carb_g=n.carb_g
+                )
+            else:
+                totals[entry.entry_date] = Nutrients(
+                    kcal=round(cur.kcal + n.kcal, 1),
+                    protein_g=round(cur.protein_g + n.protein_g, 1),
+                    fat_g=round(cur.fat_g + n.fat_g, 1),
+                    carb_g=round(cur.carb_g + n.carb_g, 1),
+                )
+        return totals
+
     async def recent_foods(self, user_id: int, days: int = 14, limit: int = 20) -> list[Food]:
         """Distinct recently-logged foods, newest first (quick-log, §8.4)."""
         since = date.today() - timedelta(days=days)

@@ -4,6 +4,43 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-26 — Trends / insights (weekly + monthly rollups)
+
+The app had no period view — dashboard was today-only, diary was day-by-day,
+weight had a chart but no per-period rate. For a "read the trend, not the day"
+product that was the biggest content gap. Added a **Trends** screen.
+
+**Backend — new `analytics` slice** (read-only/derived, owns no tables; tach:
+`depends_on = [diary, weight, nutrition, profile]`). `GET /analytics/trends`
+returns, for the last 7 and last 30 days: avg kcal + macros over logged days,
+logging adherence (days logged / total), on-target days (within ±10% of the
+kcal target), avg-vs-target delta, weight change + weekly rate from the smoothed
+trend, a 30-day intake series for the chart, and **pace vs plan** (actual weekly
+rate vs the goal's target rate, with an on-pace %). Added `DiaryService.daily_totals`
+(per-day full nutrients) feeding the aggregator. 4 tests; backend **174 passed**,
+tach green. No migration (derived data).
+
+Note: there's no goal-*weight* in the data model, so "ETA to target weight"
+isn't computed — pace is rate-vs-plan instead (honest with what we store).
+
+**Frontend — `/trends` screen**: two period cards (7d / 30d) with adherence bar,
+avg calories vs target, on-target days, macro averages, weekly weight rate; a
+pace-vs-plan card (planned vs actual rate, on-pace badge); and a 30-day daily-
+calories bar chart with the target line, over/under colouring and not-logged
+days. Nav entry added (desktop + mobile). i18n `trends.*` + `nav.trends` across
+en/ru/de (482 keys, parity verified). tsc/eslint/vitest(25) green.
+
+Verified end-to-end on prod: seeded a throwaway with 6 logged days + 3 weigh-ins,
+rendered the screen (week 6/7, avg 2248 kcal −526 vs target, rate −0.2 kg/wk,
+pace 32%, chart with target line + bars), confirmed RU localization, deleted the
+account.
+
+This covers list items #1–#4 (weekly/monthly averages, adherence, weight rate,
+pace). Still open from the list: goal-weight + ETA projection (needs a
+target-weight field), recipes/meals, CSV export, reminders (SMTP-blocked).
+
+---
+
 ## 2026-06-26 — DB-backed legal content + admin editor
 
 The legal pages (Impressum/Privacy/Terms/Cookies) were static in the frontend

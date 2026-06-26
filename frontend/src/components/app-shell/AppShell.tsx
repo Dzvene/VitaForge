@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import {
   Activity,
+  BarChart3,
   BookOpen,
   LayoutDashboard,
   LineChart,
@@ -32,6 +33,7 @@ const NAV: NavItem[] = [
   { href: "/dashboard", labelKey: "nav.today", icon: LayoutDashboard },
   { href: "/diary", labelKey: "nav.diary", icon: BookOpen },
   { href: "/weight", labelKey: "nav.weight", icon: LineChart },
+  { href: "/trends", labelKey: "nav.trends", icon: BarChart3 },
   { href: "/calibration", labelKey: "nav.calibration", icon: Sliders },
   { href: "/settings", labelKey: "nav.settings", icon: Settings },
   { href: "/admin", labelKey: "nav.admin", icon: Shield, admin: true },

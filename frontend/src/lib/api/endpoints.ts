@@ -20,6 +20,7 @@ import type {
   Sex,
   TargetOut,
   TokenPair,
+  TrendsOut,
   UserOut,
   Warning,
   WeightSeries,
@@ -145,6 +146,10 @@ export const weight = {
   log: (body: { logged_on: string; weight_kg: number }) =>
     api<void>("/weight", { method: "POST", body }),
   series: () => api<WeightSeries>("/weight/series"),
+};
+
+export const analytics = {
+  trends: () => api<TrendsOut>("/analytics/trends"),
 };
 
 export const calibration = {

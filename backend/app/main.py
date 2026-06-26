@@ -92,6 +92,7 @@ from app.modules import nutrition as _nutrition  # noqa: E402, F401  # noqa
 
 # ---- Routers ----
 from app.modules.account.router import router as account_router  # noqa: E402
+from app.modules.analytics.router import router as analytics_router  # noqa: E402
 from app.modules.admin.router import admin_router as admin_stats_router  # noqa: E402
 from app.modules.app_config.router import admin_router as app_params_admin_router  # noqa: E402
 from app.modules.auth.router import router as auth_router  # noqa: E402
@@ -123,6 +124,7 @@ for r in (
     weight_router,
     calibration_router,
     coaching_router,
+    analytics_router,
     # admin
     admin_stats_router,
     users_admin_router,

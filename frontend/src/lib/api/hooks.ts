@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import {
+  analytics,
   calibration,
   coaching,
   diary,
@@ -20,7 +21,11 @@ export const qk = {
   warnings: ["coaching", "warnings"] as const,
   hints: ["coaching", "hints"] as const,
   recent: ["diary", "recent"] as const,
+  trends: ["analytics", "trends"] as const,
 };
+
+export const useTrends = () =>
+  useQuery({ queryKey: qk.trends, queryFn: analytics.trends });
 
 export const useProfile = () =>
   useQuery({ queryKey: qk.profile, queryFn: profile.get, retry: false });
