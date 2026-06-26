@@ -20,6 +20,8 @@ import type {
   ProfileUpsert,
   RecipeCreate,
   RecipeOut,
+  ReminderConfig,
+  ReminderPrefs,
   Sex,
   TargetOut,
   TokenPair,
@@ -183,6 +185,17 @@ export const coaching = {
     api<void>(`/coaching/warnings/${type}/accept`, { method: "POST" }),
   dismiss: (type: string) =>
     api<void>(`/coaching/warnings/${type}/dismiss`, { method: "POST" }),
+};
+
+export const reminders = {
+  config: () => api<ReminderConfig>("/reminders/config"),
+  setPrefs: (body: ReminderPrefs) =>
+    api<ReminderPrefs>("/reminders/prefs", { method: "PUT", body }),
+  subscribe: (body: { endpoint: string; keys: { p256dh: string; auth: string } }) =>
+    api<void>("/reminders/subscribe", { method: "POST", body }),
+  unsubscribe: (endpoint: string) =>
+    api<void>("/reminders/unsubscribe", { method: "POST", body: { endpoint } }),
+  test: () => api<{ delivered: number; devices: number }>("/reminders/test", { method: "POST" }),
 };
 
 export const admin = {

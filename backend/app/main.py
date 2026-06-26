@@ -60,7 +60,21 @@ async def lifespan(_app: FastAPI):
     logger.info("Starting %s (env=%s)", settings.APP_NAME, settings.APP_ENV)
     if settings.APP_ENV != "test":
         _run_migrations()
+
+    # Reminder scheduler — in-process asyncio loop (push nudges). No-op unless a
+    # VAPID key is configured and the flag is on; never runs under tests.
+    import asyncio
+
+    from app.modules.reminders.scheduler import run_scheduler, should_run
+
+    scheduler_task: asyncio.Task | None = None
+    if should_run():
+        scheduler_task = asyncio.create_task(run_scheduler())
+
     yield
+
+    if scheduler_task is not None:
+        scheduler_task.cancel()
     logger.info("Shutting down %s", settings.APP_NAME)
 
 
@@ -92,8 +106,8 @@ from app.modules import nutrition as _nutrition  # noqa: E402, F401  # noqa
 
 # ---- Routers ----
 from app.modules.account.router import router as account_router  # noqa: E402
-from app.modules.analytics.router import router as analytics_router  # noqa: E402
 from app.modules.admin.router import admin_router as admin_stats_router  # noqa: E402
+from app.modules.analytics.router import router as analytics_router  # noqa: E402
 from app.modules.app_config.router import admin_router as app_params_admin_router  # noqa: E402
 from app.modules.auth.router import router as auth_router  # noqa: E402
 from app.modules.calibration import subscribers as _cal_subs  # noqa: E402, F401
@@ -110,6 +124,7 @@ from app.modules.nutrition.router import router as nutrition_router  # noqa: E40
 from app.modules.profile.router import router as profile_router  # noqa: E402
 from app.modules.public.router import router as public_router  # noqa: E402
 from app.modules.recipes.router import router as recipes_router  # noqa: E402
+from app.modules.reminders.router import router as reminders_router  # noqa: E402
 from app.modules.weight.router import router as weight_router  # noqa: E402
 
 api_v1 = settings.API_V1_PREFIX
@@ -123,6 +138,7 @@ for r in (
     foods_router,
     diary_router,
     recipes_router,
+    reminders_router,
     weight_router,
     calibration_router,
     coaching_router,

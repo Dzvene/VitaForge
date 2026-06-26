@@ -90,6 +90,24 @@ class Settings(BaseSettings):
     OFF_DUMP_PATH: str = ""   # Open Food Facts JSONL dump
     USDA_DUMP_PATH: str = ""  # USDA FoodData Central CSV/JSON dump
 
+    # ----- Web Push (VAPID) -----
+    # Reminders are delivered over the Web Push protocol (no email, no SMTP).
+    # VAPID_PRIVATE_KEY_B64 is the base64 of a PEM EC P-256 private key; the
+    # browser-facing application server key is derived from it at runtime, so
+    # there is a single source of truth. Generate both with
+    # `python -m scripts.gen_vapid`. When unset, push is disabled and the
+    # scheduler stays dormant — the rest of the app is unaffected.
+    VAPID_PRIVATE_KEY_B64: str = ""
+    VAPID_SUBJECT: str = "mailto:rybalkin.nikolay@gmail.com"
+
+    @property
+    def push_enabled(self) -> bool:
+        return bool(self.VAPID_PRIVATE_KEY_B64)
+
+    # Reminder scheduler — an in-process asyncio loop. Off under tests.
+    REMINDER_SCHEDULER_ENABLED: bool = True
+    REMINDER_TICK_SECONDS: int = 60
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -141,3 +141,13 @@ depends_on = [
     "app.modules.foods",
     "app.modules.coaching",
 ]
+
+# Reminders — push-notification nudges (weigh-in, meal logging). Reads weight +
+# diary so the scheduler can stay silent when the action is already done today.
+[[modules]]
+path = "app.modules.reminders"
+depends_on = [
+    "app.modules.identity",
+    "app.modules.weight",
+    "app.modules.diary",
+]

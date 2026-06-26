@@ -4,6 +4,70 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-26 — Reminders (Web Push, no SMTP)
+
+The last open feature-list item. Reminders never needed email — email delivery
+was stuck on a dead one.com mailbox (535 auth). Delivered them over **Web Push
+(VAPID)** instead: a notification fires even with the tab closed, which is the
+whole point, and it sidesteps SMTP entirely.
+
+**Backend — new `reminders` slice** (tach: `depends_on = [identity, weight,
+diary]`). Two tables (migration `a7b8c9d0e1f2`): `reminder_prefs` (one row/user —
+master switch, IANA timezone, locale, per-reminder on/off + `HH:MM` local time,
+and `last_*_sent_on` dedupe dates) and `push_subscriptions` (one row per
+browser/device). Endpoints: `GET /reminders/config` (prefs + browser VAPID key +
+device count), `PUT /reminders/prefs`, `POST /reminders/{subscribe,unsubscribe,
+test}`.
+
+- **Delivery** (`sender.py`): one EC P-256 private key (`VAPID_PRIVATE_KEY_B64`,
+  base64'd PEM) is the single source of truth — the browser-facing application
+  server key is *derived* from it at runtime, so they can't drift. `pywebpush`
+  (sync) is called via `asyncio.to_thread`. A 404/410 from the push service →
+  the subscription is dead → pruned.
+- **Scheduler** (`scheduler.py`): an in-process asyncio loop started from the app
+  lifespan, ticking every 60 s. State lives in the DB so a restart resumes
+  cleanly and a single backend container = exactly one scheduler (no
+  double-send). Disabled under tests / when no VAPID key is set.
+- **Calibration-first voice carried into push:** a reminder whose action is
+  already done today (weighed / logged — checked via the weight + diary slices)
+  is marked resolved *without* notifying. No nagging about something you've
+  already done. And saving prefs after a reminder's time has already passed
+  locally seeds `last_*_sent_on = today`, so enabling at 4 pm doesn't instantly
+  fire the "morning weigh-in".
+- Copy (`notifications.py`) in en/ru/de, picked by the user's stored locale
+  (the scheduler has no request, so no Accept-Language). 10 tests → **backend
+  201**, tach green.
+
+**Frontend.** `public/sw.js` (tiny service worker: `push` → `showNotification`,
+`notificationclick` → focus/open the route). `lib/push.ts` wraps the SW-register
+→ permission → `PushManager.subscribe(applicationServerKey)` dance. A new
+**Reminders card** in Settings: master toggle, per-reminder on/off + time
+pickers, a "this device" subscribe/test/disable block, and a server-not-
+configured hint. i18n en/ru/de (26 keys). Timezone is captured from
+`Intl.DateTimeFormat` and locale from i18next on save.
+
+- **Dockerfile fix:** the frontend runner stage never copied `public/` (there was
+  no public dir before), so `/sw.js` 404'd. Added the copy.
+
+**Deploy.** Generated the VAPID key (`python -m scripts.gen_vapid`), put it in
+`backend/.env`, recreated backend (env_file) + rebuilt frontend. Migration
+applied on boot; both tables live; scheduler running (`should_run` True).
+
+**Verified on prod.** API e2e (throwaway account): config defaults → prefs
+persist → subscribe (count 1) → test push (`devices:1`). Browser (logged-in QA
+account, RU): the card renders correctly, toggled the master switch on + saved →
+DB shows `enabled=t, locale=ru`, and the anti-retro-fire seeding did its job —
+`last_weigh_sent_on=today` (past 08:00) but `last_log_sent_on=null` (before
+20:00, so tonight's meal reminder will still fire). `/sw.js` → 200.
+
+**Open:** iOS Safari needs the site installed as a PWA to receive push (a
+platform limit; native mobile apps will carry their own push). Real end-to-end
+*delivery* through a push service couldn't be exercised headlessly — verified
+the full request path and pruning logic instead. Feature list now fully closed;
+the remaining lever is distribution, not features.
+
+---
+
 ## 2026-06-26 — CSV export (diary + weight log)
 
 List item #6. Spreadsheet-friendly export, alongside the existing JSON GDPR dump.

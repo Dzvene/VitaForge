@@ -285,3 +285,19 @@ export interface RecipeCreate {
   name: string;
   components: RecipeComponentIn[];
 }
+
+export interface ReminderPrefs {
+  enabled: boolean;
+  timezone: string;
+  locale: string;
+  weigh_in_enabled: boolean;
+  weigh_in_time: string;
+  log_meals_enabled: boolean;
+  log_meals_time: string;
+}
+export interface ReminderConfig {
+  vapid_public_key: string;
+  push_enabled: boolean;
+  prefs: ReminderPrefs;
+  subscriptions: number;
+}

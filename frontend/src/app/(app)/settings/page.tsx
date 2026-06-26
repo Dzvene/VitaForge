@@ -12,6 +12,7 @@ import { Button, Card, CardTitle, Field, Input, Segmented, Select, Skeleton } fr
 import { useToast } from "@/components/ui/toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeSegmented } from "@/components/ThemeToggle";
+import { RemindersCard } from "@/components/settings/RemindersCard";
 import { useAuth } from "@/lib/store/auth";
 
 const ACTIVITY_KEYS: ActivityLevel[] = ["sedentary", "light", "moderate", "high", "very_high"];
@@ -277,6 +278,8 @@ export default function SettingsPage() {
       </div>
 
       <ChangePasswordCard />
+
+      <RemindersCard />
 
       <Card>
         <CardTitle>{t("settings.dataTitle")}</CardTitle>
