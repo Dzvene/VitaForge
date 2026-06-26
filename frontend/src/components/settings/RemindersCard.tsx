@@ -41,10 +41,11 @@ export function RemindersCard() {
   const qc = useQueryClient();
   const supported = pushSupported();
 
+  // Always load prefs — even where this browser can't deliver push, the schedule
+  // is worth setting (it applies to the user's other, push-capable devices).
   const config = useQuery({
     queryKey: ["reminders", "config"],
     queryFn: reminders.config,
-    enabled: supported,
   });
 
   const [form, setForm] = useState<ReminderPrefs | null>(null);
@@ -123,15 +124,6 @@ export function RemindersCard() {
     });
   };
 
-  if (!supported) {
-    return (
-      <Card>
-        <CardTitle>{t("settings.reminders.title")}</CardTitle>
-        <p className="text-sm text-ink-muted">{t("settings.reminders.unsupported")}</p>
-      </Card>
-    );
-  }
-
   if (config.isLoading || !form) {
     return (
       <Card>
@@ -191,6 +183,10 @@ export function RemindersCard() {
         {/* This-device push subscription — distinct from the schedule above. */}
         <div className="rounded-xl border border-line p-4">
           <p className="text-sm font-medium text-ink">{t("settings.reminders.deviceTitle")}</p>
+          {!supported ? (
+            <p className="mt-1 text-sm text-ink-muted">{t("settings.reminders.unsupported")}</p>
+          ) : (
+            <>
           <p className="mt-1 text-sm text-ink-muted">
             {deviceOn
               ? t("settings.reminders.deviceOn")
@@ -225,6 +221,8 @@ export function RemindersCard() {
               </>
             )}
           </div>
+            </>
+          )}
         </div>
 
         <div className="flex justify-end">
