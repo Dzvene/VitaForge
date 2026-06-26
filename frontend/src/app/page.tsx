@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
@@ -27,14 +27,19 @@ export default function Home() {
   const router = useRouter();
   const { t } = useTranslation();
   const { accessToken, hydrated } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  // Gate the auth check behind mount so the first client render still matches
+  // the server (which can't read the localStorage token) — no hydration flash.
+  useEffect(() => setMounted(true), []);
 
   // Signed-in visitors go straight to their dashboard; everyone else sees the
   // landing instead of being bounced to a bare login form.
   useEffect(() => {
-    if (hydrated && accessToken) router.replace("/dashboard");
-  }, [accessToken, hydrated, router]);
+    if (mounted && hydrated && accessToken) router.replace("/dashboard");
+  }, [mounted, accessToken, hydrated, router]);
 
-  if (hydrated && accessToken) return null;
+  if (mounted && hydrated && accessToken) return null;
 
   return (
     <div className="min-h-dvh">

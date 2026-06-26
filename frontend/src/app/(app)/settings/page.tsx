@@ -4,7 +4,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { account, nutrition, profile as profileApi } from "@/lib/api/endpoints";
+import { account, auth, nutrition, profile as profileApi } from "@/lib/api/endpoints";
+import { ApiError } from "@/lib/api/client";
 import { qk, useProfile, useTarget } from "@/lib/api/hooks";
 import type { ActivityLevel, GoalKind, ProfileUpsert, Sex } from "@/lib/api/types";
 import { Button, Card, CardTitle, Field, Input, Segmented, Select, Skeleton } from "@/components/ui/primitives";
@@ -248,6 +249,8 @@ export default function SettingsPage() {
         </Card>
       </div>
 
+      <ChangePasswordCard />
+
       <Card>
         <CardTitle>{t("settings.dataTitle")}</CardTitle>
         <p className="mb-4 text-sm text-ink-muted">{t("settings.dataHint")}</p>
@@ -315,6 +318,89 @@ export default function SettingsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function ChangePasswordCard() {
+  const { t } = useTranslation();
+  const toast = useToast();
+  const [current, setCurrent] = useState("");
+  const [next, setNext] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const change = useMutation({
+    mutationFn: () => auth.changePassword(current, next),
+    onSuccess: () => {
+      toast(t("settings.security.toastChanged"), "ok");
+      setCurrent("");
+      setNext("");
+      setConfirm("");
+      setError(null);
+    },
+    onError: (err) =>
+      setError(err instanceof ApiError ? err.detail : t("settings.security.changeError")),
+  });
+
+  const tooShort = next.length > 0 && next.length < 8;
+  const mismatch = confirm.length > 0 && next !== confirm;
+  const canSubmit =
+    current.length > 0 && next.length >= 8 && next === confirm && !change.isPending;
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (tooShort) return setError(t("settings.security.tooShort"));
+    if (next !== confirm) return setError(t("settings.security.mismatch"));
+    change.mutate();
+  };
+
+  return (
+    <Card>
+      <CardTitle>{t("settings.security.title")}</CardTitle>
+      <p className="mb-4 text-sm text-ink-muted">{t("settings.security.hint")}</p>
+      <form onSubmit={onSubmit} className="grid max-w-md gap-4">
+        <Field label={t("settings.security.currentLabel")}>
+          <Input
+            type="password"
+            autoComplete="current-password"
+            value={current}
+            onChange={(e) => setCurrent(e.target.value)}
+            placeholder="••••••••"
+          />
+        </Field>
+        <Field
+          label={t("settings.security.newLabel")}
+          hint={t("settings.security.newHint")}
+          error={tooShort ? t("settings.security.tooShort") : undefined}
+        >
+          <Input
+            type="password"
+            autoComplete="new-password"
+            value={next}
+            onChange={(e) => setNext(e.target.value)}
+            placeholder="••••••••"
+          />
+        </Field>
+        <Field
+          label={t("settings.security.confirmLabel")}
+          error={mismatch ? t("settings.security.mismatch") : (error ?? undefined)}
+        >
+          <Input
+            type="password"
+            autoComplete="new-password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            placeholder="••••••••"
+          />
+        </Field>
+        <div>
+          <Button type="submit" disabled={!canSubmit} loading={change.isPending}>
+            {t("settings.security.submit")}
+          </Button>
+        </div>
+      </form>
+    </Card>
   );
 }
 

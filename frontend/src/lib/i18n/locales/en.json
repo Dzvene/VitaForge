@@ -350,7 +350,20 @@
     "toastSaveError": "Could not save",
     "toastRecomputed": "Norm recomputed",
     "themeTitle": "Theme",
-    "themeHint": "Light, dark, or follow your system."
+    "themeHint": "Light, dark, or follow your system.",
+    "security": {
+      "title": "Password",
+      "hint": "Change your password. You'll need your current one to confirm.",
+      "currentLabel": "Current password",
+      "newLabel": "New password",
+      "newHint": "At least 8 characters.",
+      "confirmLabel": "Confirm new password",
+      "submit": "Change password",
+      "toastChanged": "Password changed",
+      "changeError": "Could not change your password",
+      "tooShort": "Password must be at least 8 characters",
+      "mismatch": "Passwords don't match"
+    }
   },
   "admin": {
     "owner": "Owner",

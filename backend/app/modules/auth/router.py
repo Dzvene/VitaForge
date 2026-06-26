@@ -6,6 +6,7 @@ from app.core.config import settings
 from app.core.deps import CurrentUser, DbSession
 from app.core.ratelimit import RateLimiter
 from app.modules.auth.schemas import (
+    ChangePasswordRequest,
     ForgotPasswordRequest,
     LoginRequest,
     RefreshRequest,
@@ -65,6 +66,17 @@ async def forgot_password(payload: ForgotPasswordRequest, db: DbSession) -> dict
     """Email a reset link if the account exists. Always 202 — never reveals
     whether the address is registered (no account enumeration)."""
     await AuthService(db).forgot_password(payload.email)
+    return {"status": "ok"}
+
+
+@router.post("/change-password")
+async def change_password(
+    payload: ChangePasswordRequest, user: CurrentUser, db: DbSession
+) -> dict:
+    """Change the password of the signed-in user. Requires the current password."""
+    await AuthService(db).change_password(
+        user, payload.current_password, payload.new_password
+    )
     return {"status": "ok"}
 
 

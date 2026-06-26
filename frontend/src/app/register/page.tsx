@@ -7,13 +7,15 @@ import { useTranslation } from "react-i18next";
 import { auth } from "@/lib/api/endpoints";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/lib/store/auth";
+import { useRedirectIfAuthed } from "@/lib/store/useRedirectIfAuthed";
 import { AuthScaffold } from "@/components/AuthScaffold";
-import { Button, Field, Input } from "@/components/ui/primitives";
+import { Button, Field, Input, Spinner } from "@/components/ui/primitives";
 
 export default function RegisterPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const { setTokens, setUser } = useAuth();
+  const authed = useRedirectIfAuthed();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,6 +42,14 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
+
+  if (authed) {
+    return (
+      <div className="grid min-h-dvh place-items-center">
+        <Spinner className="h-6 w-6" />
+      </div>
+    );
+  }
 
   return (
     <AuthScaffold title={t("auth.registerTitle")} subtitle={t("auth.registerSubtitle")}>

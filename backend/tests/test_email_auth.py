@@ -183,3 +183,91 @@ async def test_forgot_password_is_rate_limited(client):
     ]
     assert codes.count(202) == 5
     assert codes.count(429) == 2
+
+
+# ---- change password (authenticated) ---------------------------------------
+
+
+async def _login_headers(client, email: str, password: str = _PW):
+    r = await client.post("/auth/login", json={"email": email, "password": password})
+    assert r.status_code == 200, r.text
+    return {"Authorization": f"Bearer {r.json()['access_token']}"}
+
+
+async def test_change_password_succeeds_and_new_password_works(client):
+    await _register(client, "cp1@x.io")
+    headers = await _login_headers(client, "cp1@x.io")
+    new_pw = "Br4ndNew!pw"
+
+    r = await client.post(
+        "/auth/change-password",
+        json={"current_password": _PW, "new_password": new_pw},
+        headers=headers,
+    )
+    assert r.status_code == 200, r.text
+
+    # Old password no longer works, new one does.
+    assert (
+        await client.post("/auth/login", json={"email": "cp1@x.io", "password": _PW})
+    ).status_code == 401
+    assert (
+        await client.post("/auth/login", json={"email": "cp1@x.io", "password": new_pw})
+    ).status_code == 200
+
+
+async def test_change_password_wrong_current_rejected(client):
+    await _register(client, "cp2@x.io")
+    headers = await _login_headers(client, "cp2@x.io")
+    r = await client.post(
+        "/auth/change-password",
+        json={"current_password": "WrongPass123", "new_password": "Wh4tever!pw"},
+        headers=headers,
+    )
+    assert r.status_code == 401
+    # The password is unchanged — the original still logs in.
+    assert (
+        await client.post("/auth/login", json={"email": "cp2@x.io", "password": _PW})
+    ).status_code == 200
+
+
+async def test_change_password_same_password_rejected(client):
+    await _register(client, "cp3@x.io")
+    headers = await _login_headers(client, "cp3@x.io")
+    r = await client.post(
+        "/auth/change-password",
+        json={"current_password": _PW, "new_password": _PW},
+        headers=headers,
+    )
+    assert r.status_code == 422
+
+
+async def test_change_password_requires_auth(client):
+    r = await client.post(
+        "/auth/change-password",
+        json={"current_password": _PW, "new_password": "Wh4tever!pw"},
+    )
+    assert r.status_code == 401
+
+
+async def test_change_password_voids_outstanding_reset_tokens(client):
+    await _register(client, "cp4@x.io")
+    OUTBOX.clear()
+    # User requests a reset link...
+    await client.post("/auth/forgot-password", json={"email": "cp4@x.io"})
+    reset_token = _token_in(_outbox_to("cp4@x.io")[0])
+    # ...then changes the password from inside the app.
+    headers = await _login_headers(client, "cp4@x.io")
+    assert (
+        await client.post(
+            "/auth/change-password",
+            json={"current_password": _PW, "new_password": "Ch4nged!pw"},
+            headers=headers,
+        )
+    ).status_code == 200
+    # The stale reset link is now dead.
+    assert (
+        await client.post(
+            "/auth/reset-password",
+            json={"token": reset_token, "new_password": "Yet4nother!"},
+        )
+    ).status_code == 422

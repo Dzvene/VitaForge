@@ -39,6 +39,11 @@ class VerifyEmailRequest(APIModel):
     token: str = Field(min_length=8)
 
 
+class ChangePasswordRequest(APIModel):
+    current_password: str = Field(min_length=1)
+    new_password: str = Field(min_length=8, max_length=128)
+
+
 class UserOut(APIModel):
     id: int
     email: EmailStr

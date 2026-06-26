@@ -317,4 +317,14 @@ MESSAGES: dict[str, dict[str, str]] = {
         "ru": "Эта почта уже подтверждена.",
         "de": "Diese E-Mail ist bereits bestätigt.",
     },
+    "error.current_password_wrong": {
+        "en": "Your current password is incorrect.",
+        "ru": "Текущий пароль введён неверно.",
+        "de": "Dein aktuelles Passwort ist falsch.",
+    },
+    "error.password_unchanged": {
+        "en": "The new password must be different from the current one.",
+        "ru": "Новый пароль должен отличаться от текущего.",
+        "de": "Das neue Passwort muss sich vom aktuellen unterscheiden.",
+    },
 }

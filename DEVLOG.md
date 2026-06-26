@@ -4,6 +4,45 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-26 — UX debts: change password, weight legend, auth routing
+
+Closed the open UX debts from the 2026-06-25 UI audit. All three verified in
+the browser against prod (registered a throwaway account, exercised each flow,
+then deleted it — 0 rows left behind).
+
+**Change password (signed-in users)** — previously you could only reset via the
+emailed link from the logged-out flow.
+- Backend: `POST /auth/change-password` (authenticated). `AuthService.change_password`
+  re-verifies the current password (a hijacked session can't silently swap it),
+  rejects a no-op change, and voids any outstanding reset tokens. New i18n keys
+  `error.current_password_wrong` / `error.password_unchanged` (en/ru/de).
+- Frontend: a "Password" card in Settings (current / new / confirm, client-side
+  length + match checks, backend error surfaced via `Accept-Language`).
+- Tests: 5 new in `test_email_auth.py` (success, wrong-current 401, same-password
+  422, unauth 401, voids reset tokens). Backend **160 passed**, tach green.
+
+**Weight chart legend** — with a single weigh-in the chart shows a "log two days"
+hint, but the raw/trend legend still rendered underneath (meaningless). Gated the
+legend on `points.length >= 2` so it only shows when the trend line is drawn.
+
+**Auth routing / flicker** — a signed-in visitor hitting `/login`, `/register`
+or `/` saw the guest form/landing for a beat. New `useRedirectIfAuthed` hook
+(mount-gated so the first client render still matches SSR — no hydration
+mismatch) bounces them to `/dashboard`; login/register show a spinner during the
+redirect, and the landing's auth check is mount-gated the same way.
+
+**i18n:** `settings.security.*` added to en/ru/de; all three locales at 452 keys,
+parity verified. tsc / eslint / vitest (25) green.
+
+**Deploy:** `-p vitaforge up -d --build`. Smoke: `/health` 200,
+`/api/v1/auth/change-password` 401 unauth, change-password round-trip confirmed
+(old pw → 401, new pw → 200).
+
+**Still open (unchanged):** SMTP delivery (mailbox not created), admin
+foods/params CMS depth, OFF catalog beyond the 18.5k DACH/RU subset, mobile apps.
+
+---
+
 ## 2026-06-26 — Separate admin console + landing hero preview
 
 **Admin console** — a standalone Next.js app on its own subdomain

@@ -53,14 +53,19 @@ export default function WeightPage() {
           ) : points.length ? (
             <>
               <TrendChart points={points} />
-              <div className="mt-3 flex items-center justify-center gap-6 text-xs text-ink-faint">
-                <span className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-ink-faint" /> {t("weight.raw")}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="h-0.5 w-4 rounded-full bg-brand-400" /> {t("weight.trend")}
-                </span>
-              </div>
+              {/* The legend only makes sense once the trend line is actually
+                  drawn — with a single weigh-in the chart shows a "log two days"
+                  hint, so the raw/trend key would be meaningless. */}
+              {points.length >= 2 && (
+                <div className="mt-3 flex items-center justify-center gap-6 text-xs text-ink-faint">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-ink-faint" /> {t("weight.raw")}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-0.5 w-4 rounded-full bg-brand-400" /> {t("weight.trend")}
+                  </span>
+                </div>
+              )}
             </>
           ) : (
             <EmptyState icon={<Scale className="h-7 w-7" />} title={t("weight.emptyTitle")} hint={t("weight.emptyHint")} />

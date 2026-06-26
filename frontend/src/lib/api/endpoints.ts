@@ -73,6 +73,11 @@ export const auth = {
     }),
   resendVerification: () =>
     api<{ status: string }>("/auth/resend-verification", { method: "POST" }),
+  changePassword: (current_password: string, new_password: string) =>
+    api<{ status: string }>("/auth/change-password", {
+      method: "POST",
+      body: { current_password, new_password },
+    }),
 };
 
 export const account = {

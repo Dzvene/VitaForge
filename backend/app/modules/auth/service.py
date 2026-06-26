@@ -179,6 +179,31 @@ class AuthService:
         )
         await send_password_reset_email(user.email, raw)
 
+    async def change_password(
+        self, user: User, current_password: str, new_password: str
+    ) -> None:
+        """Change the password of an authenticated user.
+
+        Requires the current password (re-auth), so a hijacked session can't
+        silently lock the owner out. Rejects a no-op change. Any outstanding
+        reset tokens are voided — the password just changed deliberately.
+        """
+        if not verify_password(current_password, user.password_hash):
+            raise UnauthorizedError(tr("error.current_password_wrong"))
+        if verify_password(new_password, user.password_hash):
+            raise ValidationError(tr("error.password_unchanged"))
+        user.password_hash = hash_password(new_password)
+        await self.db.execute(
+            update(EmailToken)
+            .where(
+                EmailToken.user_id == user.id,
+                EmailToken.purpose == PURPOSE_PASSWORD_RESET,
+                EmailToken.used_at.is_(None),
+            )
+            .values(used_at=datetime.now(UTC))
+        )
+        await self.db.commit()
+
     async def reset_password(self, raw: str, new_password: str) -> None:
         user = await self._consume_token(raw, PURPOSE_PASSWORD_RESET)
         user.password_hash = hash_password(new_password)
