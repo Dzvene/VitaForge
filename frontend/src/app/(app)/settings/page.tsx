@@ -173,14 +173,27 @@ export default function SettingsPage() {
               />
             </Field>
             {form.goal !== "maintain" && (
-              <Field label={t("settings.rateKgPerWeek")} hint={t("settings.rateHint")}>
-                <Input
-                  type="number"
-                  step="0.05"
-                  value={form.target_rate_kg_per_week}
-                  onChange={(e) => set("target_rate_kg_per_week", Number(e.target.value))}
-                />
-              </Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label={t("settings.rateKgPerWeek")} hint={t("settings.rateHint")}>
+                  <Input
+                    type="number"
+                    step="0.05"
+                    value={form.target_rate_kg_per_week}
+                    onChange={(e) => set("target_rate_kg_per_week", Number(e.target.value))}
+                  />
+                </Field>
+                <Field label={t("settings.targetWeight")} hint={t("settings.targetWeightHint")}>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={form.target_weight_kg ?? ""}
+                    placeholder={t("settings.targetWeightPlaceholder")}
+                    onChange={(e) =>
+                      set("target_weight_kg", e.target.value ? Number(e.target.value) : null)
+                    }
+                  />
+                </Field>
+              </div>
             )}
           </div>
         </Card>

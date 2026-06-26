@@ -35,6 +35,7 @@ export interface ProfileUpsert {
   activity_level: ActivityLevel;
   goal: GoalKind;
   target_rate_kg_per_week: number;
+  target_weight_kg?: number | null;
   protein_g_per_kg?: number | null;
   protein_g_abs?: number | null;
   fat_g_per_kg?: number | null;
@@ -243,6 +244,16 @@ export interface PaceOut {
   actual_rate_kg_per_week: number | null;
   on_pace_pct: number | null;
 }
+export interface GoalOut {
+  status: "no_target" | "no_data" | "reached" | "on_track" | "off_track" | "stalled";
+  target_weight_kg: number | null;
+  start_weight_kg: number | null;
+  current_weight_kg: number | null;
+  remaining_kg: number | null;
+  progress_pct: number | null;
+  eta_weeks: number | null;
+  eta_date: string | null;
+}
 export interface TrendsOut {
   target_kcal: number;
   target_protein_g: number;
@@ -252,4 +263,5 @@ export interface TrendsOut {
   month: PeriodSummary;
   daily: IntakePoint[];
   pace: PaceOut | null;
+  goal: GoalOut;
 }

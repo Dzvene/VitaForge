@@ -81,3 +81,58 @@ async def test_trends_weight_rate_and_pace(client, admin):
 async def test_trends_requires_auth(client):
     r = await client.get("/analytics/trends")
     assert r.status_code == 401
+
+
+# ---- goal weight + ETA -----------------------------------------------------
+
+
+async def _set_target(client, headers, target_kg):
+    await client.put("/profile", json={**PROFILE_BODY, "target_weight_kg": target_kg}, headers=headers)
+
+
+async def test_goal_no_target(client, admin):
+    await _setup(client, admin["headers"])
+    t = (await client.get("/analytics/trends", headers=admin["headers"])).json()
+    assert t["goal"]["status"] == "no_target"
+    assert t["goal"]["eta_date"] is None
+
+
+async def test_goal_no_data_without_weights(client, admin):
+    await _set_target(client, admin["headers"], 75)
+    g = (await client.get("/analytics/trends", headers=admin["headers"])).json()["goal"]
+    assert g["status"] == "no_data"
+    assert g["target_weight_kg"] == 75
+
+
+async def test_goal_on_track_projects_eta(client, admin):
+    await _set_target(client, admin["headers"], 75)
+    today = date.today()
+    await _log_weight(client, admin["headers"], today - timedelta(days=6), 81.0)
+    await _log_weight(client, admin["headers"], today, 80.0)
+    g = (await client.get("/analytics/trends", headers=admin["headers"])).json()["goal"]
+    assert g["status"] == "on_track"
+    assert g["remaining_kg"] > 0
+    assert g["eta_weeks"] is not None and g["eta_weeks"] > 0
+    assert g["eta_date"] is not None
+    assert g["current_weight_kg"] is not None
+
+
+async def test_goal_reached(client, admin):
+    await _set_target(client, admin["headers"], 80)
+    today = date.today()
+    await _log_weight(client, admin["headers"], today - timedelta(days=6), 80.1)
+    await _log_weight(client, admin["headers"], today, 80.0)
+    g = (await client.get("/analytics/trends", headers=admin["headers"])).json()["goal"]
+    assert g["status"] == "reached"
+    assert g["progress_pct"] == 100.0
+
+
+async def test_goal_off_track_when_moving_away(client, admin):
+    # Target below current, but weight is going UP → off track, no ETA.
+    await _set_target(client, admin["headers"], 75)
+    today = date.today()
+    await _log_weight(client, admin["headers"], today - timedelta(days=6), 80.0)
+    await _log_weight(client, admin["headers"], today, 81.0)
+    g = (await client.get("/analytics/trends", headers=admin["headers"])).json()["goal"]
+    assert g["status"] == "off_track"
+    assert g["eta_weeks"] is None

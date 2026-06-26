@@ -26,6 +26,7 @@ export default function OnboardingPage() {
   const [activity, setActivity] = useState<ActivityLevel>("moderate");
   const [goal, setGoal] = useState<GoalKind>("lose");
   const [rate, setRate] = useState("0.5");
+  const [targetWeight, setTargetWeight] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -43,6 +44,7 @@ export default function OnboardingPage() {
       activity_level: activity,
       goal,
       target_rate_kg_per_week: goal === "maintain" ? 0 : Number(rate),
+      target_weight_kg: goal !== "maintain" && targetWeight ? Number(targetWeight) : null,
     };
     try {
       await profileApi.upsert(body);
@@ -113,12 +115,23 @@ export default function OnboardingPage() {
         </Field>
 
         {goal !== "maintain" && (
-          <Field
-            label={goal === "lose" ? t("onboarding.targetRateLose") : t("onboarding.targetRateGain")}
-            hint={t("onboarding.targetRateHint")}
-          >
-            <Input type="number" step="0.05" min={0} value={rate} onChange={(e) => setRate(e.target.value)} />
-          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field
+              label={goal === "lose" ? t("onboarding.targetRateLose") : t("onboarding.targetRateGain")}
+              hint={t("onboarding.targetRateHint")}
+            >
+              <Input type="number" step="0.05" min={0} value={rate} onChange={(e) => setRate(e.target.value)} />
+            </Field>
+            <Field label={t("onboarding.targetWeight")} hint={t("onboarding.targetWeightHint")}>
+              <Input
+                type="number"
+                step="0.1"
+                value={targetWeight}
+                placeholder={t("onboarding.targetWeightPlaceholder")}
+                onChange={(e) => setTargetWeight(e.target.value)}
+              />
+            </Field>
+          </div>
         )}
 
         <div className="flex items-start gap-2.5 rounded-xl bg-surface-2 p-3.5 text-sm text-ink-muted">

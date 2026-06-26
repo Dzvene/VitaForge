@@ -5,6 +5,7 @@ from datetime import date, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.analytics.schemas import (
+    GoalOut,
     IntakePoint,
     MacroAverages,
     PaceOut,
@@ -23,6 +24,10 @@ from app.modules.weight.service import WeightService
 ON_TARGET_TOLERANCE = 0.10
 _MONTH_DAYS = 30
 _WEEK_DAYS = 7
+# Within this many kg of the target weight, call it reached.
+_GOAL_REACHED_KG = 0.3
+# A weekly rate slower than this (kg/wk) reads as "stalled" — no honest ETA.
+_GOAL_STALL_RATE = 0.02
 
 
 class AnalyticsService:
@@ -65,6 +70,8 @@ class AnalyticsService:
             "month", month_start, today, totals,
             target_row.target_calories, weight_points,
         )
+        start_weight = weight_points[0][1] if weight_points else None
+        current_weight = weight_points[-1][1] if weight_points else None
         return TrendsOut(
             target_kcal=target_row.target_calories,
             target_protein_g=target_row.protein_g,
@@ -74,6 +81,10 @@ class AnalyticsService:
             month=month,
             daily=daily,
             pace=self._pace(profile, month.weekly_rate_kg),
+            goal=self._goal(
+                profile.target_weight_kg, start_weight, current_weight,
+                month.weekly_rate_kg, today,
+            ),
         )
 
     def _period(
@@ -129,6 +140,65 @@ class AnalyticsService:
             weight_change_kg=weight_change_kg,
             weekly_rate_kg=weekly_rate_kg,
         )
+
+    @staticmethod
+    def _goal(
+        target: float | None,
+        start: float | None,
+        current: float | None,
+        actual_rate: float | None,
+        today: date,
+    ) -> GoalOut:
+        """Progress toward an optional goal weight + an ETA from the actual rate.
+
+        ETA only when the smoothed trend is actually moving toward the target;
+        otherwise the status says why (no target, no data, reached, stalled,
+        off-track) and the projection stays None — no fake countdown.
+        """
+        base = GoalOut(
+            status="no_target",
+            target_weight_kg=None,
+            start_weight_kg=None,
+            current_weight_kg=None,
+            remaining_kg=None,
+            progress_pct=None,
+            eta_weeks=None,
+            eta_date=None,
+        )
+        if target is None:
+            return base
+        if current is None:
+            return base.model_copy(update={"status": "no_data", "target_weight_kg": target})
+
+        remaining_signed = target - current  # negative ⇒ need to lose
+        remaining_abs = round(abs(remaining_signed), 2)
+
+        progress_pct: float | None = None
+        if start is not None and abs(target - start) > 1e-6:
+            pct = (current - start) / (target - start) * 100
+            progress_pct = round(max(0.0, min(100.0, pct)), 1)
+
+        common = {
+            "target_weight_kg": round(target, 2),
+            "start_weight_kg": round(start, 2) if start is not None else None,
+            "current_weight_kg": round(current, 2),
+            "remaining_kg": remaining_abs,
+            "progress_pct": progress_pct,
+        }
+
+        if remaining_abs <= _GOAL_REACHED_KG:
+            return GoalOut(status="reached", eta_weeks=0.0, eta_date=today, **{**common, "progress_pct": 100.0})
+
+        if actual_rate is None or abs(actual_rate) < _GOAL_STALL_RATE:
+            return GoalOut(status="stalled", eta_weeks=None, eta_date=None, **common)
+
+        moving_toward = (actual_rate < 0) == (remaining_signed < 0)
+        if not moving_toward:
+            return GoalOut(status="off_track", eta_weeks=None, eta_date=None, **common)
+
+        eta_weeks = round(remaining_signed / actual_rate, 1)  # both signed ⇒ positive
+        eta_date = today + timedelta(days=round(eta_weeks * 7))
+        return GoalOut(status="on_track", eta_weeks=eta_weeks, eta_date=eta_date, **common)
 
     @staticmethod
     def _pace(profile, actual_rate: float | None) -> PaceOut | None:

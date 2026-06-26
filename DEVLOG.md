@@ -4,6 +4,38 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-26 — Goal weight + ETA projection
+
+Completes list item #2. The Trends pace card showed rate-vs-plan but couldn't
+say "X kg to go, ETA <date>" because the model had no goal weight. Added one.
+
+**Backend**: `profiles.target_weight_kg` (nullable Float, migration
+`e5f6a7b8c9d0`) — optional, flows through the existing `model_dump()` upsert and
+ProfileOut. Analytics gains a `GoalOut` on `/analytics/trends`: status
+(no_target / no_data / reached / on_track / off_track / stalled), start (earliest
+trend point) → current (latest trend) → target, remaining kg, progress %, and an
+**ETA** (`eta_weeks` + `eta_date`) projected from the smoothed monthly rate.
+The ETA is only emitted when the trend is actually moving toward the goal — a
+flat trend reads "stalled", moving away reads "off_track", no fake countdown.
+5 new tests; backend **179 passed**, tach green.
+
+**Frontend**: optional "Goal weight" input in onboarding + Settings (shown when
+goal ≠ maintain). A Goal-progress card on Trends: progress bar (start · now ·
+target), and a status line — on-track shows "X kg to go · on track for <date>
+(~N wk)", with stalled/off-track/reached/no-data variants and a "set a goal"
+prompt linking to Settings when none is set. i18n across en/ru/de (498 keys,
+parity). tsc/eslint/vitest(25) green.
+
+Verified e2e on prod: seeded a throwaway (target 75, weights 82→79.4 over 4
+weeks) → goal card showed 9%, 82→75 with current trend 81.4, "6.4 kg to go · on
+track for 20 Apr 2027 (~43 wk)", RU-localized ETA date; deleted the account.
+(The EMA trend lags sparse weekly weigh-ins, so the projection is conservative —
+honest, and tightens with daily weighing.)
+
+Still open from the list: recipes/meals, CSV export, reminders (SMTP-blocked).
+
+---
+
 ## 2026-06-26 — Trends / insights (weekly + monthly rollups)
 
 The app had no period view — dashboard was today-only, diary was day-by-day,

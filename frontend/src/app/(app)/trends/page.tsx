@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { BarChart3, Flame, Target, TrendingDown } from "lucide-react";
+import { BarChart3, Flag, Flame, Target, TrendingDown } from "lucide-react";
 import { useTrends } from "@/lib/api/hooks";
-import type { PeriodSummary, TrendsOut } from "@/lib/api/types";
-import { fmtKcal, fmtKgSigned } from "@/lib/format";
+import type { GoalOut, PeriodSummary, TrendsOut } from "@/lib/api/types";
+import { fmtKcal, fmtKg, fmtKgSigned } from "@/lib/format";
 import { Badge, Card, CardTitle, EmptyState, Skeleton } from "@/components/ui/primitives";
 
 export default function TrendsPage() {
@@ -54,6 +55,8 @@ function Body({ data }: { data: TrendsOut }) {
         </Card>
       )}
 
+      <GoalCard goal={data.goal} />
+
       <div className="grid gap-6 lg:grid-cols-2">
         <PeriodCard p={data.week} target={data} />
         <PeriodCard p={data.month} target={data} />
@@ -63,6 +66,92 @@ function Body({ data }: { data: TrendsOut }) {
 
       <IntakeChart data={data} />
     </div>
+  );
+}
+
+function GoalCard({ goal }: { goal: GoalOut }) {
+  const { t, i18n } = useTranslation();
+
+  if (goal.status === "no_target") {
+    return (
+      <Card>
+        <div className="flex items-center gap-3">
+          <Flag className="h-5 w-5 shrink-0 text-brand-400" />
+          <p className="text-sm text-ink-muted">{t("trends.goalNoTarget")}</p>
+          <Link
+            href="/settings"
+            className="ml-auto shrink-0 text-sm font-medium text-brand-400 hover:text-brand-500"
+          >
+            {t("trends.goalSetCta")}
+          </Link>
+        </div>
+      </Card>
+    );
+  }
+
+  const kg = (v: number | null) => (v !== null ? fmtKg(v, t("common.kg")) : "—");
+  const etaDate =
+    goal.eta_date !== null
+      ? new Intl.DateTimeFormat(i18n.resolvedLanguage || i18n.language || "en", {
+          dateStyle: "medium",
+        }).format(new Date(goal.eta_date))
+      : null;
+
+  const statusLine: Record<string, string> = {
+    no_data: t("trends.goalNoData"),
+    reached: t("trends.goalReached"),
+    stalled: t("trends.goalStalled", { remaining: kg(goal.remaining_kg) }),
+    off_track: t("trends.goalOffTrack", { remaining: kg(goal.remaining_kg) }),
+    on_track:
+      etaDate && goal.eta_weeks !== null
+        ? t("trends.goalOnTrack", {
+            remaining: kg(goal.remaining_kg),
+            date: etaDate,
+            weeks: Math.round(goal.eta_weeks),
+          })
+        : t("trends.goalNoData"),
+  };
+  const tone =
+    goal.status === "reached" || goal.status === "on_track"
+      ? "ok"
+      : goal.status === "off_track"
+        ? "danger"
+        : "warn";
+
+  return (
+    <Card>
+      <CardTitle
+        right={
+          goal.status === "reached" ? (
+            <Badge tone="ok">{t("trends.goalReachedBadge")}</Badge>
+          ) : goal.progress_pct !== null ? (
+            <span className="nums text-sm font-medium">{Math.round(goal.progress_pct)}%</span>
+          ) : undefined
+        }
+      >
+        {t("trends.goalTitle")}
+      </CardTitle>
+
+      {goal.progress_pct !== null && (
+        <div className="mb-4">
+          <div className="h-2.5 overflow-hidden rounded-full bg-surface-3">
+            <div
+              className={`h-full rounded-full transition-[width] ${tone === "danger" ? "bg-danger" : "bg-brand-500"}`}
+              style={{ width: `${goal.progress_pct}%` }}
+            />
+          </div>
+          <div className="mt-1.5 flex justify-between text-xs text-ink-faint">
+            <span className="nums">{kg(goal.start_weight_kg)}</span>
+            <span className="nums">
+              {t("trends.goalNow")} {kg(goal.current_weight_kg)}
+            </span>
+            <span className="nums">{kg(goal.target_weight_kg)}</span>
+          </div>
+        </div>
+      )}
+
+      <p className="text-sm text-ink-muted">{statusLine[goal.status]}</p>
+    </Card>
   );
 }
 

@@ -29,6 +29,8 @@ class Profile(Base, TimestampMixin):
     # ----- Goal (§3) -----
     goal: Mapped[str] = mapped_column(String(16), default="maintain", nullable=False)
     target_rate_kg_per_week: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    # Optional goal weight — enables progress + ETA projection (analytics).
+    target_weight_kg: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     # ----- Macro overrides (§4.2) — all optional, free of charge -----
     protein_g_per_kg: Mapped[float | None] = mapped_column(Float, nullable=True)
