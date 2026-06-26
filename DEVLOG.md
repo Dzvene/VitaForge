@@ -4,6 +4,44 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-26 — Native push backend (APNs + FCM)
+
+The one mobile-push piece that can be built *and* verified here on the server
+(unlike the unverifiable native app code). The web reminders already deliver over
+Web Push/VAPID; this adds the native channels.
+
+- **New `device_push_tokens` table** (migration `b8c9d0e1f2a3`) — per-install
+  APNs/FCM tokens, distinct from the browser `push_subscriptions`. Endpoints:
+  `POST /reminders/devices {platform, token}` (idempotent re-register),
+  `DELETE /reminders/devices {token}`. `GET /reminders/config` now reports
+  `native_push_enabled` + `devices`; `POST /reminders/test` and the scheduler
+  fan out to native tokens too, pruning dead ones.
+- **`native_sender.py`** — `_send_apns` (HTTP/2 via httpx, ES256 JWT auth from
+  the `.p8`, sandbox/prod switch, 410/BadDeviceToken → prune) and `_send_fcm`
+  (HTTP v1; OAuth token minted from the service-account JSON with an RS256 JWT —
+  no google-auth dep — cached ~50 min; UNREGISTERED → prune). Both **gated behind
+  credentials**: with none set they return `"disabled"`, like the email/VAPID
+  backends. `httpx[http2]` (h2) added for APNs.
+- Config: `APNS_KEY_ID/TEAM_ID/BUNDLE_ID/PRIVATE_KEY_B64/USE_SANDBOX`,
+  `FCM_SERVICE_ACCOUNT_B64`; `native_push_enabled`. Scheduler runs when web **or**
+  native push is configured.
+- Mobile/contract: `docs/MOBILE_API.md` gains a Push section; iOS/Android API
+  facades get `registerDevice`/`unregisterDevice` stubs (the actual token
+  acquisition — APNs entitlement / Firebase — is a Mac/Win task).
+
+Backend **219 tests** (+6: device register/unregister/dedup/auth, config flags,
+test-push native count, sender disabled-path), tach + ruff clean; conftest pins
+APNs/FCM env empty for deterministic tests. **Verified on prod**: register
+ios+android → devices 2, bad platform 422, test push delivered 0 / devices 2
+(no creds), unregister → 1, migration applied.
+
+**To go live** the owner adds creds to `backend/.env`: APNs `.p8`
+(`base64` → `APNS_PRIVATE_KEY_B64` + key/team/bundle ids), and/or an FCM
+service-account JSON (`base64` → `FCM_SERVICE_ACCOUNT_B64`), then recreate the
+backend. Until then tokens are stored and sends report `delivered: 0`.
+
+---
+
 ## 2026-06-26 — Web UI gaps: edit diary entry, edit/delete weight, account details
 
 Closed the three real web gaps from the UI audit (the rest of the web was

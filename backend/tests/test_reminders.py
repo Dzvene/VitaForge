@@ -146,3 +146,80 @@ async def test_mark_sent_dedupes_same_day(client, admin):
         due2 = await ReminderService(db).collect_due()
     weigh = [d for d in due2 if d.prefs.user_id == admin["user"]["id"] and d.kind == "weigh_in"]
     assert weigh == []
+
+
+# ----- native device tokens (APNs / FCM) -----
+
+
+async def test_config_reports_native_disabled(client, admin):
+    body = (await client.get("/reminders/config", headers=admin["headers"])).json()
+    assert body["native_push_enabled"] is False  # no APNs/FCM creds in tests
+    assert body["devices"] == 0
+
+
+async def test_register_and_unregister_device(client, admin):
+    r = await client.post(
+        "/reminders/devices",
+        json={"platform": "ios", "token": "apns-token-abc"},
+        headers=admin["headers"],
+    )
+    assert r.status_code == 204
+    cfg = (await client.get("/reminders/config", headers=admin["headers"])).json()
+    assert cfg["devices"] == 1
+
+    # idempotent re-register of the same token
+    await client.post(
+        "/reminders/devices",
+        json={"platform": "ios", "token": "apns-token-abc"},
+        headers=admin["headers"],
+    )
+    cfg = (await client.get("/reminders/config", headers=admin["headers"])).json()
+    assert cfg["devices"] == 1
+
+    r = await client.request(
+        "DELETE",
+        "/reminders/devices",
+        json={"token": "apns-token-abc"},
+        headers=admin["headers"],
+    )
+    assert r.status_code == 204
+    cfg = (await client.get("/reminders/config", headers=admin["headers"])).json()
+    assert cfg["devices"] == 0
+
+
+async def test_register_device_bad_platform(client, admin):
+    r = await client.post(
+        "/reminders/devices",
+        json={"platform": "windows", "token": "x"},
+        headers=admin["headers"],
+    )
+    assert r.status_code == 422
+
+
+async def test_register_device_requires_auth(client):
+    assert (
+        await client.post("/reminders/devices", json={"platform": "ios", "token": "x"})
+    ).status_code == 401
+
+
+async def test_test_push_counts_native_devices(client, admin):
+    await client.post(
+        "/reminders/devices",
+        json={"platform": "android", "token": "fcm-token-xyz"},
+        headers=admin["headers"],
+    )
+    r = await client.post("/reminders/test", headers=admin["headers"])
+    assert r.status_code == 200
+    body = r.json()
+    # FCM not configured in tests → nothing delivered, but the device is counted.
+    assert body["devices"] == 1
+    assert body["delivered"] == 0
+
+
+async def test_native_sender_disabled_without_creds():
+    from app.modules.reminders import native_sender
+
+    payload = {"title": "t", "body": "b", "url": "/"}
+    assert await native_sender.send_to_device("ios", "tok", payload) == "disabled"
+    assert await native_sender.send_to_device("android", "tok", payload) == "disabled"
+    assert await native_sender.send_to_device("windows", "tok", payload) == "error"

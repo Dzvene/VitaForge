@@ -13,6 +13,8 @@ python-multipart==0.0.20
 ijson==3.3.0
 pywebpush==1.14.1
 tzdata==2024.2
+# httpx is used at runtime by the native push senders (APNs needs HTTP/2 → h2).
+httpx[http2]==0.28.1
 
 # dev / test / lint
 pytest==8.3.4

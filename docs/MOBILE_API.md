@@ -78,6 +78,29 @@ too (shared catalog only).
 - goal: `lose` | `maintain` | `gain`
 - meal: `breakfast` | `lunch` | `dinner` | `snack`
 
+## Push notifications (reminders)
+
+Reminders (weigh-in / log-your-day) are delivered to native apps over **APNs**
+(iOS) and **FCM** (Android). The schedule itself is configured via
+`PUT /reminders/prefs` (master switch, timezone, per-reminder `HH:MM` local time,
+locale); the scheduler stays silent when the day's action is already done.
+
+Register the device's push token after the user grants permission, and clear it
+on sign-out:
+
+- `POST /reminders/devices` `{ platform: "ios" | "android", token }` → 204.
+  `token` is the APNs device token / FCM registration token. Re-registering the
+  same token is idempotent (re-points it at the current user).
+- `DELETE /reminders/devices` `{ token }` → 204.
+- `POST /reminders/test` → fires a test notification to all of the account's
+  registered devices + browser subscriptions; returns `{ delivered, devices }`.
+- `GET /reminders/config` includes `native_push_enabled` (server has APNs/FCM
+  creds) and `devices` (count registered for this account).
+
+Server credentials (APNs `.p8` key id/team id/bundle id; FCM service-account
+JSON) are configured in the backend env. Until they're set, registration still
+works and tokens are stored, but `test`/scheduled sends report `delivered: 0`.
+
 ## Notes
 
 - All nutrition is stored/served **per 100 g**; portions carry grams.

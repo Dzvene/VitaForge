@@ -11,7 +11,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.diary.service import DiaryService
-from app.modules.reminders.models import PushSubscription, ReminderPrefs
+from app.modules.reminders.models import DevicePushToken, PushSubscription, ReminderPrefs
 from app.modules.reminders.schemas import PrefsIn, PrefsOut, SubscriptionIn
 from app.modules.weight.service import WeightService
 
@@ -133,6 +133,47 @@ class ReminderService:
 
     async def count_subscriptions(self, user_id: int) -> int:
         return len(await self.list_subscriptions(user_id))
+
+    # ----- native device tokens (APNs / FCM) -----
+
+    async def register_device(self, user_id: int, platform: str, token: str) -> None:
+        existing = (
+            await self.db.execute(select(DevicePushToken).where(DevicePushToken.token == token))
+        ).scalar_one_or_none()
+        if existing is None:
+            self.db.add(DevicePushToken(user_id=user_id, platform=platform, token=token))
+        else:
+            # Same physical install re-registering (token rotation, or a new user
+            # signing in on this device).
+            existing.user_id = user_id
+            existing.platform = platform
+        await self.db.commit()
+
+    async def unregister_device(self, user_id: int, token: str) -> None:
+        await self.db.execute(
+            delete(DevicePushToken).where(
+                DevicePushToken.user_id == user_id, DevicePushToken.token == token
+            )
+        )
+        await self.db.commit()
+
+    async def remove_device_by_id(self, device_id: int) -> None:
+        await self.db.execute(delete(DevicePushToken).where(DevicePushToken.id == device_id))
+        await self.db.commit()
+
+    async def list_device_tokens(self, user_id: int) -> list[DevicePushToken]:
+        return list(
+            (
+                await self.db.execute(
+                    select(DevicePushToken).where(DevicePushToken.user_id == user_id)
+                )
+            )
+            .scalars()
+            .all()
+        )
+
+    async def count_devices(self, user_id: int) -> int:
+        return len(await self.list_device_tokens(user_id))
 
     # ----- scheduling -----
 

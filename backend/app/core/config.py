@@ -104,6 +104,32 @@ class Settings(BaseSettings):
     def push_enabled(self) -> bool:
         return bool(self.VAPID_PRIVATE_KEY_B64)
 
+    # ----- APNs (Apple Push Notification service — native iOS) -----
+    # Token-based auth (.p8 key). APNS_PRIVATE_KEY_B64 is base64 of the .p8 PEM.
+    # When unset, native iOS push is disabled (the rest is unaffected).
+    APNS_KEY_ID: str = ""
+    APNS_TEAM_ID: str = ""
+    APNS_BUNDLE_ID: str = "net.matrixcapital.vitaforge"
+    APNS_PRIVATE_KEY_B64: str = ""
+    APNS_USE_SANDBOX: bool = True  # api.sandbox.push.apple.com vs api.push.apple.com
+
+    @property
+    def apns_enabled(self) -> bool:
+        return bool(self.APNS_KEY_ID and self.APNS_TEAM_ID and self.APNS_PRIVATE_KEY_B64)
+
+    # ----- FCM (Firebase Cloud Messaging — native Android), HTTP v1 -----
+    # FCM_SERVICE_ACCOUNT_B64 is base64 of the service-account JSON. The OAuth
+    # token is minted from it at runtime (no google-auth dependency).
+    FCM_SERVICE_ACCOUNT_B64: str = ""
+
+    @property
+    def fcm_enabled(self) -> bool:
+        return bool(self.FCM_SERVICE_ACCOUNT_B64)
+
+    @property
+    def native_push_enabled(self) -> bool:
+        return self.apns_enabled or self.fcm_enabled
+
     # Reminder scheduler — an in-process asyncio loop. Off under tests.
     REMINDER_SCHEDULER_ENABLED: bool = True
     REMINDER_TICK_SECONDS: int = 60

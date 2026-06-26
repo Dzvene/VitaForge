@@ -46,11 +46,29 @@ class SubscriptionIn(BaseModel):
     keys: SubscriptionKeys
 
 
+class DeviceRegisterIn(BaseModel):
+    """A native app registering its push token (APNs/FCM)."""
+
+    platform: str  # "ios" | "android"
+    token: str = Field(min_length=1, max_length=4096)
+
+    @field_validator("platform")
+    @classmethod
+    def _valid_platform(cls, v: str) -> str:
+        if v not in {"ios", "android"}:
+            raise ValueError("platform must be 'ios' or 'android'")
+        return v
+
+
 class ConfigOut(BaseModel):
     # Browser-facing VAPID application server key (base64url), empty if push is
     # not configured on the server.
     vapid_public_key: str
     push_enabled: bool
+    # True when at least one native channel (APNs/FCM) is configured server-side.
+    native_push_enabled: bool = False
     prefs: PrefsOut
-    # How many active push subscriptions this account has registered.
+    # How many active browser push subscriptions this account has registered.
     subscriptions: int
+    # How many native device tokens (iOS/Android apps) are registered.
+    devices: int = 0

@@ -23,9 +23,13 @@ os.environ["APP_DEBUG"] = "false"
 os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{_TMP_DB}"
 os.environ["JWT_SECRET"] = "test-jwt-secret"
 os.environ["SECRET_KEY"] = "test-secret-key"
-# Pin push off regardless of a local .env (which may carry a real VAPID key) so
-# the reminders tests see a deterministic "push not configured" baseline.
+# Pin push off regardless of a local .env (which may carry real keys) so the
+# reminders tests see a deterministic "push not configured" baseline.
 os.environ["VAPID_PRIVATE_KEY_B64"] = ""
+os.environ["APNS_PRIVATE_KEY_B64"] = ""
+os.environ["APNS_KEY_ID"] = ""
+os.environ["APNS_TEAM_ID"] = ""
+os.environ["FCM_SERVICE_ACCOUNT_B64"] = ""
 
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402

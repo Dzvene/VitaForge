@@ -51,3 +51,18 @@ class PushSubscription(Base, TimestampMixin):
     # ECDH public key + auth secret the push service needs to encrypt payloads.
     p256dh: Mapped[str] = mapped_column(String(255), nullable=False)
     auth: Mapped[str] = mapped_column(String(255), nullable=False)
+
+
+class DevicePushToken(Base, TimestampMixin):
+    """A native app install's push token (APNs for iOS, FCM for Android). Distinct
+    from the browser `PushSubscription` — native tokens are opaque strings, not
+    encrypted-payload endpoints."""
+
+    __tablename__ = "device_push_tokens"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    platform: Mapped[str] = mapped_column(String(16), nullable=False)  # "ios" | "android"
+    token: Mapped[str] = mapped_column(Text, unique=True, nullable=False)

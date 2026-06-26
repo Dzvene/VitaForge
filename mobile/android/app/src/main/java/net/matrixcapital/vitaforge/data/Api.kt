@@ -49,6 +49,11 @@ object Api {
     suspend fun logRecipe(id: Int, body: RecipeLogIn) = client.submit("/recipes/$id/log", "POST", body)
     suspend fun deleteRecipe(id: Int) = client.delete("/recipes/$id")
 
+    suspend fun registerDevice(platform: String, token: String) =
+        client.submit("/reminders/devices", "POST", mapOf("platform" to platform, "token" to token))
+    suspend fun unregisterDevice(token: String) =
+        client.submit("/reminders/devices", "DELETE", mapOf("token" to token))
+
     suspend fun calibrationStatus(): CalibrationStatus = client.get("/calibration/status")
     suspend fun calibrationRecalc(): EstimateResult = client.postEmpty("/calibration/recalc")
     suspend fun calibrationSkip(): EstimateResult = client.postEmpty("/calibration/skip")

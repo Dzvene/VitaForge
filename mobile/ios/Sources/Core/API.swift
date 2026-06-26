@@ -48,6 +48,14 @@ enum API {
     }
     static func deleteRecipe(_ id: Int) async throws { try await client.send("/recipes/\(id)", method: "DELETE") }
 
+    // Push reminders — register/clear this device's APNs/FCM token.
+    static func registerDevice(platform: String, token: String) async throws {
+        try await client.send("/reminders/devices", method: "POST", body: ["platform": platform, "token": token])
+    }
+    static func unregisterDevice(_ token: String) async throws {
+        try await client.send("/reminders/devices", method: "DELETE", body: ["token": token])
+    }
+
     // Calibration
     static func calibrationStatus() async throws -> CalibrationStatus { try await client.get("/calibration/status") }
     static func calibrationRecalc() async throws -> EstimateResult { try await client.post("/calibration/recalc") }
