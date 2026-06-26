@@ -38,6 +38,16 @@ enum API {
     }
     static func weightSeries() async throws -> WeightSeries { try await client.get("/weight/series") }
 
+    // Analytics
+    static func trends() async throws -> TrendsOut { try await client.get("/analytics/trends") }
+
+    // Recipes
+    static func recipes() async throws -> [RecipeOut] { try await client.get("/recipes") }
+    static func logRecipe(_ id: Int, _ body: RecipeLogIn) async throws {
+        try await client.send("/recipes/\(id)/log", method: "POST", body: body)
+    }
+    static func deleteRecipe(_ id: Int) async throws { try await client.send("/recipes/\(id)", method: "DELETE") }
+
     // Calibration
     static func calibrationStatus() async throws -> CalibrationStatus { try await client.get("/calibration/status") }
     static func calibrationRecalc() async throws -> EstimateResult { try await client.post("/calibration/recalc") }

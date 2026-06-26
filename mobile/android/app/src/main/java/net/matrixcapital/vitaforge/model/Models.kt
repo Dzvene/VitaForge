@@ -223,6 +223,88 @@ data class EstimateResult(
     @SerialName("target_calories") val targetCalories: Double? = null,
 )
 
+// ---- analytics / trends ----
+
+@Serializable
+data class MacroAverages(
+    val kcal: Double,
+    @SerialName("protein_g") val proteinG: Double,
+    @SerialName("fat_g") val fatG: Double,
+    @SerialName("carb_g") val carbG: Double,
+)
+
+@Serializable
+data class PeriodSummary(
+    val range: String,
+    val start: String,
+    val end: String,
+    @SerialName("days_total") val daysTotal: Int,
+    @SerialName("days_logged") val daysLogged: Int,
+    @SerialName("logging_adherence_pct") val loggingAdherencePct: Double,
+    val avg: MacroAverages? = null,
+    @SerialName("on_target_days") val onTargetDays: Int,
+    @SerialName("on_target_pct") val onTargetPct: Double? = null,
+    @SerialName("avg_kcal_delta") val avgKcalDelta: Double? = null,
+    @SerialName("weight_change_kg") val weightChangeKg: Double? = null,
+    @SerialName("weekly_rate_kg") val weeklyRateKg: Double? = null,
+)
+
+@Serializable
+data class PaceOut(
+    val goal: String,
+    @SerialName("target_rate_kg_per_week") val targetRateKgPerWeek: Double,
+    @SerialName("actual_rate_kg_per_week") val actualRateKgPerWeek: Double? = null,
+    @SerialName("on_pace_pct") val onPacePct: Double? = null,
+)
+
+@Serializable
+data class GoalOut(
+    val status: String,
+    @SerialName("target_weight_kg") val targetWeightKg: Double? = null,
+    @SerialName("start_weight_kg") val startWeightKg: Double? = null,
+    @SerialName("current_weight_kg") val currentWeightKg: Double? = null,
+    @SerialName("remaining_kg") val remainingKg: Double? = null,
+    @SerialName("progress_pct") val progressPct: Double? = null,
+    @SerialName("eta_weeks") val etaWeeks: Double? = null,
+    @SerialName("eta_date") val etaDate: String? = null,
+)
+
+@Serializable
+data class TrendsOut(
+    @SerialName("target_kcal") val targetKcal: Double,
+    @SerialName("target_protein_g") val targetProteinG: Double,
+    @SerialName("target_fat_g") val targetFatG: Double,
+    @SerialName("target_carb_g") val targetCarbG: Double,
+    val week: PeriodSummary,
+    val month: PeriodSummary,
+    val pace: PaceOut? = null,
+    val goal: GoalOut,
+)
+
+// ---- recipes ----
+
+@Serializable
+data class RecipeComponentOut(
+    @SerialName("food_id") val foodId: Int,
+    @SerialName("food_name") val foodName: String,
+    val grams: Double,
+    val nutrients: Nutrients,
+)
+
+@Serializable
+data class RecipeOut(
+    val id: Int,
+    val name: String,
+    val totals: Nutrients,
+    val components: List<RecipeComponentOut>,
+)
+
+@Serializable
+data class RecipeLogIn(
+    @SerialName("entry_date") val entryDate: String,
+    val meal: Meal,
+)
+
 // ---- coaching ----
 
 @Serializable

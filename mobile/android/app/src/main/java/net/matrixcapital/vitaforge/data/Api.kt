@@ -9,8 +9,11 @@ import net.matrixcapital.vitaforge.model.FoodOut
 import net.matrixcapital.vitaforge.model.LoginRequest
 import net.matrixcapital.vitaforge.model.ProfileOut
 import net.matrixcapital.vitaforge.model.ProfileUpsert
+import net.matrixcapital.vitaforge.model.RecipeLogIn
+import net.matrixcapital.vitaforge.model.RecipeOut
 import net.matrixcapital.vitaforge.model.RegisterRequest
 import net.matrixcapital.vitaforge.model.TargetOut
+import net.matrixcapital.vitaforge.model.TrendsOut
 import net.matrixcapital.vitaforge.model.CalibrationStatus
 import net.matrixcapital.vitaforge.model.EstimateResult
 import net.matrixcapital.vitaforge.model.TokenPair
@@ -39,6 +42,12 @@ object Api {
 
     suspend fun logWeight(body: WeightLogIn) = client.submit("/weight", "POST", body)
     suspend fun weightSeries(): WeightSeries = client.get("/weight/series")
+
+    suspend fun trends(): TrendsOut = client.get("/analytics/trends")
+
+    suspend fun recipes(): List<RecipeOut> = client.get("/recipes")
+    suspend fun logRecipe(id: Int, body: RecipeLogIn) = client.submit("/recipes/$id/log", "POST", body)
+    suspend fun deleteRecipe(id: Int) = client.delete("/recipes/$id")
 
     suspend fun calibrationStatus(): CalibrationStatus = client.get("/calibration/status")
     suspend fun calibrationRecalc(): EstimateResult = client.postEmpty("/calibration/recalc")

@@ -7,7 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.DonutLarge
 import androidx.compose.material.icons.outlined.MonitorWeight
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -29,8 +29,8 @@ import net.matrixcapital.vitaforge.ui.auth.AuthScreen
 import net.matrixcapital.vitaforge.ui.calibration.CalibrationScreen
 import net.matrixcapital.vitaforge.ui.dashboard.DashboardScreen
 import net.matrixcapital.vitaforge.ui.diary.DiaryScreen
+import net.matrixcapital.vitaforge.ui.more.MoreScreen
 import net.matrixcapital.vitaforge.ui.onboarding.OnboardingScreen
-import net.matrixcapital.vitaforge.ui.settings.SettingsScreen
 import net.matrixcapital.vitaforge.ui.weight.WeightScreen
 
 @Composable
@@ -47,7 +47,7 @@ fun AppRoot(session: SessionViewModel = viewModel()) {
 }
 
 private enum class Tab(val label: String) {
-    TODAY("Today"), DIARY("Diary"), WEIGHT("Weight"), CALIBRATE("Calibrate"), SETTINGS("Settings")
+    TODAY("Today"), DIARY("Diary"), WEIGHT("Weight"), CALIBRATE("Calibrate"), MORE("More")
 }
 
 @Composable
@@ -81,10 +81,10 @@ private fun MainScaffold(session: SessionViewModel) {
                     label = { Text(Tab.CALIBRATE.label) },
                 )
                 NavigationBarItem(
-                    selected = tab == Tab.SETTINGS,
-                    onClick = { tab = Tab.SETTINGS },
-                    icon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
-                    label = { Text(Tab.SETTINGS.label) },
+                    selected = tab == Tab.MORE,
+                    onClick = { tab = Tab.MORE },
+                    icon = { Icon(Icons.Outlined.MoreHoriz, contentDescription = null) },
+                    label = { Text(Tab.MORE.label) },
                 )
             }
         },
@@ -95,7 +95,7 @@ private fun MainScaffold(session: SessionViewModel) {
                 Tab.DIARY -> DiaryScreen()
                 Tab.WEIGHT -> WeightScreen()
                 Tab.CALIBRATE -> CalibrationScreen()
-                Tab.SETTINGS -> SettingsScreen(session)
+                Tab.MORE -> MoreScreen(session)
             }
         }
     }

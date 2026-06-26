@@ -4,6 +4,30 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-26 — Mobile: trends + recipes screens (both platforms)
+
+Rounded out the core product surface on iOS and Android.
+
+- **Trends** (`GET /analytics/trends`) — 7- and 30-day summary cards (logging
+  adherence, avg intake, on-target days, weight change + weekly rate), a goal
+  card (progress bar + status + ETA), and a pace card.
+- **Recipes** (`GET /recipes`) — list saved recipes with totals; tap → pick a
+  meal → log the whole recipe to today (`POST /recipes/{id}/log`); swipe/icon to
+  delete. Recipe *creation* stays on the web for now (it needs the per-component
+  food search — deferred, noted in the READMEs).
+
+Navigation: the tab count outgrew a flat bar. iOS lets its `TabView` auto-collapse
+the overflow into the system **More** tab (7 tabs). Android added an explicit
+**More** tab (a small menu → Trends / Recipes / Settings with a back bar), so the
+bottom bar stays at 5.
+
+New DTOs (TrendsOut + nested, RecipeOut/Component/LogIn) verified against the
+backend schemas. Still **source-only / uncompiled** — first build on Mac/Win.
+Remaining: recipe creation, push (APNs/FCM — needs new backend device-token
+endpoints), barcode scanner, biometric lock, store/CI.
+
+---
+
 ## 2026-06-26 — Mobile: weight + calibration screens (both platforms)
 
 Extended the native apps with the two screens most central to the

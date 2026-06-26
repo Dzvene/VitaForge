@@ -35,8 +35,7 @@ The Gradle wrapper jar/scripts are intentionally not committed; `gradle wrapper`
 
 ## Scope (this pass)
 
-Register/login → onboarding → dashboard (calorie ring + macros + maintenance +
-coaching) → diary (search catalog, log/delete) → weight (weigh-in + Canvas
-raw/EMA trend chart) → calibration (window progress + recalc/skip).
-**Not yet:** recipes, trends, push reminders, barcode scanner, biometric lock.
-The networking/auth/model foundation extends to those directly.
+Register/login → onboarding → dashboard → diary → weight (Canvas trend chart) →
+calibration → a "More" tab holding trends (7/30-day summaries + goal/pace),
+recipes (log to diary), and settings.
+**Not yet:** recipe creation, push reminders, barcode scanner, biometric lock.

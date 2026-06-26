@@ -174,6 +174,81 @@ struct EstimateResult: Codable, Equatable {
     let targetCalories: Double?
 }
 
+// MARK: - Analytics / trends
+
+struct MacroAverages: Codable, Equatable {
+    let kcal: Double
+    let proteinG: Double
+    let fatG: Double
+    let carbG: Double
+}
+
+struct PeriodSummary: Codable, Equatable {
+    let range: String              // "week" | "month"
+    let start: String
+    let end: String
+    let daysTotal: Int
+    let daysLogged: Int
+    let loggingAdherencePct: Double
+    let avg: MacroAverages?
+    let onTargetDays: Int
+    let onTargetPct: Double?
+    let avgKcalDelta: Double?
+    let weightChangeKg: Double?
+    let weeklyRateKg: Double?
+}
+
+struct PaceOut: Codable, Equatable {
+    let goal: String
+    let targetRateKgPerWeek: Double
+    let actualRateKgPerWeek: Double?
+    let onPacePct: Double?
+}
+
+struct GoalOut: Codable, Equatable {
+    let status: String             // no_target|no_data|reached|on_track|off_track|stalled
+    let targetWeightKg: Double?
+    let startWeightKg: Double?
+    let currentWeightKg: Double?
+    let remainingKg: Double?
+    let progressPct: Double?
+    let etaWeeks: Double?
+    let etaDate: String?
+}
+
+struct TrendsOut: Codable, Equatable {
+    let targetKcal: Double
+    let targetProteinG: Double
+    let targetFatG: Double
+    let targetCarbG: Double
+    let week: PeriodSummary
+    let month: PeriodSummary
+    let pace: PaceOut?
+    let goal: GoalOut
+}
+
+// MARK: - Recipes
+
+struct RecipeComponentOut: Codable, Identifiable, Equatable {
+    let foodId: Int
+    let foodName: String
+    let grams: Double
+    let nutrients: Nutrients
+    var id: Int { foodId }
+}
+
+struct RecipeOut: Codable, Identifiable, Equatable {
+    let id: Int
+    let name: String
+    let totals: Nutrients
+    let components: [RecipeComponentOut]
+}
+
+struct RecipeLogIn: Encodable {
+    let entryDate: String
+    let meal: Meal
+}
+
 // MARK: - Coaching
 
 struct GuidanceItem: Codable, Identifiable, Equatable {

@@ -30,8 +30,7 @@ open VitaForge.xcodeproj        # set your DEVELOPMENT_TEAM, run on a simulator/
 
 ## Scope (this pass)
 
-Register/login → onboarding → dashboard (calorie ring + macros + maintenance +
-coaching) → diary (search catalog, log/delete) → weight (weigh-in + Swift Charts
-raw/EMA trend) → calibration (window progress + recalc/skip).
-**Not yet:** recipes, trends, push reminders, barcode scanner, biometric lock.
-The networking + auth + model foundation extends to those directly.
+Register/login → onboarding → dashboard → diary → weight (Swift Charts trend) →
+calibration → trends (7/30-day summaries + goal/pace) → recipes (log to diary).
+The 5+ tabs collapse into iOS's automatic "More" tab.
+**Not yet:** recipe creation, push reminders, barcode scanner, biometric lock.

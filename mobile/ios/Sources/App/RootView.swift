@@ -28,6 +28,10 @@ struct MainTabView: View {
                 .tabItem { Label("Weight", systemImage: "scalemass") }
             CalibrationView()
                 .tabItem { Label("Calibrate", systemImage: "scope") }
+            TrendsView()
+                .tabItem { Label("Trends", systemImage: "chart.xyaxis.line") }
+            RecipesView()
+                .tabItem { Label("Recipes", systemImage: "list.bullet.rectangle") }
             SettingsView()
                 .tabItem { Label("Settings", systemImage: "gearshape") }
         }
