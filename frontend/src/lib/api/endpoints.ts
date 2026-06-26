@@ -92,6 +92,8 @@ export const legal = {
 
 export const account = {
   exportData: () => api<Record<string, unknown>>("/account/export"),
+  exportCsv: (dataset: "diary" | "weight") =>
+    api<string>("/account/export.csv", { query: { dataset } }),
   deleteAccount: (password: string) =>
     api<void>("/account/delete", { method: "POST", body: { password } }),
 };

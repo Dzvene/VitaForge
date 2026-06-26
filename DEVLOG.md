@@ -4,6 +4,31 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-26 — CSV export (diary + weight log)
+
+List item #6. Spreadsheet-friendly export, alongside the existing JSON GDPR dump.
+
+**Backend.** New `GET /account/export.csv?dataset=diary|weight` (defaults to
+`diary`) in the `account` slice, streaming `text/csv` with a
+`Content-Disposition` attachment header. `AccountService.export_csv` builds the
+file with stdlib `csv`: the diary export joins `DiaryEntry`→`Food` and writes
+per-entry kcal/macros scaled to grams; the weight export writes
+`logged_on,weight_kg`. No new tables, no migration. 4 tests (diary row math,
+weight row, default dataset, auth-required) → backend 191, tach green.
+
+**Frontend.** `account.exportCsv(dataset)` in the API client (the client's
+`parse()` already falls back to raw text for non-JSON responses). Settings →
+"Data & account" gains two buttons (Diary CSV / Weight log CSV) that fetch and
+trigger a Blob download. i18n en/ru/de.
+
+**Deploy.** Rebuilt + redeployed backend + frontend. Smoke: health 200,
+`/account/export.csv` → 401 without a token, frontend 200.
+
+**Feature list status:** Trends items #1–6 now all closed. Remaining: reminders
+(blocked on SMTP mailbox).
+
+---
+
 ## 2026-06-26 — Recipes / meals (log a whole meal in one tap)
 
 List item #5. Compose foods you eat together into a named recipe, then log the

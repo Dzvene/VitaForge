@@ -409,6 +409,8 @@
     "dataTitle": "Data & account",
     "dataHint": "Download everything we hold about you, or delete your account for good.",
     "exportBtn": "Export my data",
+    "exportDiaryCsvBtn": "Diary (CSV)",
+    "exportWeightCsvBtn": "Weight log (CSV)",
     "exportError": "Could not export your data",
     "deleteBtn": "Delete account",
     "deleteConfirmTitle": "Delete your account permanently?",

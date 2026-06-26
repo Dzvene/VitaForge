@@ -46,6 +46,20 @@ export default function SettingsPage() {
     onError: () => toast(t("settings.exportError"), "error"),
   });
 
+  const exportCsv = useMutation({
+    mutationFn: (dataset: "diary" | "weight") => account.exportCsv(dataset),
+    onSuccess: (csv, dataset) => {
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `vitaforge-${dataset}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    onError: () => toast(t("settings.exportError"), "error"),
+  });
+
   const deleteAccount = useMutation({
     mutationFn: () => account.deleteAccount(deletePassword),
     onSuccess: () => {
@@ -274,6 +288,20 @@ export default function SettingsPage() {
             loading={exportData.isPending}
           >
             {t("settings.exportBtn")}
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => exportCsv.mutate("diary")}
+            loading={exportCsv.isPending && exportCsv.variables === "diary"}
+          >
+            {t("settings.exportDiaryCsvBtn")}
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => exportCsv.mutate("weight")}
+            loading={exportCsv.isPending && exportCsv.variables === "weight"}
+          >
+            {t("settings.exportWeightCsvBtn")}
           </Button>
           {!confirmingDelete ? (
             <Button variant="ghost" className="text-danger" onClick={() => setConfirmingDelete(true)}>

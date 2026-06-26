@@ -63,3 +63,50 @@ async def test_delete_account_erases_and_cascades(client, admin):
         "/auth/register", json={"email": "owner@vitaforge.app", "password": "Sup3rSecret!"}
     )
     assert again.status_code == 201
+
+
+# ---- CSV export ------------------------------------------------------------
+
+_FOOD = {"name": "Oats", "kcal_100g": 380, "protein_100g": 13, "fat_100g": 7, "carb_100g": 67}
+
+
+async def test_export_diary_csv(client, admin):
+    await client.put("/profile", json=PROFILE_BODY, headers=admin["headers"])
+    food = (await client.post("/foods", json=_FOOD, headers=admin["headers"])).json()
+    await client.post(
+        "/diary",
+        json={"entry_date": "2026-06-20", "meal": "lunch", "food_id": food["id"], "grams": 100},
+        headers=admin["headers"],
+    )
+
+    r = await client.get("/account/export.csv?dataset=diary", headers=admin["headers"])
+    assert r.status_code == 200
+    assert r.headers["content-type"].startswith("text/csv")
+    assert "attachment" in r.headers.get("content-disposition", "")
+    lines = r.text.strip().splitlines()
+    assert lines[0] == "entry_date,meal,food,grams,kcal,protein_g,fat_g,carb_g"
+    # 100 g of a 380 kcal/100g food → 380 kcal on the data row.
+    assert "2026-06-20,lunch,Oats,100.0,380.0,13.0,7.0,67.0" in lines[1]
+
+
+async def test_export_weight_csv(client, admin):
+    await client.put("/profile", json=PROFILE_BODY, headers=admin["headers"])
+    await client.post(
+        "/weight", json={"logged_on": "2026-06-21", "weight_kg": 79.5}, headers=admin["headers"]
+    )
+    r = await client.get("/account/export.csv?dataset=weight", headers=admin["headers"])
+    assert r.status_code == 200
+    lines = r.text.strip().splitlines()
+    assert lines[0] == "logged_on,weight_kg"
+    assert lines[1] == "2026-06-21,79.5"
+
+
+async def test_export_csv_defaults_to_diary(client, admin):
+    await client.put("/profile", json=PROFILE_BODY, headers=admin["headers"])
+    r = await client.get("/account/export.csv", headers=admin["headers"])
+    assert r.status_code == 200
+    assert r.text.splitlines()[0].startswith("entry_date,")
+
+
+async def test_export_csv_requires_auth(client):
+    assert (await client.get("/account/export.csv")).status_code == 401

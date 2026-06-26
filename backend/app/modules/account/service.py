@@ -7,6 +7,8 @@ Deletion relies on the ``ondelete=CASCADE`` FKs to users.id — removing the
 custom foods and coaching state in one statement.
 """
 
+import csv
+import io
 from datetime import UTC, date, datetime
 from decimal import Decimal
 
@@ -96,6 +98,50 @@ class AccountService:
             "custom_foods": [_dump(f) for f in custom_foods],
             "coaching_state": [_dump(c) for c in coaching],
         }
+
+    async def export_csv(self, user_id: int, dataset: str) -> str:
+        """A spreadsheet-friendly CSV of one dataset (diary or weight)."""
+        buf = io.StringIO()
+        writer = csv.writer(buf)
+
+        if dataset == "weight":
+            writer.writerow(["logged_on", "weight_kg"])
+            logs = (
+                await self.db.execute(
+                    select(WeightLog)
+                    .where(WeightLog.user_id == user_id)
+                    .order_by(WeightLog.logged_on)
+                )
+            ).scalars().all()
+            for w in logs:
+                writer.writerow([w.logged_on.isoformat(), w.weight_kg])
+        else:  # diary
+            writer.writerow(
+                ["entry_date", "meal", "food", "grams", "kcal", "protein_g", "fat_g", "carb_g"]
+            )
+            rows = (
+                await self.db.execute(
+                    select(DiaryEntry, Food)
+                    .join(Food, Food.id == DiaryEntry.food_id)
+                    .where(DiaryEntry.user_id == user_id)
+                    .order_by(DiaryEntry.entry_date, DiaryEntry.created_at)
+                )
+            ).all()
+            for entry, food in rows:
+                f = entry.grams / 100.0
+                writer.writerow(
+                    [
+                        entry.entry_date.isoformat(),
+                        entry.meal,
+                        food.name,
+                        round(entry.grams, 1),
+                        round(food.kcal_100g * f, 1),
+                        round(food.protein_100g * f, 1),
+                        round(food.fat_100g * f, 1),
+                        round(food.carb_100g * f, 1),
+                    ]
+                )
+        return buf.getvalue()
 
     async def delete(self, user_id: int, password: str) -> None:
         """Erase the account after re-authenticating. Cascades to all owned rows."""

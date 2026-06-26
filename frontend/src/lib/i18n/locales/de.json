@@ -409,6 +409,8 @@
     "dataTitle": "Daten & Konto",
     "dataHint": "Lade alle Daten herunter, die wir über dich speichern, oder lösche dein Konto endgültig.",
     "exportBtn": "Meine Daten exportieren",
+    "exportDiaryCsvBtn": "Tagebuch (CSV)",
+    "exportWeightCsvBtn": "Gewichtsverlauf (CSV)",
     "exportError": "Daten konnten nicht exportiert werden",
     "deleteBtn": "Konto löschen",
     "deleteConfirmTitle": "Konto endgültig löschen?",

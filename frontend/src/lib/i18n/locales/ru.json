@@ -409,6 +409,8 @@
     "dataTitle": "Данные и аккаунт",
     "dataHint": "Скачайте все данные, которые мы о вас храним, или удалите аккаунт навсегда.",
     "exportBtn": "Скачать мои данные",
+    "exportDiaryCsvBtn": "Дневник (CSV)",
+    "exportWeightCsvBtn": "Журнал веса (CSV)",
     "exportError": "Не удалось выгрузить данные",
     "deleteBtn": "Удалить аккаунт",
     "deleteConfirmTitle": "Удалить аккаунт навсегда?",
