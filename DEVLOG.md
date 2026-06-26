@@ -27,6 +27,18 @@ trigger a Blob download. i18n en/ru/de.
 **Feature list status:** Trends items #1–6 now all closed. Remaining: reminders
 (blocked on SMTP mailbox).
 
+**Dashboard quick weigh-in.** Calibration-first lives or dies on the daily
+morning weigh-in ("weigh daily" is literally on the dashboard), yet logging a
+weight meant navigating to /weight every morning. The dashboard weight-trend
+card now has an inline weigh-in: a number field + "Log" that posts today's
+weight, invalidates the weight + calibration queries, and toasts. Once today is
+logged the form is replaced by "Today's weight is logged ✓" (guarded by
+`loggedToday` = any point with `logged_on === today`). Reuses the existing
+`weight.log` endpoint and `weight.*` copy; two new keys (`dashboard.weighInToday`,
+`dashboard.weighedInToday`) in en/ru/de. Verified live: logged 80.5 kg from the
+dashboard → card flips to "80.5 kg / smoothed trend" + the done note. Also
+removed a stray `node_modules/` that had been npm-installed at the repo root.
+
 **Live QA + favicon.** Walked register → onboarding → dashboard → settings on
 prod (throwaway account), confirmed the CSV buttons download correctly. The only
 defect surfaced was a `favicon.ico` 404 on every page load — the app shipped

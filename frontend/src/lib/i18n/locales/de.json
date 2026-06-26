@@ -193,7 +193,9 @@
     "trendOverDays": "{{change}} über {{days}} Tage",
     "smoothedTrend": "geglätteter Trend",
     "openChart": "Diagramm öffnen →",
-    "logFirstWeighIn": "Erste Wägung erfassen →"
+    "logFirstWeighIn": "Erste Wägung erfassen →",
+    "weighInToday": "Eintragen",
+    "weighedInToday": "Heutiges Gewicht ist erfasst ✓"
   },
   "coaching": {
     "gotIt": "Verstanden",

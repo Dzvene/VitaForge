@@ -193,7 +193,9 @@
     "trendOverDays": "{{change}} за {{days}} дн.",
     "smoothedTrend": "сглаженный тренд",
     "openChart": "Открыть график →",
-    "logFirstWeighIn": "Запишите первое взвешивание →"
+    "logFirstWeighIn": "Запишите первое взвешивание →",
+    "weighInToday": "Записать",
+    "weighedInToday": "Вес за сегодня записан ✓"
   },
   "coaching": {
     "gotIt": "Понятно",

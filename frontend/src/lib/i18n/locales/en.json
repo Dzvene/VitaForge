@@ -193,7 +193,9 @@
     "trendOverDays": "{{change}} over {{days}} days",
     "smoothedTrend": "smoothed trend",
     "openChart": "Open chart →",
-    "logFirstWeighIn": "Log your first weigh-in →"
+    "logFirstWeighIn": "Log your first weigh-in →",
+    "weighInToday": "Log",
+    "weighedInToday": "Today's weight is logged ✓"
   },
   "coaching": {
     "gotIt": "Got it",
