@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.DonutLarge
+import androidx.compose.material.icons.outlined.MonitorWeight
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -24,10 +26,12 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import net.matrixcapital.vitaforge.session.SessionViewModel
 import net.matrixcapital.vitaforge.ui.auth.AuthScreen
+import net.matrixcapital.vitaforge.ui.calibration.CalibrationScreen
 import net.matrixcapital.vitaforge.ui.dashboard.DashboardScreen
 import net.matrixcapital.vitaforge.ui.diary.DiaryScreen
 import net.matrixcapital.vitaforge.ui.onboarding.OnboardingScreen
 import net.matrixcapital.vitaforge.ui.settings.SettingsScreen
+import net.matrixcapital.vitaforge.ui.weight.WeightScreen
 
 @Composable
 fun AppRoot(session: SessionViewModel = viewModel()) {
@@ -42,7 +46,9 @@ fun AppRoot(session: SessionViewModel = viewModel()) {
     }
 }
 
-private enum class Tab(val label: String) { TODAY("Today"), DIARY("Diary"), SETTINGS("Settings") }
+private enum class Tab(val label: String) {
+    TODAY("Today"), DIARY("Diary"), WEIGHT("Weight"), CALIBRATE("Calibrate"), SETTINGS("Settings")
+}
 
 @Composable
 private fun MainScaffold(session: SessionViewModel) {
@@ -63,6 +69,18 @@ private fun MainScaffold(session: SessionViewModel) {
                     label = { Text(Tab.DIARY.label) },
                 )
                 NavigationBarItem(
+                    selected = tab == Tab.WEIGHT,
+                    onClick = { tab = Tab.WEIGHT },
+                    icon = { Icon(Icons.Outlined.MonitorWeight, contentDescription = null) },
+                    label = { Text(Tab.WEIGHT.label) },
+                )
+                NavigationBarItem(
+                    selected = tab == Tab.CALIBRATE,
+                    onClick = { tab = Tab.CALIBRATE },
+                    icon = { Icon(Icons.Outlined.Tune, contentDescription = null) },
+                    label = { Text(Tab.CALIBRATE.label) },
+                )
+                NavigationBarItem(
                     selected = tab == Tab.SETTINGS,
                     onClick = { tab = Tab.SETTINGS },
                     icon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
@@ -75,6 +93,8 @@ private fun MainScaffold(session: SessionViewModel) {
             when (tab) {
                 Tab.TODAY -> DashboardScreen()
                 Tab.DIARY -> DiaryScreen()
+                Tab.WEIGHT -> WeightScreen()
+                Tab.CALIBRATE -> CalibrationScreen()
                 Tab.SETTINGS -> SettingsScreen(session)
             }
         }

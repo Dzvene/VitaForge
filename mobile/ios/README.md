@@ -30,8 +30,8 @@ open VitaForge.xcodeproj        # set your DEVELOPMENT_TEAM, run on a simulator/
 
 ## Scope (this pass)
 
-Core loop: register/login → onboarding (profile) → dashboard (calorie ring +
-macros + maintenance + coaching) → diary (search catalog, log/delete entries).
-**Not yet:** weight logging + trend chart, calibration screen, recipes, trends,
-push reminders, barcode scanner, biometric lock. The networking + auth + model
-foundation is built to extend to those directly.
+Register/login → onboarding → dashboard (calorie ring + macros + maintenance +
+coaching) → diary (search catalog, log/delete) → weight (weigh-in + Swift Charts
+raw/EMA trend) → calibration (window progress + recalc/skip).
+**Not yet:** recipes, trends, push reminders, barcode scanner, biometric lock.
+The networking + auth + model foundation extends to those directly.

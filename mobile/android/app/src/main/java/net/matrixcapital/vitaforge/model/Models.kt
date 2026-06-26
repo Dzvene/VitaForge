@@ -178,6 +178,51 @@ data class DiaryAddIn(
     val grams: Double,
 )
 
+// ---- weight ----
+
+@Serializable
+data class WeightLogIn(
+    @SerialName("logged_on") val loggedOn: String,
+    @SerialName("weight_kg") val weightKg: Double,
+)
+
+@Serializable
+data class WeightPoint(
+    @SerialName("logged_on") val loggedOn: String,
+    @SerialName("weight_kg") val weightKg: Double,
+    @SerialName("trend_kg") val trendKg: Double,
+)
+
+@Serializable
+data class WeightSeries(
+    val points: List<WeightPoint>,
+    @SerialName("latest_trend_kg") val latestTrendKg: Double? = null,
+)
+
+// ---- calibration ----
+
+@Serializable
+data class CalibrationStatus(
+    val phase: String,
+    @SerialName("started_on") val startedOn: String,
+    @SerialName("window_days") val windowDays: Int,
+    @SerialName("clean_days_collected") val cleanDaysCollected: Int,
+    @SerialName("days_remaining") val daysRemaining: Int,
+    @SerialName("ready_to_estimate") val readyToEstimate: Boolean,
+    @SerialName("last_real_tdee") val lastRealTdee: Double? = null,
+)
+
+@Serializable
+data class EstimateResult(
+    val ok: Boolean,
+    val reason: String? = null,
+    @SerialName("real_tdee") val realTdee: Double? = null,
+    @SerialName("avg_daily_intake") val avgDailyIntake: Double? = null,
+    @SerialName("trend_change_kg") val trendChangeKg: Double? = null,
+    val days: Int? = null,
+    @SerialName("target_calories") val targetCalories: Double? = null,
+)
+
 // ---- coaching ----
 
 @Serializable

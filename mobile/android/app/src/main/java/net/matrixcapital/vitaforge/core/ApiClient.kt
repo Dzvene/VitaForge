@@ -55,6 +55,15 @@ class ApiClient(
         perform(path, "DELETE", null, authed = true, query = null)
     }
 
+    /** POST/PUT with a body but no (or ignored) response — e.g. logging weight (204). */
+    suspend inline fun <reified B> submit(path: String, method: String, body: B) {
+        perform(path, method, json.encodeToString(body), authed = true, query = null)
+    }
+
+    /** POST with no request body but a decoded response — e.g. calibration recalc. */
+    suspend inline fun <reified T> postEmpty(path: String): T =
+        json.decodeFromString(perform(path, "POST", null, authed = true, query = null))
+
     /** Unauthenticated call (register/login/guest preview). */
     suspend inline fun <reified B, reified T> anonymous(path: String, body: B): T =
         json.decodeFromString(perform(path, "POST", json.encodeToString(body), authed = false, query = null))

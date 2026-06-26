@@ -37,6 +37,11 @@ actor APIClient {
         try decoder.decode(R.self, from: await perform(path, method: "PUT", body: try encoder.encode(body), authed: true, query: nil))
     }
 
+    /// POST with no request body but a decoded response (e.g. calibration recalc).
+    func post<R: Decodable>(_ path: String) async throws -> R {
+        try decoder.decode(R.self, from: await perform(path, method: "POST", body: nil, authed: true, query: nil))
+    }
+
     /// POST/PUT/DELETE that returns no body (204) or whose body we ignore.
     @discardableResult
     func send<B: Encodable>(_ path: String, method: String, body: B) async throws -> Data {

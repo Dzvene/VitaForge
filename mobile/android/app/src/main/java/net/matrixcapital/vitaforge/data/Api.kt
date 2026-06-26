@@ -11,8 +11,12 @@ import net.matrixcapital.vitaforge.model.ProfileOut
 import net.matrixcapital.vitaforge.model.ProfileUpsert
 import net.matrixcapital.vitaforge.model.RegisterRequest
 import net.matrixcapital.vitaforge.model.TargetOut
+import net.matrixcapital.vitaforge.model.CalibrationStatus
+import net.matrixcapital.vitaforge.model.EstimateResult
 import net.matrixcapital.vitaforge.model.TokenPair
 import net.matrixcapital.vitaforge.model.UserOut
+import net.matrixcapital.vitaforge.model.WeightLogIn
+import net.matrixcapital.vitaforge.model.WeightSeries
 
 /** Endpoint facade (paths/DTOs per docs/MOBILE_API.md). */
 object Api {
@@ -32,4 +36,11 @@ object Api {
     suspend fun deleteDiary(id: Int) = client.delete("/diary/$id")
 
     suspend fun searchFoods(q: String): List<FoodOut> = client.get("/foods/search", mapOf("q" to q))
+
+    suspend fun logWeight(body: WeightLogIn) = client.submit("/weight", "POST", body)
+    suspend fun weightSeries(): WeightSeries = client.get("/weight/series")
+
+    suspend fun calibrationStatus(): CalibrationStatus = client.get("/calibration/status")
+    suspend fun calibrationRecalc(): EstimateResult = client.postEmpty("/calibration/recalc")
+    suspend fun calibrationSkip(): EstimateResult = client.postEmpty("/calibration/skip")
 }

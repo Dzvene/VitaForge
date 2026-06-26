@@ -25,13 +25,16 @@ step:
 3. **Dashboard** — calorie ring + macro bars + maintenance + coaching guidance.
 4. **Diary** — search the catalog (localized via `Accept-Language`), log and
    delete entries.
+5. **Weight** — daily weigh-in + raw/EMA-trend chart (Swift Charts on iOS, a
+   Compose `Canvas` chart on Android).
+6. **Calibration** — window progress, real-TDEE recalc / skip, estimate result.
 
 Every request sends the user's language as `Accept-Language` (en/ru/de) so
 server-generated copy comes back localized.
 
 ### Not yet built (next passes)
 
-Weight logging + EMA trend chart, calibration screen, recipes, trends/insights,
-**push reminders** (APNs / FCM — separate from the web's Web Push), barcode
-scanner, biometric app-lock, store metadata/CI. The networking + auth + model
-foundation is shared-shaped on both platforms so these slot in directly.
+Recipes, trends/insights, **push reminders** (APNs / FCM — separate from the
+web's Web Push), barcode scanner, biometric app-lock, store metadata/CI. The
+networking + auth + model foundation is shared-shaped on both platforms so these
+slot in directly.

@@ -24,6 +24,10 @@ struct MainTabView: View {
                 .tabItem { Label("Today", systemImage: "circle.dashed") }
             DiaryView()
                 .tabItem { Label("Diary", systemImage: "book") }
+            WeightView()
+                .tabItem { Label("Weight", systemImage: "scalemass") }
+            CalibrationView()
+                .tabItem { Label("Calibrate", systemImage: "scope") }
             SettingsView()
                 .tabItem { Label("Settings", systemImage: "gearshape") }
         }

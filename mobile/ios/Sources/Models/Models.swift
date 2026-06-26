@@ -133,6 +133,47 @@ struct DiaryAddIn: Encodable {
     let grams: Double
 }
 
+// MARK: - Weight
+
+struct WeightLogIn: Encodable {
+    let loggedOn: String
+    let weightKg: Double
+}
+
+struct WeightPoint: Codable, Identifiable, Equatable {
+    let loggedOn: String
+    let weightKg: Double
+    let trendKg: Double
+    var id: String { loggedOn }
+}
+
+struct WeightSeries: Codable, Equatable {
+    let points: [WeightPoint]
+    let latestTrendKg: Double?
+}
+
+// MARK: - Calibration
+
+struct CalibrationStatus: Codable, Equatable {
+    let phase: String                 // "calibrating" | "completed"
+    let startedOn: String
+    let windowDays: Int
+    let cleanDaysCollected: Int
+    let daysRemaining: Int
+    let readyToEstimate: Bool
+    let lastRealTdee: Double?
+}
+
+struct EstimateResult: Codable, Equatable {
+    let ok: Bool
+    let reason: String?
+    let realTdee: Double?
+    let avgDailyIntake: Double?
+    let trendChangeKg: Double?
+    let days: Int?
+    let targetCalories: Double?
+}
+
 // MARK: - Coaching
 
 struct GuidanceItem: Codable, Identifiable, Equatable {

@@ -4,6 +4,33 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-26 — Mobile: weight + calibration screens (both platforms)
+
+Extended the native apps with the two screens most central to the
+calibration-first identity, mirrored on iOS and Android.
+
+- **Weight.** Daily weigh-in (`POST /weight`) + a raw/EMA-trend chart from
+  `GET /weight/series`. iOS uses **Swift Charts** (raw faint line + brand trend
+  line); Android draws a **Compose `Canvas`** chart (two normalized polylines +
+  raw dots) — no charting dependency added. "Already logged today" collapses the
+  input, matching the web.
+- **Calibration.** `GET /calibration/status` → window progress (clean days /
+  window), days-remaining, last real-TDEE; **Recalculate** (`POST
+  /calibration/recalc`, gated on `ready_to_estimate`) and **Skip**
+  (`/calibration/skip`) with the estimate result (real maintenance, avg intake,
+  trend change, new target) rendered after.
+
+Plumbing: new DTOs (WeightLogIn/Point/Series, CalibrationStatus, EstimateResult)
+verified against the backend schemas; client gained a no-body `POST→decode`
+helper (iOS `post(_:)`, Android `postEmpty`) and a body-no-response submit; both
+tab bars went 3 → 5 (Today/Diary/Weight/Calibrate/Settings).
+
+Still **source-only / uncompiled** (no toolchain on this box — first build is on
+Mac/Win). Remaining: recipes, trends, push (APNs/FCM), barcode scanner,
+biometric lock, store/CI.
+
+---
+
 ## 2026-06-26 — Native mobile apps scaffolded (iOS + Android)
 
 Started the native apps under `mobile/` (monorepo, next to `docs/MOBILE_API.md`):

@@ -32,6 +32,17 @@ enum API {
     }
     static func deleteDiary(_ id: Int) async throws { try await client.send("/diary/\(id)", method: "DELETE") }
 
+    // Weight
+    static func logWeight(_ body: WeightLogIn) async throws {
+        try await client.send("/weight", method: "POST", body: body)
+    }
+    static func weightSeries() async throws -> WeightSeries { try await client.get("/weight/series") }
+
+    // Calibration
+    static func calibrationStatus() async throws -> CalibrationStatus { try await client.get("/calibration/status") }
+    static func calibrationRecalc() async throws -> EstimateResult { try await client.post("/calibration/recalc") }
+    static func calibrationSkip() async throws -> EstimateResult { try await client.post("/calibration/skip") }
+
     // Foods
     static func searchFoods(_ q: String) async throws -> [FoodOut] {
         try await client.get("/foods/search", query: ["q": q])
