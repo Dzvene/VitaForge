@@ -27,6 +27,14 @@ trigger a Blob download. i18n en/ru/de.
 **Feature list status:** Trends items #1–6 now all closed. Remaining: reminders
 (blocked on SMTP mailbox).
 
+**Live QA + favicon.** Walked register → onboarding → dashboard → settings on
+prod (throwaway account), confirmed the CSV buttons download correctly. The only
+defect surfaced was a `favicon.ico` 404 on every page load — the app shipped
+without an icon. Added `src/app/icon.svg` (brand rounded-square + the lucide
+"activity" pulse, brand-500 on white) via the App Router icon convention; Next
+now injects `<link rel="icon">` and serves `/icon.svg` (200). Re-checked prod:
+0 console errors.
+
 ---
 
 ## 2026-06-26 — Recipes / meals (log a whole meal in one tap)
