@@ -17,7 +17,8 @@ import {
   TrendingDown,
 } from "lucide-react";
 import { useAuth } from "@/lib/store/auth";
-import { Button } from "@/components/ui/primitives";
+import { Badge, Button } from "@/components/ui/primitives";
+import { CalorieRing, MacroBar } from "@/components/ui/charts";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SiteFooter } from "@/components/site/SiteFooter";
@@ -88,6 +89,11 @@ export default function Home() {
           </Link>
         </div>
         <p className="mt-3 text-xs text-ink-faint">{t("landing.hero.noStrings")}</p>
+      </section>
+
+      {/* Product preview — a real, localized snapshot of the dashboard */}
+      <section className="mx-auto max-w-md px-5 pb-10">
+        <HeroPreview />
       </section>
 
       {/* How it's different — the method */}
@@ -208,6 +214,30 @@ function Fact({ value, label }: { value: string; label: string }) {
     <div className="bg-surface-2 p-6 text-center">
       <p className="text-2xl font-semibold tracking-tight text-brand-400">{value}</p>
       <p className="mt-1.5 text-sm text-ink-muted">{label}</p>
+    </div>
+  );
+}
+
+function HeroPreview() {
+  const { t } = useTranslation();
+  return (
+    <div className="relative animate-fade-up">
+      {/* Soft brand glow behind the card */}
+      <div className="absolute -inset-6 -z-10 rounded-[2.5rem] bg-gradient-to-tr from-brand-500/15 via-accent/10 to-transparent blur-2xl" />
+      <div className="card overflow-hidden p-6 shadow-card-lg">
+        <div className="mb-4 flex items-center justify-between">
+          <span className="label">{t("common.today")}</span>
+          <Badge tone="brand">{t("landing.preview.calibrating")}</Badge>
+        </div>
+        <div className="flex justify-center">
+          <CalorieRing eaten={920} target={2760} size={184} />
+        </div>
+        <div className="mt-6 space-y-3.5">
+          <MacroBar kind="protein" label={t("common.protein")} eaten={70} target={170} />
+          <MacroBar kind="fat" label={t("common.fat")} eaten={28} target={75} />
+          <MacroBar kind="carb" label={t("common.carbs")} eaten={120} target={320} />
+        </div>
+      </div>
     </div>
   );
 }

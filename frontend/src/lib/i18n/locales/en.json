@@ -135,6 +135,9 @@
       "try": "Try it",
       "login": "Log in",
       "signup": "Sign up"
+    },
+    "preview": {
+      "calibrating": "Calibrating"
     }
   },
   "try": {

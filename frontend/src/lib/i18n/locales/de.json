@@ -135,6 +135,9 @@
       "try": "Ausprobieren",
       "login": "Anmelden",
       "signup": "Registrieren"
+    },
+    "preview": {
+      "calibrating": "Kalibrierung"
     }
   },
   "try": {
