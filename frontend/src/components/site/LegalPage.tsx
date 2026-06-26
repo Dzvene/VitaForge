@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Activity, ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { LEGAL, type LegalDoc } from "@/lib/legal";
+import { LEGAL, type LegalContent, type LegalDoc } from "@/lib/legal";
+import { legal as legalApi } from "@/lib/api/endpoints";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/primitives";
@@ -17,7 +19,32 @@ function pickLocale(lang: string | undefined): "en" | "ru" | "de" {
 export function LegalPage({ doc }: { doc: LegalDoc }) {
   const { t, i18n } = useTranslation();
   const locale = pickLocale(i18n.resolvedLanguage || i18n.language);
-  const content = LEGAL[locale][doc];
+
+  // The bundled copy renders instantly (no fetch flash, crawlable); then we pull
+  // the live version from the API — which carries any admin override — and swap
+  // it in. On error we keep the bundled copy, so the page never goes blank.
+  const [content, setContent] = useState<LegalContent>(LEGAL[locale][doc]);
+  useEffect(() => {
+    setContent(LEGAL[locale][doc]);
+    let active = true;
+    legalApi
+      .get(doc)
+      .then((c) => {
+        if (active) {
+          setContent({
+            title: c.title,
+            updated: c.updated,
+            intro: c.intro ?? undefined,
+            sections: c.sections,
+          });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [doc, locale]);
+
   const updated = new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(
     new Date(content.updated),
   );

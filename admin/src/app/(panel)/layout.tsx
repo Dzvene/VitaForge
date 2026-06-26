@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Activity,
   Apple,
+  FileText,
   LayoutDashboard,
   LogOut,
   SlidersHorizontal,
@@ -22,6 +23,7 @@ const NAV: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/users", label: "Users", icon: Users },
   { href: "/foods", label: "Foods", icon: Apple },
   { href: "/params", label: "Parameters", icon: SlidersHorizontal },
+  { href: "/legal", label: "Legal pages", icon: FileText },
 ];
 
 export default function PanelLayout({ children }: { children: ReactNode }) {

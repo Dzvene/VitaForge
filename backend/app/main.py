@@ -102,6 +102,8 @@ from app.modules.diary.router import router as diary_router  # noqa: E402
 from app.modules.foods.admin_router import admin_router as foods_admin_router  # noqa: E402
 from app.modules.foods.router import router as foods_router  # noqa: E402
 from app.modules.identity.admin_router import admin_router as users_admin_router  # noqa: E402
+from app.modules.legal.admin_router import admin_router as legal_admin_router  # noqa: E402
+from app.modules.legal.router import router as legal_router  # noqa: E402
 from app.modules.nutrition import subscribers as _nut_subs  # noqa: E402, F401
 from app.modules.nutrition.router import router as nutrition_router  # noqa: E402
 from app.modules.profile.router import router as profile_router  # noqa: E402
@@ -111,6 +113,7 @@ from app.modules.weight.router import router as weight_router  # noqa: E402
 api_v1 = settings.API_V1_PREFIX
 for r in (
     public_router,
+    legal_router,
     auth_router,
     account_router,
     profile_router,
@@ -125,6 +128,7 @@ for r in (
     users_admin_router,
     foods_admin_router,
     app_params_admin_router,
+    legal_admin_router,
 ):
     app.include_router(r, prefix=api_v1)
 

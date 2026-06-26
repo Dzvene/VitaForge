@@ -4,6 +4,45 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-26 — DB-backed legal content + admin editor
+
+The legal pages (Impressum/Privacy/Terms/Cookies) were static in the frontend
+(`lib/legal.ts`) with `[Operator legal name]`-style placeholders that needed a
+code change to fill. Made them admin-editable.
+
+**Backend — new `legal` slice** (canonical VSA, tach leaf, `depends_on = []`),
+same defaults-plus-overrides shape as `app_config`:
+- `defaults.json` (generated from `lib/legal.ts` via tsx, lives inside the slice)
+  is the baseline; a `legal_documents` row overrides a (doc, locale). Migration
+  `d4e5f6a7b8c9`.
+- Public `GET /legal/{doc}` — localized via Accept-Language (or `?locale=`),
+  unknown locale → English, unknown doc → 404.
+- Admin `GET /admin/legal` (all 12 doc×locale, override-or-default with a
+  `customized` flag), `GET/PUT /admin/legal/{doc}/{locale}`.
+- 10 tests (`test_legal.py`): defaults, localization, locale fallback, 404,
+  admin list, admin-role gate, create/update override, public reflection,
+  no-duplicate upsert. Backend **170 passed**, tach green.
+
+**Public frontend** — `LegalPage` renders the bundled copy instantly (no flash,
+crawlable) then swaps in the live API version (which carries any admin override);
+on fetch error it keeps the bundled copy, so the page never blanks.
+
+**Admin console** — new `/legal` page: a card per document with en/ru/de chips
+(`customized`/`default` badges), and a section editor (title, intro, last-updated,
+add/remove sections, add/remove body paragraphs). Plain-fetch, matches the
+existing admin style.
+
+Verified end-to-end against prod with a throwaway admin: edited impressum/en
+(filled the operator placeholder), confirmed `customized=true` and that the
+public page served the override, opened the editor in the browser (sections +
+controls render), then reverted the row (table back to 0 = defaults) and deleted
+the account. **Defaults still carry the placeholders** — the operator now fills
+real legal details from Admin → Legal pages instead of editing code (closes the
+editing half of the Impressum/Privacy launch blocker; the real data is still
+the owner's to enter).
+
+---
+
 ## 2026-06-26 — OFF catalog expansion (EU + RU)
 
 Grew the Open Food Facts slice from **18,490 → 64,710** (+46,220, all barcoded).

@@ -13,6 +13,7 @@ import type {
   FoodOut,
   GoalKind,
   Hint,
+  LegalContentOut,
   ParamsView,
   ProfileOut,
   ProfileUpsert,
@@ -78,6 +79,11 @@ export const auth = {
       method: "POST",
       body: { current_password, new_password },
     }),
+};
+
+// Public legal/policy documents — localized server-side via Accept-Language.
+export const legal = {
+  get: (doc: string) => api<LegalContentOut>(`/legal/${doc}`, { auth: false }),
 };
 
 export const account = {

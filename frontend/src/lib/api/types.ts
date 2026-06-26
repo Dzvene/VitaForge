@@ -198,3 +198,16 @@ export interface ParamsView {
   effective: Record<string, number | string | boolean | Record<string, number>>;
   overrides: Record<string, unknown>;
 }
+export interface LegalSectionOut {
+  heading: string;
+  body: string[];
+}
+export interface LegalContentOut {
+  doc: string;
+  locale: string;
+  title: string;
+  intro: string | null;
+  updated: string;
+  sections: LegalSectionOut[];
+  customized: boolean;
+}

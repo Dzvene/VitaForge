@@ -67,6 +67,11 @@ depends_on = []
 path = "app.modules.public"
 depends_on = []
 
+# Legal/policy documents — bundled defaults + admin DB overrides. A leaf slice.
+[[modules]]
+path = "app.modules.legal"
+depends_on = []
+
 [[modules]]
 path = "app.modules.weight"
 depends_on = ["app.modules.profile"]

@@ -97,6 +97,25 @@ export interface ParamsView {
   effective: Record<string, unknown>;
   overrides: Record<string, unknown>;
 }
+export interface LegalSection {
+  heading: string;
+  body: string[];
+}
+export interface LegalContent {
+  doc: string;
+  locale: string;
+  title: string;
+  intro: string | null;
+  updated: string;
+  sections: LegalSection[];
+  customized: boolean;
+}
+export interface LegalUpdate {
+  title: string;
+  intro: string | null;
+  updated: string;
+  sections: LegalSection[];
+}
 
 // ----- endpoints -----
 export const auth = {
@@ -126,4 +145,8 @@ export const admin = {
   getParams: () => api<ParamsView>("/admin/params"),
   setParams: (overrides: Record<string, number>) =>
     api<ParamsView>("/admin/params", { method: "PUT", body: { overrides } }),
+
+  legal: () => api<LegalContent[]>("/admin/legal"),
+  saveLegal: (doc: string, locale: string, body: LegalUpdate) =>
+    api<LegalContent>(`/admin/legal/${doc}/${locale}`, { method: "PUT", body }),
 };
