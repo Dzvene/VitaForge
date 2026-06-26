@@ -4,6 +4,46 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-26 — Native mobile apps scaffolded (iOS + Android)
+
+Started the native apps under `mobile/` (monorepo, next to `docs/MOBILE_API.md`):
+**iOS** SwiftUI (`mobile/ios`) and **Android** Jetpack Compose (`mobile/android`).
+
+**🔴 Honest caveat up front.** This Linux box has no Swift/Xcode and no
+JDK/Gradle/Android SDK, and it runs prod containers — installing heavy toolchains
+here would risk prod, so I didn't. That means **none of this mobile code has been
+through a compiler.** It's source-only, written to be built + fixed on the
+Mac/Win instances (where the paid store accounts live). First build = a
+compile-fix pass. Recorded plan was always "mobile on Win/Mac"; this is the
+hand-off source, structured so each side builds in one step (XcodeGen
+`project.yml` for iOS, standard Gradle for Android).
+
+**Both platforms, same core loop** (deliberately mirrored):
+
+- **Networking.** iOS: `actor APIClient` (URLSession) with single-flight token
+  refresh on 401 + `Accept-Language` on every request. Android: `ApiClient`
+  (OkHttp + kotlinx.serialization) with a `Mutex`-coalesced refresh + same header.
+  No third-party deps on iOS; Android uses OkHttp/serialization/security-crypto.
+- **Token storage.** iOS Keychain; Android EncryptedSharedPreferences (Keystore).
+- **Models.** DTOs hand-written against the live schemas (auth/profile/nutrition/
+  diary/foods/coaching) — verified field-by-field against the backend Pydantic
+  schemas, not guessed. iOS uses `.convertFromSnakeCase`; Android uses explicit
+  `@SerialName`.
+- **Routing.** A `loading → unauthenticated → onboarding → ready` state machine
+  (iOS `Session` ObservableObject, Android `SessionViewModel`). `GET /profile`
+  404 ⇒ onboarding.
+- **Screens.** Auth (login/register + language), onboarding (profile → norm),
+  dashboard (calorie ring + macro bars + maintenance + coaching guidance), diary
+  (catalog search, log/delete), settings (language + sign out).
+
+**Not yet:** weight + EMA trend, calibration, recipes, trends, push (APNs/FCM —
+separate from the web's Web Push), barcode scanner, biometric lock, store/CI.
+The auth + networking + model foundation is shared-shaped so these extend
+directly. ~19 Swift + ~20 Kotlin files. READMEs in each platform dir cover the
+build steps.
+
+---
+
 ## 2026-06-26 — Reminders (Web Push, no SMTP)
 
 The last open feature-list item. Reminders never needed email — email delivery

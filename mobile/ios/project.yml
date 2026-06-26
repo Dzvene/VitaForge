@@ -1,0 +1,37 @@
+# XcodeGen spec — generate the Xcode project on a Mac with:
+#   brew install xcodegen && cd mobile/ios && xcodegen generate && open VitaForge.xcodeproj
+#
+# No third-party dependencies: URLSession, SwiftUI, and the Security framework
+# (Keychain) only. Models/DTOs are hand-written against docs/MOBILE_API.md; when
+# the schema grows, prefer regenerating from openapi.json.
+name: VitaForge
+options:
+  bundleIdPrefix: net.matrixcapital
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.9"
+    DEVELOPMENT_TEAM: "" # set on the build machine
+targets:
+  VitaForge:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+    info:
+      path: Sources/Info.plist
+      properties:
+        CFBundleDisplayName: VitaForge
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: net.matrixcapital.vitaforge
+        GENERATE_INFOPLIST_FILE: NO
+        TARGETED_DEVICE_FAMILY: "1,2"

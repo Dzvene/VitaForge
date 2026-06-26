@@ -1,0 +1,9 @@
+# XcodeGen output + Xcode/build artifacts (regenerate with `xcodegen generate`).
+VitaForge.xcodeproj/
+*.xcworkspace/
+.build/
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+.DS_Store
