@@ -3,7 +3,15 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, LayoutDashboard, LogOut, Users, type LucideIcon } from "lucide-react";
+import {
+  Activity,
+  Apple,
+  LayoutDashboard,
+  LogOut,
+  SlidersHorizontal,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { auth, session, type UserOut } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -12,6 +20,8 @@ import { Spinner } from "@/components/primitives";
 const NAV: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/", label: "Overview", icon: LayoutDashboard },
   { href: "/users", label: "Users", icon: Users },
+  { href: "/foods", label: "Foods", icon: Apple },
+  { href: "/params", label: "Parameters", icon: SlidersHorizontal },
 ];
 
 export default function PanelLayout({ children }: { children: ReactNode }) {

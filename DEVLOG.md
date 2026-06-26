@@ -4,6 +4,37 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-26 — Admin foods/params CMS + SMTP attempt
+
+**Admin catalog + parameters (standalone console).** The standalone admin
+(`admin-vitaforge.matrix-capital.net`) had only Overview + Users; ported the
+Foods and Parameters management that previously lived only in the in-app admin.
+- `admin/src/lib/api.ts`: types (FoodOut/FoodCreate/Portion/ParamsView) +
+  endpoints (foods/createFood/updateFood/deleteFood, getParams/setParams) —
+  all hit existing backend admin routers, no backend change.
+- `foods/page.tsx`: search, list (source badge + per-100g macros + barcode),
+  create/edit modal (the admin app has no Dialog primitive, so a lean inline
+  overlay), delete with confirm. `params/page.tsx`: effective values grid,
+  "overridden" badges, save.
+- `(panel)/layout.tsx`: Foods + Parameters nav entries (desktop + mobile).
+- Verified end-to-end against prod: registered a throwaway, promoted it to admin
+  in the DB, confirmed list/create/edit/delete via API (201/200/204, 0 leftover)
+  and the UI (modal + params grid render), then deleted the account (cascade —
+  0 rows, only the real owner remains admin). Did **not** click "Save
+  parameters" so no engine overrides were written to prod. admin tsc clean.
+
+**SMTP — attempted, blocked on credentials.** Wired `andreas@mattalnet.com` /
+`send.one.com` into `backend/.env` (mattalnet.com is on one.com per MX). one.com
+rejected the login with **535 Authentication failed** on both 465 (SSL) and 587
+(STARTTLS) — transport fine, the password pair is wrong/needs SMTP enabled. Per
+policy I don't guess passwords, so reverted the mailer to the safe console
+fallback (host/user kept as a ready recipe, password blanked) and recreated the
+backend. **Still blocked:** need a working mailbox password (or confirm SMTP
+access is enabled for that mailbox) — then just fill `SMTP_PASSWORD` and
+`up -d --force-recreate backend`.
+
+---
+
 ## 2026-06-26 — UX debts: change password, weight legend, auth routing
 
 Closed the open UX debts from the 2026-06-25 UI audit. All three verified in

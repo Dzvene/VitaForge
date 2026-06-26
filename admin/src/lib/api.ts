@@ -66,6 +66,37 @@ export interface AdminStats {
 export interface AdminUser extends UserOut {
   created_at: string;
 }
+export interface Portion {
+  id?: number;
+  name: string;
+  grams: number;
+}
+export interface FoodOut {
+  id: number;
+  source: string;
+  barcode: string | null;
+  name: string;
+  brand: string | null;
+  kcal_100g: number;
+  protein_100g: number;
+  fat_100g: number;
+  carb_100g: number;
+  portions: Portion[];
+}
+export interface FoodCreate {
+  name: string;
+  brand: string | null;
+  barcode: string | null;
+  kcal_100g: number;
+  protein_100g: number;
+  fat_100g: number;
+  carb_100g: number;
+  portions: Portion[];
+}
+export interface ParamsView {
+  effective: Record<string, unknown>;
+  overrides: Record<string, unknown>;
+}
 
 // ----- endpoints -----
 export const auth = {
@@ -82,4 +113,17 @@ export const admin = {
   users: () => api<AdminUser[]>("/admin/users"),
   patchUser: (id: number, body: { role?: string; is_active?: boolean }) =>
     api<AdminUser>(`/admin/users/${id}`, { method: "PATCH", body }),
+
+  foods: (q?: string) => {
+    const qs = q ? `?q=${encodeURIComponent(q)}&limit=100` : "?limit=100";
+    return api<FoodOut[]>(`/admin/foods${qs}`);
+  },
+  createFood: (body: FoodCreate) => api<FoodOut>("/admin/foods", { method: "POST", body }),
+  updateFood: (id: number, body: FoodCreate) =>
+    api<FoodOut>(`/admin/foods/${id}`, { method: "PUT", body }),
+  deleteFood: (id: number) => api<void>(`/admin/foods/${id}`, { method: "DELETE" }),
+
+  getParams: () => api<ParamsView>("/admin/params"),
+  setParams: (overrides: Record<string, number>) =>
+    api<ParamsView>("/admin/params", { method: "PUT", body: { overrides } }),
 };
