@@ -48,7 +48,7 @@ fun SettingsScreen(session: SessionViewModel) {
                 AppLanguage.entries.forEach { lang ->
                     FilterChip(
                         selected = session.language == lang,
-                        onClick = { session.setLanguage(lang) },
+                        onClick = { session.changeLanguage(lang) },
                         label = { Text(lang.display) },
                     )
                 }

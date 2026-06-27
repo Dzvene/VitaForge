@@ -77,7 +77,7 @@ class SessionViewModel(app: Application) : AndroidViewModel(app) {
 
     fun finishOnboarding() { route = Route.READY }
 
-    fun setLanguage(lang: AppLanguage) {
+    fun changeLanguage(lang: AppLanguage) {
         AppLanguage.set(getApplication(), lang)
         language = lang
     }

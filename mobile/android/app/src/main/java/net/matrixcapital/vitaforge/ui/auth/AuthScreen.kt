@@ -111,7 +111,7 @@ fun AuthScreen(session: SessionViewModel) {
         Spacer(Modifier.height(24.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             AppLanguage.entries.forEach { lang ->
-                TextButton(onClick = { session.setLanguage(lang) }) {
+                TextButton(onClick = { session.changeLanguage(lang) }) {
                     Text(
                         lang.code.uppercase(),
                         fontWeight = if (session.language == lang) FontWeight.Bold else FontWeight.Normal,
