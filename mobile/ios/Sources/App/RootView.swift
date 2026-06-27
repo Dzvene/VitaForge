@@ -4,15 +4,18 @@ struct RootView: View {
     @EnvironmentObject var session: Session
 
     var body: some View {
-        switch session.route {
-        case .loading:
-            ProgressView().controlSize(.large)
-        case .unauthenticated:
-            AuthView()
-        case .onboarding:
-            OnboardingView()
-        case .ready:
-            MainTabView()
+        ZStack {
+            VFBackground()
+            switch session.route {
+            case .loading:
+                ProgressView().controlSize(.large)
+            case .unauthenticated:
+                AuthView()
+            case .onboarding:
+                OnboardingView()
+            case .ready:
+                MainTabView()
+            }
         }
     }
 }

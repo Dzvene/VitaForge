@@ -1,6 +1,8 @@
 package net.matrixcapital.vitaforge.ui.theme
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -9,6 +11,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 // VitaForge design language — ported 1:1 from the web token set
@@ -105,7 +111,44 @@ fun VitaForgeTheme(
 ) {
     val scheme = if (darkTheme) DarkColors else LightColors
     val vf = if (darkTheme) DarkVF else LightVF
-    CompositionLocalProvider(LocalVFColors provides vf) {
-        MaterialTheme(colorScheme = scheme, content = content)
+    MaterialTheme(colorScheme = scheme, typography = VFTypography) {
+        // Default every bare Text() to Inter; styled Text() overrides size/weight
+        // but inherits the family (mirrors the web's global Inter body font).
+        CompositionLocalProvider(
+            LocalVFColors provides vf,
+            LocalTextStyle provides LocalTextStyle.current.copy(fontFamily = Inter),
+            content = content,
+        )
     }
+}
+
+/**
+ * Two faint corner glows over the canvas — the brand tint top-right, the accent
+ * tint bottom-left — matching the web `body` radial-gradient backdrop. Apply to
+ * a full-screen container behind the content.
+ */
+@Composable
+fun Modifier.vfBackground(darkTheme: Boolean = isSystemInDarkTheme()): Modifier {
+    val vf = VF.colors
+    val base = MaterialTheme.colorScheme.background
+    val tintA = if (darkTheme) 0.08f else 0.05f
+    val tintB = if (darkTheme) 0.06f else 0.05f
+    return this
+        .background(base)
+        .drawBehind {
+            drawRect(
+                Brush.radialGradient(
+                    colors = listOf(vf.brand.copy(alpha = tintA), Color.Transparent),
+                    center = Offset(size.width, -size.height * 0.1f),
+                    radius = size.maxDimension * 0.9f,
+                ),
+            )
+            drawRect(
+                Brush.radialGradient(
+                    colors = listOf(vf.accent.copy(alpha = tintB), Color.Transparent),
+                    center = Offset(-size.width * 0.1f, size.height * 1.1f),
+                    radius = size.maxDimension * 0.8f,
+                ),
+            )
+        }
 }

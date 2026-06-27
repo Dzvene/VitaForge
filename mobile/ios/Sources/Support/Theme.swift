@@ -17,6 +17,30 @@ extension Color {
     static let inkMuted = Color(uiColor: .secondaryLabel)
 }
 
+/// Faint corner glows over the canvas — the brand tint top-right, the accent
+/// tint bottom-left — mirroring the web `body` radial-gradient backdrop. Place
+/// behind screen content (e.g. in a ZStack at the app root).
+struct VFBackground: View {
+    var body: some View {
+        ZStack {
+            Color.screenBg
+            GeometryReader { geo in
+                Circle()
+                    .fill(Color.brand.opacity(0.06))
+                    .frame(width: geo.size.width * 1.6)
+                    .blur(radius: 120)
+                    .position(x: geo.size.width, y: geo.size.height * -0.05)
+                Circle()
+                    .fill(Color.accentTeal.opacity(0.06))
+                    .frame(width: geo.size.width * 1.4)
+                    .blur(radius: 120)
+                    .position(x: 0, y: geo.size.height * 1.05)
+            }
+        }
+        .ignoresSafeArea()
+    }
+}
+
 /// Card container used across screens.
 struct CardView<Content: View>: View {
     @ViewBuilder var content: Content

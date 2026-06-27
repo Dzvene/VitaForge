@@ -23,8 +23,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import net.matrixcapital.vitaforge.session.SessionViewModel
+import net.matrixcapital.vitaforge.ui.theme.vfBackground
 import net.matrixcapital.vitaforge.ui.auth.AuthScreen
 import net.matrixcapital.vitaforge.ui.calibration.CalibrationScreen
 import net.matrixcapital.vitaforge.ui.dashboard.DashboardScreen
@@ -37,12 +39,14 @@ import net.matrixcapital.vitaforge.ui.weight.WeightScreen
 fun AppRoot(session: SessionViewModel = viewModel()) {
     LaunchedEffect(Unit) { session.bootstrap() }
 
-    when (session.route) {
-        SessionViewModel.Route.LOADING ->
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-        SessionViewModel.Route.UNAUTH -> AuthScreen(session)
-        SessionViewModel.Route.ONBOARDING -> OnboardingScreen(session)
-        SessionViewModel.Route.READY -> MainScaffold(session)
+    Box(Modifier.fillMaxSize().vfBackground()) {
+        when (session.route) {
+            SessionViewModel.Route.LOADING ->
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+            SessionViewModel.Route.UNAUTH -> AuthScreen(session)
+            SessionViewModel.Route.ONBOARDING -> OnboardingScreen(session)
+            SessionViewModel.Route.READY -> MainScaffold(session)
+        }
     }
 }
 
@@ -54,6 +58,7 @@ private enum class Tab(val label: String) {
 private fun MainScaffold(session: SessionViewModel) {
     var tab by remember { mutableStateOf(Tab.TODAY) }
     Scaffold(
+        containerColor = Color.Transparent,
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
