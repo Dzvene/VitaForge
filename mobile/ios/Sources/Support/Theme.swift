@@ -1,15 +1,16 @@
 import SwiftUI
 
-/// Brand palette — light-first, blue-steel brand + teal accent (mirrors the web
-/// design system, not a clone of any other app). Uses asset-free dynamic colors.
+/// Brand palette — ported 1:1 from the web token set (frontend globals.css,
+/// `:root` light values). Backgrounds stay on system grouped colors so the app
+/// follows light/dark automatically, mirroring the web's theme toggle.
 extension Color {
-    static let brand = Color(red: 0.16, green: 0.40, blue: 0.92)      // #2966EB-ish
-    static let brandSoft = Color(red: 0.16, green: 0.40, blue: 0.92).opacity(0.12)
-    static let accentTeal = Color(red: 0.0, green: 0.65, blue: 0.62)
+    static let brand = Color(red: 0.169, green: 0.486, blue: 0.941)   // brand-500 #2B7CF0
+    static let brandSoft = Color(red: 0.169, green: 0.486, blue: 0.941).opacity(0.12)
+    static let accentTeal = Color(red: 0.051, green: 0.647, blue: 0.706) // accent #0DA5B4
 
-    static let proteinColor = Color(red: 0.20, green: 0.52, blue: 0.96)
-    static let fatColor = Color(red: 0.95, green: 0.62, blue: 0.20)
-    static let carbColor = Color(red: 0.30, green: 0.72, blue: 0.50)
+    static let proteinColor = Color(red: 0.200, green: 0.478, blue: 0.941) // #337AF0
+    static let fatColor = Color(red: 0.776, green: 0.525, blue: 0.043)     // #C6860B
+    static let carbColor = Color(red: 0.051, green: 0.635, blue: 0.455)    // #0DA274
 
     static let cardBg = Color(uiColor: .secondarySystemGroupedBackground)
     static let screenBg = Color(uiColor: .systemGroupedBackground)

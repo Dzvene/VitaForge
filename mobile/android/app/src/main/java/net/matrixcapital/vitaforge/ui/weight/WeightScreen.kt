@@ -42,7 +42,7 @@ import net.matrixcapital.vitaforge.data.Api
 import net.matrixcapital.vitaforge.model.WeightPoint
 import net.matrixcapital.vitaforge.model.WeightSeries
 import net.matrixcapital.vitaforge.ui.components.VFCard
-import net.matrixcapital.vitaforge.ui.theme.Brand
+import net.matrixcapital.vitaforge.ui.theme.VF
 
 @Composable
 fun WeightScreen() {
@@ -138,7 +138,7 @@ private fun WeightChart(points: List<WeightPoint>) {
     val values = points.map { it.weightKg } + points.map { it.trendKg }
     val minV = values.min()
     val range = (values.max() - minV).coerceAtLeast(0.1)
-    val brand = Brand
+    val brand = VF.colors.brand
 
     Canvas(Modifier.fillMaxWidth().height(200.dp)) {
         val n = points.size

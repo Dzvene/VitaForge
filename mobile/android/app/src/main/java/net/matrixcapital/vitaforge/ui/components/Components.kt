@@ -35,7 +35,7 @@ import kotlin.math.min
 fun VFCard(content: @Composable () -> Unit) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(18.dp),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(16.dp)) { content() }
@@ -49,7 +49,11 @@ fun MacroBar(label: String, eaten: Double, target: Double, tint: Color) {
     Column(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(label, fontWeight = FontWeight.Medium, fontSize = 14.sp)
-            Text("${eaten.toInt()} / ${target.toInt()} g", color = Color.Gray, fontSize = 12.sp)
+            Text(
+                "${eaten.toInt()} / ${target.toInt()} g",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 12.sp,
+            )
         }
         Spacer(Modifier.height(4.dp))
         Box(
@@ -93,7 +97,7 @@ fun CalorieRing(eaten: Double, target: Double, ringColor: Color) {
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text("$remaining", fontSize = 32.sp, fontWeight = FontWeight.Bold)
-            Text("kcal left", color = Color.Gray, fontSize = 12.sp)
+            Text("kcal left", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
         }
     }
 }

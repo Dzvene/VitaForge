@@ -34,10 +34,7 @@ import net.matrixcapital.vitaforge.model.TargetOut
 import net.matrixcapital.vitaforge.ui.components.CalorieRing
 import net.matrixcapital.vitaforge.ui.components.MacroBar
 import net.matrixcapital.vitaforge.ui.components.VFCard
-import net.matrixcapital.vitaforge.ui.theme.Brand
-import net.matrixcapital.vitaforge.ui.theme.CarbColor
-import net.matrixcapital.vitaforge.ui.theme.FatColor
-import net.matrixcapital.vitaforge.ui.theme.ProteinColor
+import net.matrixcapital.vitaforge.ui.theme.VF
 
 @Composable
 fun DashboardScreen() {
@@ -72,12 +69,12 @@ fun DashboardScreen() {
         if (d != null && t != null) {
             VFCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    CalorieRing(eaten = d.eaten.kcal, target = d.target.calories, ringColor = Brand)
+                    CalorieRing(eaten = d.eaten.kcal, target = d.target.calories, ringColor = VF.colors.brand)
                     Spacer(Modifier.width(16.dp))
                     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        MacroBar("Protein", d.eaten.proteinG, d.target.proteinG, ProteinColor)
-                        MacroBar("Fat", d.eaten.fatG, d.target.fatG, FatColor)
-                        MacroBar("Carbs", d.eaten.carbG, d.target.carbG, CarbColor)
+                        MacroBar("Protein", d.eaten.proteinG, d.target.proteinG, VF.colors.protein)
+                        MacroBar("Fat", d.eaten.fatG, d.target.fatG, VF.colors.fat)
+                        MacroBar("Carbs", d.eaten.carbG, d.target.carbG, VF.colors.carb)
                     }
                 }
             }
