@@ -1,24 +1,31 @@
 package net.matrixcapital.vitaforge.ui.diary
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,107 +37,181 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import net.matrixcapital.vitaforge.core.DateUtil
+import net.matrixcapital.vitaforge.core.Fmt
 import net.matrixcapital.vitaforge.data.Api
 import net.matrixcapital.vitaforge.model.DaySummary
 import net.matrixcapital.vitaforge.model.DiaryEntryOut
+import net.matrixcapital.vitaforge.model.GuidanceItem
 import net.matrixcapital.vitaforge.model.Meal
+import net.matrixcapital.vitaforge.ui.components.CardTitle
+import net.matrixcapital.vitaforge.ui.components.EmptyState
+import net.matrixcapital.vitaforge.ui.components.EyebrowLabel
+import net.matrixcapital.vitaforge.ui.components.GuidanceList
+import net.matrixcapital.vitaforge.ui.components.VFButton
+import net.matrixcapital.vitaforge.ui.components.VFCard
+import net.matrixcapital.vitaforge.ui.components.VFField
+import net.matrixcapital.vitaforge.ui.components.VFVariant
+import net.matrixcapital.vitaforge.ui.theme.VF
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiaryScreen() {
     val scope = rememberCoroutineScope()
-    var day by remember { mutableStateOf<DaySummary?>(null) }
+    val cs = MaterialTheme.colorScheme
+    var day by remember { mutableStateOf(DateUtil.today()) }
+    var summary by remember { mutableStateOf<DaySummary?>(null) }
+    var guidance by remember { mutableStateOf<List<GuidanceItem>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var showAdd by remember { mutableStateOf(false) }
     var reloadKey by remember { mutableIntStateOf(0) }
+    var addMeal by remember { mutableStateOf<Meal?>(null) }
+    var customOpen by remember { mutableStateOf(false) }
+    var editing by remember { mutableStateOf<Pair<Int, String>?>(null) }
 
-    LaunchedEffect(reloadKey) {
+    LaunchedEffect(day, reloadKey) {
         loading = true
-        try {
-            day = Api.day(DateUtil.today())
-        } catch (e: Exception) {
-            error = e.message
-        } finally {
-            loading = false
-        }
+        summary = runCatching { Api.day(day) }.getOrNull()
+        guidance = runCatching { Api.dayGuidance(day).items }.getOrDefault(emptyList())
+        loading = false
     }
 
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("Diary") }) },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { showAdd = true }) {
-                Icon(Icons.Filled.Add, contentDescription = "Add food")
+    fun reload() { reloadKey++ }
+
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        // Day nav
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, "Previous day",
+                tint = cs.onSurfaceVariant, modifier = Modifier.size(28.dp).clickable { day = DateUtil.addDays(day, -1) })
+            Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(DateUtil.label(day), fontWeight = FontWeight.SemiBold, fontSize = 18.sp, color = cs.onSurface)
+                Text(day, fontSize = 11.sp, color = cs.onSurfaceVariant.copy(alpha = 0.7f))
             }
-        },
-    ) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding)) {
-            val d = day
-            when {
-                d != null -> {
-                    if (d.entries.isEmpty()) {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("Nothing logged yet — tap + to add a food.", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                        }
-                    } else {
-                        LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-                            Meal.entries.forEach { meal ->
-                                val entries = d.entries.filter { it.meal == meal }
-                                if (entries.isNotEmpty()) {
-                                    item {
-                                        Text(
-                                            mealLabel(meal),
-                                            fontWeight = FontWeight.SemiBold,
-                                            modifier = Modifier.padding(top = 14.dp, bottom = 4.dp),
-                                        )
-                                    }
-                                    items(entries, key = { it.id }) { entry ->
-                                        EntryRow(entry) {
-                                            scope.launch {
-                                                runCatching { Api.deleteDiary(entry.id) }
-                                                reloadKey++
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, "Next day",
+                tint = cs.onSurfaceVariant, modifier = Modifier.size(28.dp).clickable { day = DateUtil.addDays(day, 1) })
+        }
+
+        VFButton("Copy yesterday", variant = VFVariant.Secondary, small = true, onClick = {
+            scope.launch { runCatching { Api.copyDay(DateUtil.addDays(day, -1), day) }; reload() }
+        })
+
+        // Mini totals
+        val s = summary
+        if (s != null) {
+            VFCard {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Total("Calories", Fmt.kcal(s.eaten.kcal), "/ ${Fmt.kcal(s.target.calories)}")
+                    Total("Protein", Fmt.g(s.eaten.proteinG), "/ ${Fmt.g(s.target.proteinG)}")
+                    Total("Fat", Fmt.g(s.eaten.fatG), "/ ${Fmt.g(s.target.fatG)}")
+                    Total("Carbs", Fmt.g(s.eaten.carbG), "/ ${Fmt.g(s.target.carbG)}")
+                }
+            }
+        }
+
+        GuidanceList(guidance)
+
+        // Meals
+        val entries = s?.entries ?: emptyList()
+        Meal.entries.forEach { m ->
+            val mealEntries = entries.filter { it.meal == m }
+            val mealKcal = mealEntries.sumOf { it.nutrients.kcal }
+            VFCard {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(mealLabel(m), fontWeight = FontWeight.SemiBold, color = cs.onSurface, modifier = Modifier.weight(1f))
+                    if (mealKcal > 0) {
+                        Text("${Fmt.kcal(mealKcal)} kcal", fontSize = 12.sp, color = cs.onSurfaceVariant, modifier = Modifier.padding(end = 8.dp))
+                    }
+                    VFButton("Add", variant = VFVariant.Ghost, small = true,
+                        leading = { Icon(Icons.Filled.Add, null, modifier = Modifier.size(16.dp)) },
+                        onClick = { addMeal = m })
+                }
+                if (mealEntries.isEmpty()) {
+                    Text("No items yet.", fontSize = 12.sp, color = cs.onSurfaceVariant.copy(alpha = 0.6f), modifier = Modifier.padding(top = 6.dp))
+                } else {
+                    mealEntries.forEach { e ->
+                        EntryRow(
+                            e,
+                            editingGrams = editing?.takeIf { it.first == e.id }?.second,
+                            onStartEdit = { editing = e.id to e.grams.toInt().toString() },
+                            onEditChange = { editing = e.id to it },
+                            onSaveEdit = {
+                                val g = editing?.second?.toDoubleOrNull()
+                                editing = null
+                                if (g != null && g > 0) scope.launch { runCatching { Api.updateDiary(e.id, g) }; reload() }
+                            },
+                            onCancelEdit = { editing = null },
+                            onDelete = { scope.launch { runCatching { Api.deleteDiary(e.id) }; reload() } },
+                        )
                     }
                 }
-                loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-                error != null -> Text(error!!, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(16.dp))
             }
+        }
+
+        if (s != null && entries.isEmpty() && !loading) {
+            EmptyState(
+                title = "Nothing logged yet",
+                hint = "Add a food to start your day.",
+                action = { VFButton("Log food", onClick = { addMeal = Meal.BREAKFAST }) },
+            )
         }
     }
 
-    if (showAdd) {
+    addMeal?.let { m ->
         AddFoodSheet(
-            onDismiss = { showAdd = false },
-            onAdded = { showAdd = false; reloadKey++ },
+            day = day,
+            defaultMeal = m,
+            onClose = { addMeal = null },
+            onChanged = { reload() },
+            onCreateCustom = { addMeal = null; customOpen = true },
         )
+    }
+
+    if (customOpen) {
+        CustomFoodDialog(onClose = { customOpen = false }, onCreated = { customOpen = false; reload() })
     }
 }
 
 @Composable
-private fun EntryRow(entry: DiaryEntryOut, onDelete: () -> Unit) {
-    androidx.compose.foundation.layout.Row(
-        Modifier.fillMaxWidth().padding(vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+private fun Total(label: String, value: String, sub: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(value, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface)
+        Text(sub, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+    }
+}
+
+@Composable
+private fun EntryRow(
+    entry: DiaryEntryOut,
+    editingGrams: String?,
+    onStartEdit: () -> Unit,
+    onEditChange: (String) -> Unit,
+    onSaveEdit: () -> Unit,
+    onCancelEdit: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    val cs = MaterialTheme.colorScheme
+    Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Text(entry.foodName, fontWeight = FontWeight.Medium)
+            Text(entry.foodName, fontWeight = FontWeight.Medium, color = cs.onSurface)
             Text(
-                "${entry.grams.toInt()} g · ${entry.nutrients.kcal.toInt()} kcal",
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                "${Fmt.g(entry.grams)} · P${Fmt.g(entry.nutrients.proteinG)} F${Fmt.g(entry.nutrients.fatG)} C${Fmt.g(entry.nutrients.carbG)}",
+                fontSize = 12.sp, color = cs.onSurfaceVariant,
             )
         }
-        IconButton(onClick = onDelete) {
-            Icon(Icons.Filled.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
+        if (editingGrams != null) {
+            VFField("g", editingGrams, onEditChange, modifier = Modifier.width(90.dp), keyboardType = KeyboardType.Decimal)
+            Icon(Icons.Filled.Check, "Save", tint = VF.colors.brand, modifier = Modifier.size(22.dp).clickable(onClick = onSaveEdit).padding(start = 6.dp))
+            Icon(Icons.Filled.Close, "Cancel", tint = cs.onSurfaceVariant, modifier = Modifier.size(22.dp).clickable(onClick = onCancelEdit).padding(start = 6.dp))
+        } else {
+            Text("${Fmt.kcal(entry.nutrients.kcal)}", fontWeight = FontWeight.Medium, color = cs.onSurface)
+            Icon(Icons.Filled.Edit, "Edit", tint = cs.onSurfaceVariant, modifier = Modifier.size(20.dp).clickable(onClick = onStartEdit).padding(start = 10.dp))
+            Icon(Icons.Filled.Delete, "Delete", tint = cs.error, modifier = Modifier.size(20.dp).clickable(onClick = onDelete).padding(start = 8.dp))
         }
     }
 }
