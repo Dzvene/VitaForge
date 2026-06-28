@@ -22,7 +22,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +44,37 @@ fun AuthScreen(session: SessionViewModel) {
     var fullName by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
+    var showForgot by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    if (showForgot) {
+        var fgEmail by remember { mutableStateOf(email) }
+        var fgSent by remember { mutableStateOf(false) }
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showForgot = false },
+            title = { Text("Reset password") },
+            text = {
+                if (fgSent) {
+                    Text("If that email exists, a reset link is on its way.")
+                } else {
+                    OutlinedTextField(
+                        value = fgEmail, onValueChange = { fgEmail = it },
+                        label = { Text("Email") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            },
+            confirmButton = {
+                if (!fgSent) {
+                    TextButton(onClick = {
+                        scope.launch { runCatching { net.matrixcapital.vitaforge.data.Api.forgotPassword(fgEmail.trim()) }; fgSent = true }
+                    }) { Text("Send reset link") }
+                } else {
+                    TextButton(onClick = { showForgot = false }) { Text("Done") }
+                }
+            },
+            dismissButton = { if (!fgSent) TextButton(onClick = { showForgot = false }) { Text("Cancel") } },
+        )
+    }
 
     val canSubmit = email.isNotBlank() && password.length >= 8 && !busy
 
@@ -106,6 +139,9 @@ fun AuthScreen(session: SessionViewModel) {
         Button(onClick = { submit() }, enabled = canSubmit, modifier = Modifier.fillMaxWidth()) {
             if (busy) CircularProgressIndicator(Modifier.height(18.dp), strokeWidth = 2.dp)
             else Text(if (isLogin) "Sign in" else "Create account")
+        }
+        if (isLogin) {
+            TextButton(onClick = { showForgot = true }) { Text("Forgot password?") }
         }
 
         Spacer(Modifier.height(24.dp))

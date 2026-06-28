@@ -40,8 +40,8 @@ fun MoreScreen(session: SessionViewModel) {
         Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("More", fontSize = 24.sp, fontWeight = FontWeight.Bold)
             MoreDest.entries.forEach { d ->
-                VFCard {
-                    Text(d.title, fontWeight = FontWeight.Medium, modifier = Modifier.clickable { dest = d })
+                VFCard(modifier = Modifier.clickable { dest = d }) {
+                    Text(d.title, fontWeight = FontWeight.Medium)
                 }
             }
         }

@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import net.matrixcapital.vitaforge.session.SessionViewModel
+import net.matrixcapital.vitaforge.ui.components.VerifyEmailBanner
 import net.matrixcapital.vitaforge.ui.theme.vfBackground
 import net.matrixcapital.vitaforge.ui.auth.AuthScreen
 import net.matrixcapital.vitaforge.ui.calibration.CalibrationScreen
@@ -94,17 +95,20 @@ private fun MainScaffold(session: SessionViewModel) {
             }
         },
     ) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding)) {
-            when (tab) {
-                Tab.TODAY -> DashboardScreen(
-                    onLogFood = { tab = Tab.DIARY },
-                    onOpenCalibration = { tab = Tab.CALIBRATE },
-                    onOpenWeight = { tab = Tab.WEIGHT },
-                )
-                Tab.DIARY -> DiaryScreen()
-                Tab.WEIGHT -> WeightScreen()
-                Tab.CALIBRATE -> CalibrationScreen()
-                Tab.MORE -> MoreScreen(session)
+        androidx.compose.foundation.layout.Column(Modifier.fillMaxSize().padding(padding)) {
+            VerifyEmailBanner(emailVerified = session.user?.emailVerified ?: true)
+            Box(Modifier.fillMaxSize()) {
+                when (tab) {
+                    Tab.TODAY -> DashboardScreen(
+                        onLogFood = { tab = Tab.DIARY },
+                        onOpenCalibration = { tab = Tab.CALIBRATE },
+                        onOpenWeight = { tab = Tab.WEIGHT },
+                    )
+                    Tab.DIARY -> DiaryScreen()
+                    Tab.WEIGHT -> WeightScreen()
+                    Tab.CALIBRATE -> CalibrationScreen()
+                    Tab.MORE -> MoreScreen(session)
+                }
             }
         }
     }

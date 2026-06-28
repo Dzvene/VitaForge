@@ -11,6 +11,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Services.init(applicationContext)
+        net.matrixcapital.vitaforge.core.ThemeController.init(applicationContext)
         setContent {
             VitaForgeTheme { AppRoot() }
         }

@@ -106,7 +106,11 @@ private val DarkColors = darkColorScheme(
 
 @Composable
 fun VitaForgeTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = when (net.matrixcapital.vitaforge.core.ThemeController.mode) {
+        net.matrixcapital.vitaforge.core.ThemeMode.LIGHT -> false
+        net.matrixcapital.vitaforge.core.ThemeMode.DARK -> true
+        net.matrixcapital.vitaforge.core.ThemeMode.SYSTEM -> isSystemInDarkTheme()
+    },
     content: @Composable () -> Unit,
 ) {
     val scheme = if (darkTheme) DarkColors else LightColors
