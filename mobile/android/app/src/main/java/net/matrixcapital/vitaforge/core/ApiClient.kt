@@ -51,9 +51,16 @@ class ApiClient(
     suspend inline fun <reified B, reified T> put(path: String, body: B): T =
         json.decodeFromString(perform(path, "PUT", json.encodeToString(body), authed = true, query = null))
 
+    suspend inline fun <reified B, reified T> patch(path: String, body: B): T =
+        json.decodeFromString(perform(path, "PATCH", json.encodeToString(body), authed = true, query = null))
+
     suspend fun delete(path: String) {
         perform(path, "DELETE", null, authed = true, query = null)
     }
+
+    /** Authed GET returning the raw response body (e.g. JSON/CSV export). */
+    suspend fun getRaw(path: String, query: Map<String, String>? = null): String =
+        perform(path, "GET", null, authed = true, query = query)
 
     /** POST/PUT with a body but no (or ignored) response — e.g. logging weight (204). */
     suspend inline fun <reified B> submit(path: String, method: String, body: B) {
@@ -63,6 +70,15 @@ class ApiClient(
     /** POST with no request body but a decoded response — e.g. calibration recalc. */
     suspend inline fun <reified T> postEmpty(path: String): T =
         json.decodeFromString(perform(path, "POST", null, authed = true, query = null))
+
+    /** POST with query params, no body, decoded response — e.g. diary copy. */
+    suspend inline fun <reified T> postEmptyQuery(path: String, query: Map<String, String>): T =
+        json.decodeFromString(perform(path, "POST", null, authed = true, query = query))
+
+    /** Authed call with no body and no response (e.g. PUT favorite, POST accept). */
+    suspend fun submitEmpty(path: String, method: String) {
+        perform(path, method, null, authed = true, query = null)
+    }
 
     /** Unauthenticated call (register/login/guest preview). */
     suspend inline fun <reified B, reified T> anonymous(path: String, body: B): T =

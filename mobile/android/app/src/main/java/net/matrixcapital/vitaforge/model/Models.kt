@@ -53,10 +53,42 @@ data class UserOut(
     val email: String,
     @SerialName("full_name") val fullName: String? = null,
     val role: String,
+    @SerialName("is_active") val isActive: Boolean = true,
     @SerialName("email_verified") val emailVerified: Boolean = false,
 ) {
     val isAdmin: Boolean get() = role == "admin"
 }
+
+/** Generic `{ "status": "ok" }` ack from auth/account endpoints. */
+@Serializable
+data class StatusOut(val status: String = "ok")
+
+@Serializable
+data class ForgotPasswordIn(val email: String)
+
+@Serializable
+data class ResetPasswordIn(
+    val token: String,
+    @SerialName("new_password") val newPassword: String,
+)
+
+@Serializable
+data class VerifyEmailIn(val token: String)
+
+@Serializable
+data class ChangePasswordIn(
+    @SerialName("current_password") val currentPassword: String,
+    @SerialName("new_password") val newPassword: String,
+)
+
+@Serializable
+data class UpdateAccountIn(
+    @SerialName("full_name") val fullName: String? = null,
+    val email: String? = null,
+)
+
+@Serializable
+data class DeleteAccountIn(val password: String)
 
 @Serializable
 data class RegisterRequest(
@@ -97,6 +129,9 @@ data class ProfileUpsert(
     val goal: GoalKind,
     @SerialName("target_rate_kg_per_week") val targetRateKgPerWeek: Double,
     @SerialName("target_weight_kg") val targetWeightKg: Double? = null,
+    @SerialName("protein_g_per_kg") val proteinGPerKg: Double? = null,
+    @SerialName("protein_g_abs") val proteinGAbs: Double? = null,
+    @SerialName("fat_g_per_kg") val fatGPerKg: Double? = null,
 )
 
 // ---- nutrition ----
@@ -117,6 +152,21 @@ data class TargetOut(
 
 @Serializable
 data class PortionOut(val id: Int, val name: String, val grams: Double)
+
+@Serializable
+data class PortionIn(val name: String, val grams: Double)
+
+@Serializable
+data class FoodCreate(
+    val name: String,
+    val brand: String? = null,
+    val barcode: String? = null,
+    @SerialName("kcal_100g") val kcal100g: Double,
+    @SerialName("protein_100g") val protein100g: Double,
+    @SerialName("fat_100g") val fat100g: Double,
+    @SerialName("carb_100g") val carb100g: Double,
+    val portions: List<PortionIn> = emptyList(),
+)
 
 @Serializable
 data class FoodOut(
@@ -175,8 +225,16 @@ data class DiaryAddIn(
     @SerialName("entry_date") val entryDate: String,
     val meal: Meal,
     @SerialName("food_id") val foodId: Int,
-    val grams: Double,
+    val grams: Double? = null,
+    @SerialName("portion_id") val portionId: Int? = null,
+    @SerialName("portion_count") val portionCount: Double? = null,
 )
+
+@Serializable
+data class DiaryUpdateIn(val grams: Double)
+
+@Serializable
+data class CopyResult(val copied: Int = 0)
 
 // ---- weight ----
 
@@ -188,6 +246,7 @@ data class WeightLogIn(
 
 @Serializable
 data class WeightPoint(
+    val id: Int = 0,
     @SerialName("logged_on") val loggedOn: String,
     @SerialName("weight_kg") val weightKg: Double,
     @SerialName("trend_kg") val trendKg: Double,
@@ -270,6 +329,14 @@ data class GoalOut(
 )
 
 @Serializable
+data class IntakePoint(
+    val day: String,
+    val logged: Boolean,
+    val kcal: Double? = null,
+    @SerialName("protein_g") val proteinG: Double? = null,
+)
+
+@Serializable
 data class TrendsOut(
     @SerialName("target_kcal") val targetKcal: Double,
     @SerialName("target_protein_g") val targetProteinG: Double,
@@ -277,6 +344,7 @@ data class TrendsOut(
     @SerialName("target_carb_g") val targetCarbG: Double,
     val week: PeriodSummary,
     val month: PeriodSummary,
+    val daily: List<IntakePoint> = emptyList(),
     val pace: PaceOut? = null,
     val goal: GoalOut,
 )
@@ -305,6 +373,18 @@ data class RecipeLogIn(
     val meal: Meal,
 )
 
+@Serializable
+data class RecipeComponentIn(
+    @SerialName("food_id") val foodId: Int,
+    val grams: Double,
+)
+
+@Serializable
+data class RecipeCreate(
+    val name: String,
+    val components: List<RecipeComponentIn>,
+)
+
 // ---- coaching ----
 
 @Serializable
@@ -312,3 +392,35 @@ data class GuidanceItem(val kind: String, val message: String)
 
 @Serializable
 data class DayGuidance(val items: List<GuidanceItem>)
+
+@Serializable
+data class Hint(val key: String, val title: String, val body: String)
+
+@Serializable
+data class Warning(
+    val type: String,
+    val title: String,
+    val message: String,
+    @SerialName("auto_show") val autoShow: Boolean = false,
+)
+
+// ---- reminders ----
+
+@Serializable
+data class ReminderPrefs(
+    val enabled: Boolean = false,
+    val timezone: String = "UTC",
+    val locale: String = "en",
+    @SerialName("weigh_in_enabled") val weighInEnabled: Boolean = false,
+    @SerialName("weigh_in_time") val weighInTime: String = "08:00",
+    @SerialName("log_meals_enabled") val logMealsEnabled: Boolean = false,
+    @SerialName("log_meals_time") val logMealsTime: String = "20:00",
+)
+
+@Serializable
+data class ReminderConfig(
+    @SerialName("vapid_public_key") val vapidPublicKey: String = "",
+    @SerialName("push_enabled") val pushEnabled: Boolean = false,
+    val prefs: ReminderPrefs = ReminderPrefs(),
+    val subscriptions: Int = 0,
+)

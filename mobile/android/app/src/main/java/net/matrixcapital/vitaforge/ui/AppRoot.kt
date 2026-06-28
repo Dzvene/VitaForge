@@ -96,7 +96,11 @@ private fun MainScaffold(session: SessionViewModel) {
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             when (tab) {
-                Tab.TODAY -> DashboardScreen()
+                Tab.TODAY -> DashboardScreen(
+                    onLogFood = { tab = Tab.DIARY },
+                    onOpenCalibration = { tab = Tab.CALIBRATE },
+                    onOpenWeight = { tab = Tab.WEIGHT },
+                )
                 Tab.DIARY -> DiaryScreen()
                 Tab.WEIGHT -> WeightScreen()
                 Tab.CALIBRATE -> CalibrationScreen()
