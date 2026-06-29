@@ -1,16 +1,18 @@
-"""Import Open Food Facts — EU + RU-relevant branded products, with localized names.
+"""Import Open Food Facts — the full dump, ranked, with localized names.
 
-The full OFF dump is ~12 GB gzipped / ~100 GB raw, and most of it is US products
-that do nothing for our users. This importer **streams** the JSONL (decompressed
-on the fly — never stored), keeps products sold in the European markets that
-actually share German/Austrian shelves plus the Russian-speaking neighbours
-(see ``_KEEP_COUNTRIES``) — or any product that carries a German/Russian name —
-and maps OFF's per-language name fields into our bilingual columns
-(`name_ru`/`name_de`/`aliases`) so the search we built pays off for branded items.
+The full OFF dump is ~12 GB gzipped / ~100 GB raw. This importer **streams** the
+JSONL (decompressed on the fly — never stored) and keeps every product with a
+usable energy value and name, for complete barcode coverage. It does NOT drop
+the rest of the world: instead it tags each row with a search-ranking `priority`
+— products sold in DACH/RU markets (see ``_KEEP_COUNTRIES``) or carrying a
+German/Russian name get priority 1 (rank with the curated catalog), everything
+else gets priority 0 (worldwide bulk, kept for barcode lookups but pushed below
+the relevant rows in name search). OFF's per-language name fields are mapped into
+our bilingual columns (`name_ru`/`name_de`/`aliases`).
 
-Scope note (2026-06-26): the original DACH/RU-only filter topped out at ~18.5k
-matches (a full dump re-scan added 0 new). Broadened to the EU core + RU
-neighbours below to give real barcode coverage for products sold in Germany.
+Scope history (2026-06-29): earlier revisions *filtered* the dump down to a
+DACH/RU subset (~64k) to protect search quality. With ranking now done by the
+`priority` column, we load the whole dump for full barcode coverage instead.
 
 Usage — stream straight from the dump with zero disk footprint:
 
@@ -110,12 +112,14 @@ def _map(row: dict) -> dict | None:
     if not name:
         return None
 
-    # Relevance gate: sold in DACH/RU, OR carries a German/Russian name. Keeps the
-    # import to what helps a RU/DE user instead of dumping the whole world.
+    # We now load the *whole* OFF dump for full barcode coverage, but rank it:
+    # products sold in DACH/RU markets — or carrying a German/Russian name —
+    # are "relevant" (priority 1) and rank with the curated catalog; everything
+    # else is worldwide bulk (priority 0), kept for barcode lookups but pushed
+    # below the relevant rows in name search so it never pollutes results.
     countries = row.get("countries_tags") or []
     in_region = isinstance(countries, list) and not _KEEP_COUNTRIES.isdisjoint(countries)
-    if not in_region and not name_de and not name_ru:
-        return None
+    priority = 1 if (in_region or name_de or name_ru) else 0
 
     try:
         macros = {
@@ -136,6 +140,7 @@ def _map(row: dict) -> dict | None:
 
     return {
         "source": _SOURCE,
+        "priority": priority,
         "barcode": str(row["code"])[:32] if row.get("code") else None,
         "name": name[:512],
         "name_ru": name_ru[:512] if name_ru else None,

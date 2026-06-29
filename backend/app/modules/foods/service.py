@@ -73,8 +73,9 @@ class FoodService:
         # Relevance, not alphabetical (the catalog is ~2M rows; "chicken" must not
         # surface "Abc chicken brand X" before plain "Chicken"). Portable ordering
         # that works on both Postgres (prod, trigram GIN indexes) and SQLite
-        # (tests): prefix match first, then generic foods (no brand) over branded,
-        # then the shorter / more canonical name.
+        # (tests): curated/region-relevant tier first (so the worldwide OFF bulk
+        # never outranks the local catalog), then prefix match, then generic foods
+        # (no brand) over branded, then the shorter / more canonical name.
         prefix_first = case(
             (
                 or_(
@@ -90,7 +91,13 @@ class FoodService:
         stmt = (
             select(Food)
             .where(self._visible(user_id), matches)
-            .order_by(prefix_first, generic_first, func.length(Food.name), Food.name)
+            .order_by(
+                Food.priority.desc(),
+                prefix_first,
+                generic_first,
+                func.length(Food.name),
+                Food.name,
+            )
             .limit(limit)
         )
         return list((await self.db.execute(stmt)).scalars().all())

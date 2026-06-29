@@ -4,6 +4,29 @@ Newest first. One entry per work session. Honest, not hype.
 
 ---
 
+## 2026-06-30 — Production deploy на vita-forge.app
+
+Первый деплой на продакшн-сервер (`82.165.134.230`).
+
+- Склонировано в `/root/projects/VitaForge`, создан `backend/.env` с production-значениями (APP_ENV=production, секреты сгенерированы).
+- `docker-compose.prod.yml` обновлён: домены `vitaforge.matrix-capital.net` → `vita-forge.app`; `NEXT_PUBLIC_API_BASE` → `https://api.vita-forge.app/api/v1`.
+- Nginx конфиги созданы для `vita-forge.app` (3630), `api.vita-forge.app` (8130), `admin.vita-forge.app` (3631).
+- SSL сертификаты Let's Encrypt получены для всех трёх доменов (действуют до 2026-09-27, autorenewal включён).
+- Контейнеры подняты: `docker compose -f docker-compose.prod.yml -p vitaforge up -d --build`. Миграции применились автоматически при старте бэкенда (все 9 миграций).
+- Все сервисы отвечают: backend 401 (auth required), frontend 200, admin 200.
+
+**Открытая проблема — `ERR_SSL_PROTOCOL_ERROR` в браузере пользователя.**
+
+SSL на сервере работает корректно (openssl + curl с `--resolve` → TLSv1.3, 200 OK). DNS записи в IONOS выставлены правильно (`A @ → 82.165.134.230`). Проблема на стороне клиента: роутер пользователя (`o2.spot`, немецкий O2) кеширует старую DNS-запись (старый IP `217.160.0.15`). Chrome использует Happy Eyeballs и приоритизирует IPv6; роутер, вероятно, отдаёт кешированную AAAA-запись старого сервера.
+
+**Workaround**: добавить в `C:\Windows\System32\drivers\etc\hosts`:
+```
+82.165.134.230 vita-forge.app
+```
+Либо перезагрузить роутер. Проблема самоустранится после истечения TTL кеша в роутере.
+
+---
+
 ## 2026-06-26 — Native push backend (APNs + FCM)
 
 The one mobile-push piece that can be built *and* verified here on the server
@@ -1086,3 +1109,15 @@ https://api-vitaforge.matrix-capital.net/health → ok, catalog populated.
 **Still open:** coaching copy is first-pass/placeholder; calibration soft-degrade
 gap thresholds want field tuning; no OFF/USDA dump downloaded yet (only seed +
 importers ready); mobile apps not started.
+
+## 2026-06-29 — Перенос на vita-forge.app (сервер 82.165.134.230) + full-OFF каталог с ранжированием
+
+**Переезд со старого сервера 217.154.149.153.** Домен `vitaforge.matrix-capital.net` → **vita-forge.app** (+ admin.vita-forge.app). `.env`: `CORS_ORIGINS=https://vita-forge.app,https://admin.vita-forge.app`, `FRONTEND_BASE_URL=https://vita-forge.app`. БД нового сервера приехала ПУСТОЙ — каталог `foods` (522 964) + `food_portions` (154) перенесён вручную стримом `pg_dump --data-only -t foods -t food_portions | ssh | psql --single-transaction` (14 сек, sequence выставлен). Личные данные (3 юзера старого сервера) НЕ переносил — на новом 1 свежий owner-аккаунт. Старый сервер 217 ещё жив.
+
+**Full OFF + priority-ранжирование.** Владелец велел снять DACH/RU-фильтр OFF и залить весь дамп ради barcode-покрытия, но так, чтобы зарубежный bulk не засорял поиск по названию:
+- Миграция `c9d0e1f2a3b4`: колонка `foods.priority` SMALLINT `server_default "1"` (все существующие строки → relevant=1).
+- `scripts/import_off.py`: убран фильтр-гейт (`if not in_region and not name_de and not name_ru: return None`); вместо дропа ставит `priority=1` (in-region по `_KEEP_COUNTRIES` ИЛИ есть DE/RU-имя) либо `priority=0` (мировой bulk). Docstring обновлён.
+- `app/modules/foods/service.py` `search()`: `Food.priority.desc()` добавлен ПЕРВЫМ ключом ORDER BY (перед prefix/generic/length/name) → bulk всплывает только когда relevant-совпадений < limit. Модель `Food.priority default=1` => USDA/staples/custom вставки сами получают 1 (import_foods.py/сервис не трогал).
+- Импорт (stream `curl static.openfoodfacts.org/.../openfoodfacts-products.jsonl.gz | gunzip | docker exec -i vitaforge-backend python -m scripts.import_off --stdin`): scanned 4 585 292, +922 821 вставлено (все priority 0), skipped 3 662 471. Каталог 522 964 → **1 445 785** (relevant 522 964 / bulk 922 821). Штрихкоды 514 733 → **1 437 554** (×2.8). `VACUUM ANALYZE foods` прогнан.
+- Тесты foods/recipes/diary зелёные (throwaway-контейнер с bind-mount репо; прод-образ tests/ не содержит). Ranking-смоук подтверждён: топ «chocolate»/«milk» = priority 1, live API совпадает. FoodOut `priority` наружу не отдаёт.
+- ⚠️ Изменения scp'нуты в working-tree + backend пересобран (`up -d --build backend`), миграция накатана — но НЕ закоммичены (репо 217=a86454b и 82=5eff008 разошлись; коммит по просьбе владельца).

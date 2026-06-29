@@ -1,9 +1,10 @@
 # =============================================================================
 # VitaForge — Docker Compose (Production)
 # =============================================================================
-#   vitaforge.matrix-capital.net      → frontend  (127.0.0.1:3630)
-#   api-vitaforge.matrix-capital.net  → backend   (127.0.0.1:8130)
-#   postgres                          → internal only (compose network)
+#   vita-forge.app        → frontend  (127.0.0.1:3630)
+#   api.vita-forge.app    → backend   (127.0.0.1:8130)
+#   admin.vita-forge.app  → admin     (127.0.0.1:3631)
+#   postgres              → internal only (compose network)
 #
 # External access via the host's nginx reverse proxy + Let's Encrypt.
 # Run with:  docker compose -f docker-compose.prod.yml -p vitaforge up -d --build
@@ -41,7 +42,7 @@ services:
     build:
       context: ./frontend
       args:
-        NEXT_PUBLIC_API_BASE: https://api-vitaforge.matrix-capital.net/api/v1
+        NEXT_PUBLIC_API_BASE: https://api.vita-forge.app/api/v1
     container_name: vitaforge-frontend
     restart: unless-stopped
     ports:
@@ -53,7 +54,7 @@ services:
     build:
       context: ./admin
       args:
-        NEXT_PUBLIC_API_BASE: https://api-vitaforge.matrix-capital.net/api/v1
+        NEXT_PUBLIC_API_BASE: https://api.vita-forge.app/api/v1
     container_name: vitaforge-admin
     restart: unless-stopped
     ports:
