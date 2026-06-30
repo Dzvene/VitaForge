@@ -14,8 +14,8 @@ UPLOAD_DIR = Path("/data/photos")
 
 
 def _url(filename: str) -> str:
-    base = settings.FRONTEND_BASE_URL.rstrip("/")
-    return f"{base}/api/v1/photos/file/{filename}"
+    base = settings.PUBLIC_API_BASE.rstrip("/")
+    return f"{base}/photos/file/{filename}"
 
 
 class PhotoService:

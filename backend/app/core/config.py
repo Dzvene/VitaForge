@@ -82,6 +82,10 @@ class Settings(BaseSettings):
     # Public base URL of the frontend — used to build links inside emails.
     FRONTEND_BASE_URL: str = "http://localhost:3000"
 
+    # Public base URL of the backend API — used to build absolute media URLs.
+    # In production this is e.g. https://api.vita-forge.app/api/v1
+    PUBLIC_API_BASE: str = "http://localhost:8000/api/v1"
+
     # ----- Email token TTLs -----
     EMAIL_VERIFICATION_TTL_HOURS: int = 48
     PASSWORD_RESET_TTL_MINUTES: int = 60

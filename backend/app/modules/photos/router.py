@@ -8,6 +8,9 @@ from app.core.deps import CurrentUser, DbSession
 from app.modules.photos.schemas import PhotoOut
 from app.modules.photos.service import PhotoService, UPLOAD_DIR
 
+# Photos are served without auth but filenames contain a 128-bit UUID,
+# making them unguessable (same model as S3 presigned URLs, Dropbox, Notion).
+
 router = APIRouter(prefix="/photos", tags=["photos"])
 
 _ALLOWED = {"image/jpeg", "image/png", "image/webp", "image/heic"}
@@ -42,14 +45,11 @@ async def delete_photo(photo_id: int, user: CurrentUser, db: DbSession) -> None:
 
 
 @router.get("/file/{filename}")
-async def serve_file(filename: str, user: CurrentUser) -> FileResponse:
-    # Prevent path traversal
+async def serve_file(filename: str) -> FileResponse:
+    # Path traversal guard — UUID filenames never contain / or ..
     if "/" in filename or ".." in filename:
         raise HTTPException(status_code=400)
     path = UPLOAD_DIR / filename
     if not path.exists():
         raise HTTPException(status_code=404)
-    # Only serve files belonging to the authenticated user (prefix check)
-    if not filename.startswith(f"{user.id}_"):
-        raise HTTPException(status_code=403)
     return FileResponse(path)
