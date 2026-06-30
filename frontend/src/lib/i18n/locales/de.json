@@ -53,8 +53,8 @@
     "settings": "Einstellungen",
     "admin": "Admin",
     "tagline": "kalibrieren · erfassen · anpassen",
-    "owner": "Inhaber",
-    "member": "Mitglied"
+    "member": "Mitglied",
+    "more": "Mehr"
   },
   "enums": {
     "meal": {

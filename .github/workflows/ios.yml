@@ -1,0 +1,65 @@
+name: iOS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "mobile/ios/**"
+      - ".github/workflows/ios.yml"
+  pull_request:
+    paths:
+      - "mobile/ios/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: mobile/ios
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Set Development Team
+        run: |
+          sed -i '' "s/DEVELOPMENT_TEAM = \"\"/DEVELOPMENT_TEAM = ${{ secrets.APPLE_TEAM_ID }}/" VitaForge.xcodeproj/project.pbxproj
+
+      - name: Build (simulator)
+        run: |
+          xcodebuild build \
+            -project VitaForge.xcodeproj \
+            -scheme VitaForge \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -configuration Debug \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            | xcpretty || true
+
+      - name: Archive (App Store)
+        if: github.ref == 'refs/heads/main'
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          xcodebuild archive \
+            -project VitaForge.xcodeproj \
+            -scheme VitaForge \
+            -configuration Release \
+            -archivePath $RUNNER_TEMP/VitaForge.xcarchive \
+            DEVELOPMENT_TEAM=$APPLE_TEAM_ID \
+            | xcpretty
+
+      - name: Upload archive artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: VitaForge.xcarchive
+          path: ${{ runner.temp }}/VitaForge.xcarchive
+          retention-days: 14

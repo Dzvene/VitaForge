@@ -53,8 +53,8 @@
     "settings": "Settings",
     "admin": "Admin",
     "tagline": "calibrate · track · adapt",
-    "owner": "Owner",
-    "member": "Member"
+    "member": "Member",
+    "more": "More"
   },
   "enums": {
     "meal": {

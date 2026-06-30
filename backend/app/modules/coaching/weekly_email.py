@@ -145,7 +145,7 @@ async def _weekly_tick() -> None:
     from datetime import datetime
 
     async with AsyncSessionLocal() as db:
-        from app.modules.auth.models import User
+        from app.modules.identity.models import User
         from app.modules.reminders.models import ReminderPrefs
 
         # Find users with reminders prefs (has timezone) who have email enabled

@@ -13,9 +13,10 @@ import {
   LayoutDashboard,
   LineChart,
   LogOut,
+  MoreHorizontal,
   Settings,
-  Shield,
   Sliders,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "@/lib/store/auth";
@@ -23,13 +24,12 @@ import { cn } from "@/lib/cn";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { VerifyEmailBanner } from "@/components/app-shell/VerifyEmailBanner";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 
 interface NavItem {
   href: string;
   labelKey: string;
   icon: LucideIcon;
-  admin?: boolean;
 }
 
 const NAV: NavItem[] = [
@@ -42,7 +42,6 @@ const NAV: NavItem[] = [
   { href: "/progress", labelKey: "nav.progress", icon: Camera },
   { href: "/calibration", labelKey: "nav.calibration", icon: Sliders },
   { href: "/settings", labelKey: "nav.settings", icon: Settings },
-  { href: "/admin", labelKey: "nav.admin", icon: Shield, admin: true },
 ];
 
 function Brand() {
@@ -65,14 +64,16 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { t } = useTranslation();
   const { user, clear } = useAuth();
-  const isAdmin = user?.role === "admin";
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const logout = () => {
     clear();
     router.replace("/login");
   };
 
-  const items = NAV.filter((n) => !n.admin || isAdmin);
+  const items = NAV;
+  const primaryItems = items.slice(0, 4);
+  const secondaryItems = items.slice(4);
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-6xl">
@@ -107,7 +108,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="flex items-center justify-between rounded-xl bg-surface-2 px-3 py-2.5">
             <div className="min-w-0">
               <p className="truncate text-xs font-medium text-ink">{user?.full_name || user?.email}</p>
-              <p className="text-[11px] text-ink-faint">{isAdmin ? t("nav.owner") : t("nav.member")}</p>
+              <p className="text-[11px] text-ink-faint">{t("nav.member")}</p>
             </div>
             <button onClick={logout} className="rounded-lg p-1.5 text-ink-muted hover:bg-surface-3 hover:text-danger" aria-label={t("common.logOut")}>
               <LogOut className="h-4 w-4" />
@@ -140,7 +141,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Bottom nav (mobile) */}
       <nav className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-around border-t border-line bg-surface/95 px-2 py-2 backdrop-blur md:hidden">
-        {items.slice(0, 5).map((it) => {
+        {primaryItems.map((it) => {
           const active = pathname === it.href || pathname.startsWith(it.href + "/");
           return (
             <Link
@@ -158,7 +159,61 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           );
         })}
+        <button
+          onClick={() => setMoreOpen(true)}
+          className={cn(
+            "flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-[10px] font-medium transition-colors",
+            secondaryItems.some((it) => pathname === it.href || pathname.startsWith(it.href + "/"))
+              ? "bg-brand-500/10 text-brand-400"
+              : "text-ink-faint hover:text-ink-muted",
+          )}
+        >
+          <MoreHorizontal className="h-5 w-5" />
+          {t("nav.more")}
+        </button>
       </nav>
+
+      {/* More sheet (mobile) */}
+      {moreOpen && (
+        <div className="fixed inset-0 z-40 md:hidden" onClick={() => setMoreOpen(false)}>
+          <div className="absolute inset-0 bg-black/40" />
+          <div
+            className="absolute inset-x-0 bottom-0 rounded-t-2xl border-t border-line bg-surface p-4 pb-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-sm font-semibold text-ink">{t("nav.more")}</p>
+              <button
+                onClick={() => setMoreOpen(false)}
+                className="rounded-lg p-1.5 text-ink-muted hover:bg-surface-2"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {secondaryItems.map((it) => {
+                const active = pathname === it.href || pathname.startsWith(it.href + "/");
+                return (
+                  <Link
+                    key={it.href}
+                    href={it.href}
+                    onClick={() => setMoreOpen(false)}
+                    className={cn(
+                      "flex flex-col items-center gap-1.5 rounded-xl px-2 py-3 text-xs font-medium transition-colors",
+                      active
+                        ? "bg-brand-500/10 text-brand-400"
+                        : "bg-surface-2 text-ink-muted hover:bg-surface-3 hover:text-ink",
+                    )}
+                  >
+                    <it.icon className="h-5 w-5" />
+                    {t(it.labelKey)}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
