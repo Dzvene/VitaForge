@@ -16,6 +16,7 @@ import type {
   LegalContentOut,
   Meal,
   ParamsView,
+  PhotoOut,
   ProfileOut,
   ProfileUpsert,
   RecipeCreate,
@@ -28,6 +29,8 @@ import type {
   TrendsOut,
   UserOut,
   Warning,
+  WaterDaySummary,
+  WaterLogOut,
   WeightSeries,
 } from "@/lib/api/types";
 
@@ -190,6 +193,20 @@ export const coaching = {
     api<void>(`/coaching/warnings/${type}/accept`, { method: "POST" }),
   dismiss: (type: string) =>
     api<void>(`/coaching/warnings/${type}/dismiss`, { method: "POST" }),
+};
+
+export const water = {
+  day: (date: string) => api<WaterDaySummary>(`/water/${date}`),
+  log: (body: { logged_on: string; ml: number }) =>
+    api<WaterLogOut>("/water", { method: "POST", body }),
+  remove: (id: number) => api<void>(`/water/${id}`, { method: "DELETE" }),
+};
+
+export const photos = {
+  list: () => api<PhotoOut[]>("/photos"),
+  upload: (formData: FormData) =>
+    api<PhotoOut>("/photos", { method: "POST", formData }),
+  remove: (id: number) => api<void>(`/photos/${id}`, { method: "DELETE" }),
 };
 
 export const reminders = {

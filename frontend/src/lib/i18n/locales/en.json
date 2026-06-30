@@ -21,6 +21,7 @@
     "loading": "Loading…",
     "retry": "Retry",
     "logOut": "Log out",
+    "details": "Details",
     "continue": "Continue",
     "create": "Create",
     "today": "Today",
@@ -47,6 +48,8 @@
     "weight": "Weight",
     "trends": "Trends",
     "calibration": "Calibration",
+    "water": "Water",
+    "progress": "Progress",
     "settings": "Settings",
     "admin": "Admin",
     "tagline": "calibrate · track · adapt",
@@ -680,5 +683,38 @@
   "legal": {
     "backHome": "Back to home",
     "lastUpdated": "Last updated"
+  },
+  "water": {
+    "title": "Water",
+    "eyebrow": "Hydration",
+    "ml": "ml",
+    "liters": "L",
+    "quickAdd": "Quick add",
+    "todayLog": "Today's log",
+    "logged": "Water logged",
+    "removed": "Entry removed",
+    "logError": "Couldn't log water"
+  },
+  "progress": {
+    "title": "Progress Photos",
+    "eyebrow": "Body composition",
+    "subtitle": "Visual progress over time",
+    "addPhoto": "Add photo",
+    "addFirstPhoto": "Add your first photo",
+    "takenOn": "Date",
+    "weightOptional": "Weight (optional)",
+    "noteOptional": "Note (optional)",
+    "notePlaceholder": "e.g. Front view, 8 weeks in",
+    "savePhoto": "Save photo",
+    "photoSaved": "Photo saved",
+    "photoRemoved": "Photo removed",
+    "uploadError": "Upload failed",
+    "deleteConfirm": "Delete this photo?",
+    "emptyTitle": "No photos yet",
+    "emptyHint": "Track your visual progress by uploading photos regularly"
+  },
+  "voice": {
+    "start": "Start voice input",
+    "stop": "Stop recording"
   }
 }

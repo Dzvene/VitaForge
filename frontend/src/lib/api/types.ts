@@ -287,6 +287,28 @@ export interface RecipeCreate {
   components: RecipeComponentIn[];
 }
 
+// ----- water -----
+export interface WaterLogOut {
+  id: number;
+  logged_on: string;
+  ml: number;
+}
+export interface WaterDaySummary {
+  logged_on: string;
+  total_ml: number;
+  goal_ml: number;
+  logs: WaterLogOut[];
+}
+
+// ----- progress photos -----
+export interface PhotoOut {
+  id: number;
+  taken_on: string;
+  url: string;
+  weight_kg: number | null;
+  note: string | null;
+}
+
 export interface ReminderPrefs {
   enabled: boolean;
   timezone: string;

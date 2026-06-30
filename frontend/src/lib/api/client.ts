@@ -18,6 +18,7 @@ export class ApiError extends Error {
 interface RequestOptions {
   method?: string;
   body?: unknown;
+  formData?: FormData;
   query?: Record<string, string | number | undefined>;
   auth?: boolean; // attach bearer (default true)
 }
@@ -85,7 +86,7 @@ async function tryRefresh(): Promise<boolean> {
 }
 
 export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, query, auth = true } = opts;
+  const { method = "GET", body, formData, query, auth = true } = opts;
 
   const send = async (): Promise<Response> => {
     const headers: Record<string, string> = {};
@@ -99,7 +100,7 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
     return fetch(buildUrl(path, query), {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: formData ?? (body !== undefined ? JSON.stringify(body) : undefined),
     });
   };
 

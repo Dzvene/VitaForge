@@ -5,11 +5,12 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import Link from "next/link";
-import { ArrowLeft, Barcode, Camera, ChefHat, Heart, Plus, Search, Star } from "lucide-react";
+import { ArrowLeft, Barcode, Camera, ChefHat, Heart, Mic, MicOff, Plus, Search, Star } from "lucide-react";
 import { diary, foods, recipes } from "@/lib/api/endpoints";
 import { qk } from "@/lib/api/hooks";
 import type { FoodOut, Meal, RecipeOut } from "@/lib/api/types";
 import { Button, Field, Input, Segmented, Spinner } from "@/components/ui/primitives";
+import { useVoiceFood } from "@/hooks/useVoiceFood";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
 import { BarcodeScannerDialog } from "@/components/ui/BarcodeScannerDialog";
@@ -47,6 +48,14 @@ export function AddFoodDialog({
   const [barcode, setBarcode] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
   const [selected, setSelected] = useState<FoodOut | null>(null);
+
+  const voice = useVoiceFood({
+    onResult: (text) => {
+      setTab("search");
+      setQuery(text);
+      setSubmitted(text);
+    },
+  });
 
   const lookup = useMutation({
     mutationFn: (code: string) => foods.byBarcode(code),
@@ -164,6 +173,20 @@ export function AddFoodDialog({
                   autoFocus
                 />
               </div>
+              {voice.supported && (
+                <button
+                  type="button"
+                  onClick={voice.toggle}
+                  className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl border transition-colors ${
+                    voice.listening
+                      ? "border-brand-500/40 bg-brand-500/15 text-brand-400 animate-pulse"
+                      : "border-line bg-surface-2 text-ink-muted hover:border-line-strong hover:text-ink"
+                  }`}
+                  aria-label={voice.listening ? t("voice.stop") : t("voice.start")}
+                >
+                  {voice.listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                </button>
+              )}
               <Button type="submit" variant="secondary">
                 {t("diary.addFood.go")}
               </Button>

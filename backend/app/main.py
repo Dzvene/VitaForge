@@ -66,15 +66,22 @@ async def lifespan(_app: FastAPI):
     import asyncio
 
     from app.modules.reminders.scheduler import run_scheduler, should_run
+    from app.modules.coaching.weekly_email import run_weekly_email_scheduler
 
     scheduler_task: asyncio.Task | None = None
     if should_run():
         scheduler_task = asyncio.create_task(run_scheduler())
 
+    weekly_task: asyncio.Task | None = None
+    if settings.email_enabled and settings.APP_ENV != "test":
+        weekly_task = asyncio.create_task(run_weekly_email_scheduler())
+
     yield
 
     if scheduler_task is not None:
         scheduler_task.cancel()
+    if weekly_task is not None:
+        weekly_task.cancel()
     logger.info("Shutting down %s", settings.APP_NAME)
 
 
@@ -125,6 +132,8 @@ from app.modules.profile.router import router as profile_router  # noqa: E402
 from app.modules.public.router import router as public_router  # noqa: E402
 from app.modules.recipes.router import router as recipes_router  # noqa: E402
 from app.modules.reminders.router import router as reminders_router  # noqa: E402
+from app.modules.water.router import router as water_router  # noqa: E402
+from app.modules.photos.router import router as photos_router  # noqa: E402
 from app.modules.weight.router import router as weight_router  # noqa: E402
 
 api_v1 = settings.API_V1_PREFIX
@@ -139,6 +148,8 @@ for r in (
     diary_router,
     recipes_router,
     reminders_router,
+    water_router,
+    photos_router,
     weight_router,
     calibration_router,
     coaching_router,

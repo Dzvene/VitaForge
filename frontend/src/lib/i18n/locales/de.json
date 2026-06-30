@@ -21,6 +21,7 @@
     "loading": "Wird geladen…",
     "retry": "Erneut versuchen",
     "logOut": "Abmelden",
+    "details": "Details",
     "continue": "Weiter",
     "create": "Erstellen",
     "today": "Heute",
@@ -47,6 +48,8 @@
     "weight": "Gewicht",
     "trends": "Trends",
     "calibration": "Kalibrierung",
+    "water": "Wasser",
+    "progress": "Fortschritt",
     "settings": "Einstellungen",
     "admin": "Admin",
     "tagline": "kalibrieren · erfassen · anpassen",
@@ -680,5 +683,38 @@
   "legal": {
     "backHome": "Zur Startseite",
     "lastUpdated": "Zuletzt aktualisiert"
+  },
+  "water": {
+    "title": "Wasser",
+    "eyebrow": "Hydratation",
+    "ml": "ml",
+    "liters": "L",
+    "quickAdd": "Schnell hinzufügen",
+    "todayLog": "Heutiges Protokoll",
+    "logged": "Wasser erfasst",
+    "removed": "Eintrag entfernt",
+    "logError": "Konnte nicht erfasst werden"
+  },
+  "progress": {
+    "title": "Fortschrittsfotos",
+    "eyebrow": "Körperzusammensetzung",
+    "subtitle": "Visueller Fortschritt über die Zeit",
+    "addPhoto": "Foto hinzufügen",
+    "addFirstPhoto": "Erstes Foto hinzufügen",
+    "takenOn": "Datum",
+    "weightOptional": "Gewicht (optional)",
+    "noteOptional": "Notiz (optional)",
+    "notePlaceholder": "z.B. Frontansicht, 8 Wochen",
+    "savePhoto": "Foto speichern",
+    "photoSaved": "Foto gespeichert",
+    "photoRemoved": "Foto entfernt",
+    "uploadError": "Upload fehlgeschlagen",
+    "deleteConfirm": "Dieses Foto löschen?",
+    "emptyTitle": "Noch keine Fotos",
+    "emptyHint": "Verfolge deinen Fortschritt durch regelmäßige Fotos"
+  },
+  "voice": {
+    "start": "Spracheingabe starten",
+    "stop": "Aufnahme stoppen"
   }
 }

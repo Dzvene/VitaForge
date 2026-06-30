@@ -7,8 +7,10 @@ import {
   coaching,
   diary,
   nutrition,
+  photos,
   profile,
   recipes,
+  water,
   weight,
 } from "@/lib/api/endpoints";
 
@@ -24,6 +26,8 @@ export const qk = {
   recent: ["diary", "recent"] as const,
   trends: ["analytics", "trends"] as const,
   recipes: ["recipes"] as const,
+  water: (d: string) => ["water", d] as const,
+  photos: ["photos"] as const,
 };
 
 export const useTrends = () =>
@@ -55,3 +59,9 @@ export const useWarnings = () =>
 
 export const useHints = () =>
   useQuery({ queryKey: qk.hints, queryFn: coaching.hints, staleTime: Infinity });
+
+export const useWaterDay = (day: string) =>
+  useQuery({ queryKey: qk.water(day), queryFn: () => water.day(day) });
+
+export const usePhotos = () =>
+  useQuery({ queryKey: qk.photos, queryFn: photos.list });

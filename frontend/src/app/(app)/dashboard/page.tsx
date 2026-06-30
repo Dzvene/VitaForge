@@ -12,6 +12,7 @@ import { useDayLabel } from "@/lib/i18n/useDayLabel";
 import { Badge, Button, Card, CardTitle, Input, Skeleton } from "@/components/ui/primitives";
 import { CalorieRing, MacroBar } from "@/components/ui/charts";
 import { GuidanceList, HintsRail, WarningList } from "@/components/coaching/coaching";
+import { WaterWidget } from "@/components/water/WaterWidget";
 import { useToast } from "@/components/ui/toast";
 
 export default function DashboardPage() {
@@ -236,6 +237,9 @@ export default function DashboardPage() {
               )}
             </div>
           </Card>
+
+          {/* Water widget */}
+          <WaterWidget />
 
           {/* Target calories summary */}
           {target.data && (
