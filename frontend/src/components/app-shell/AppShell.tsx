@@ -85,11 +85,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                   active
-                    ? "bg-surface-3 text-ink ring-1 ring-line-strong"
-                    : "text-ink-muted hover:bg-surface-2 hover:text-ink",
+                    ? "border-l-[3px] border-brand-400 bg-brand-500/8 pl-[9px] text-ink"
+                    : "border-l-[3px] border-transparent text-ink-muted hover:bg-surface-2 hover:text-ink",
                 )}
               >
-                <it.icon className={cn("h-[18px] w-[18px]", active && "text-brand-400")} />
+                <it.icon className={cn("h-[18px] w-[18px] shrink-0", active ? "text-brand-400" : "text-ink-muted")} />
                 {t(it.labelKey)}
               </Link>
             );
@@ -143,8 +143,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               key={it.href}
               href={it.href}
               className={cn(
-                "flex flex-col items-center gap-0.5 rounded-lg px-3 py-1 text-[10px] font-medium",
-                active ? "text-brand-400" : "text-ink-faint",
+                "flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-[10px] font-medium transition-colors",
+                active
+                  ? "bg-brand-500/10 text-brand-400"
+                  : "text-ink-faint hover:text-ink-muted",
               )}
             >
               <it.icon className="h-5 w-5" />

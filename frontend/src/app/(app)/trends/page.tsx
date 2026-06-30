@@ -7,6 +7,7 @@ import { useTrends } from "@/lib/api/hooks";
 import type { GoalOut, PeriodSummary, TrendsOut } from "@/lib/api/types";
 import { fmtKcal, fmtKg, fmtKgSigned } from "@/lib/format";
 import { Badge, Card, CardTitle, EmptyState, Skeleton } from "@/components/ui/primitives";
+import { MACRO_TEXT, MACRO_BG } from "@/components/ui/charts";
 
 export default function TrendsPage() {
   const { t } = useTranslation();
@@ -213,9 +214,9 @@ function PeriodCard({ p, target }: { p: PeriodSummary; target: TrendsOut }) {
           </div>
 
           <div className="mt-4 grid grid-cols-3 gap-3 border-t border-line pt-4 text-center">
-            <Macro label={t("common.protein")} value={p.avg.protein_g} target={target.target_protein_g} />
-            <Macro label={t("common.fat")} value={p.avg.fat_g} target={target.target_fat_g} />
-            <Macro label={t("common.carbs")} value={p.avg.carb_g} target={target.target_carb_g} />
+            <Macro kind="protein" label={t("common.protein")} value={p.avg.protein_g} target={target.target_protein_g} />
+            <Macro kind="fat" label={t("common.fat")} value={p.avg.fat_g} target={target.target_fat_g} />
+            <Macro kind="carb" label={t("common.carbs")} value={p.avg.carb_g} target={target.target_carb_g} />
           </div>
         </>
       ) : (
@@ -258,13 +259,20 @@ function Stat({
   );
 }
 
-function Macro({ label, value, target }: { label: string; value: number; target: number }) {
+function Macro({ kind, label, value, target }: { kind: "protein" | "fat" | "carb"; label: string; value: number; target: number }) {
   const { t } = useTranslation();
+  const pct = target > 0 ? Math.min((value / target) * 100, 100) : 0;
   return (
     <div>
-      <p className="nums text-lg font-semibold">{Math.round(value)}</p>
-      <p className="text-xs text-ink-muted">{label}</p>
-      <p className="nums text-[11px] text-ink-faint">
+      <p className={`nums text-lg font-semibold ${MACRO_TEXT[kind]}`}>{Math.round(value)}</p>
+      <div className="flex items-center justify-center gap-1 text-xs text-ink-muted">
+        <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${MACRO_BG[kind]}`} />
+        {label}
+      </div>
+      <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-surface-3">
+        <div className={`h-full rounded-full ${MACRO_BG[kind]}`} style={{ width: `${pct}%` }} />
+      </div>
+      <p className="nums mt-1 text-[11px] text-ink-faint">
         {t("trends.ofTarget", { target: Math.round(target) })}
       </p>
     </div>

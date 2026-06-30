@@ -54,9 +54,23 @@ export default function WeightPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <p className="label">{t("weight.eyebrow")}</p>
-        <h1 className="text-2xl font-semibold tracking-tight">{t("weight.title")}</h1>
+      <header className="flex items-end justify-between gap-4">
+        <div>
+          <p className="label">{t("weight.eyebrow")}</p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("weight.title")}</h1>
+        </div>
+        {latest && (
+          <div className="text-right">
+            <p className="nums text-4xl font-bold tracking-tight text-ink">
+              {fmtKg(latest.trend_kg, t("common.kg"))}
+            </p>
+            {change !== null && (
+              <p className={`nums text-sm font-medium ${change < 0 ? "text-ok" : change > 0 ? "text-danger" : "text-ink-faint"}`}>
+                {fmtKgSigned(change, t("common.kg"))} {t("weight.sinceStart")}
+              </p>
+            )}
+          </div>
+        )}
       </header>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -110,11 +124,24 @@ export default function WeightPage() {
             </form>
           </Card>
 
-          {change !== null && (
+          {points.length > 0 && (
             <Card>
               <CardTitle>{t("weight.sinceStart")}</CardTitle>
-              <p className="nums text-3xl font-semibold">{fmtKgSigned(change, t("common.kg"))}</p>
-              <p className="mt-1 text-xs text-ink-faint">{t("weight.sinceStartHint", { count: points.length })}</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-surface-2 px-3 py-2.5">
+                  <p className="label">{t("weight.raw")}</p>
+                  <p className="nums mt-1 text-lg font-bold text-ink">{latest ? fmtKg(latest.weight_kg, t("common.kg")) : "—"}</p>
+                </div>
+                <div className="rounded-xl bg-surface-2 px-3 py-2.5">
+                  <p className="label">{t("weight.trend")}</p>
+                  <p className="nums mt-1 text-lg font-bold text-brand-400">{latest ? fmtKg(latest.trend_kg, t("common.kg")) : "—"}</p>
+                </div>
+              </div>
+              {change !== null && (
+                <p className={`nums mt-3 text-sm font-medium ${change < 0 ? "text-ok" : change > 0 ? "text-danger" : "text-ink-faint"}`}>
+                  {fmtKgSigned(change, t("common.kg"))} {t("weight.sinceStartHint", { count: points.length })}
+                </p>
+              )}
             </Card>
           )}
         </div>

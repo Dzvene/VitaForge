@@ -10,6 +10,7 @@ import { addDays, fmtG, fmtKcal, isoDate, MEALS } from "@/lib/format";
 import { useDayLabel } from "@/lib/i18n/useDayLabel";
 import type { Meal } from "@/lib/api/types";
 import { Button, Card, EmptyState, Skeleton } from "@/components/ui/primitives";
+import { MacroDot } from "@/components/ui/charts";
 import { GuidanceList } from "@/components/coaching/coaching";
 import { useToast } from "@/components/ui/toast";
 import { AddFoodDialog } from "./AddFoodDialog";
@@ -105,17 +106,27 @@ export default function DiaryPage() {
       {/* Mini totals */}
       {eaten && target && (
         <div className="card-2 grid grid-cols-4 divide-x divide-line p-0 text-center">
-          {[
-            [t("common.calories"), `${fmtKcal(eaten.kcal)} / ${fmtKcal(target.calories)}`],
-            [t("common.protein"), `${fmtG(eaten.protein_g, t("common.grams"))} / ${fmtG(target.protein_g, t("common.grams"))}`],
-            [t("common.fat"), `${fmtG(eaten.fat_g, t("common.grams"))} / ${fmtG(target.fat_g, t("common.grams"))}`],
-            [t("common.carbs"), `${fmtG(eaten.carb_g, t("common.grams"))} / ${fmtG(target.carb_g, t("common.grams"))}`],
-          ].map(([k, v]) => (
-            <div key={k} className="px-2 py-3">
-              <p className="label">{k}</p>
-              <p className="nums mt-1 text-sm font-medium text-ink">{v}</p>
-            </div>
-          ))}
+          <div className="px-2 py-3">
+            <p className="label">{t("common.calories")}</p>
+            <p className="nums mt-1 text-sm font-medium text-ink">
+              {fmtKcal(eaten.kcal)} / {fmtKcal(target.calories)}
+            </p>
+          </div>
+          {(["protein", "fat", "carb"] as const).map((kind) => {
+            const eatenG = kind === "protein" ? eaten.protein_g : kind === "fat" ? eaten.fat_g : eaten.carb_g;
+            const targetG = kind === "protein" ? target.protein_g : kind === "fat" ? target.fat_g : target.carb_g;
+            const label = kind === "protein" ? t("common.protein") : kind === "fat" ? t("common.fat") : t("common.carbs");
+            const colorClass = kind === "protein" ? "text-macro-protein" : kind === "fat" ? "text-macro-fat" : "text-macro-carb";
+            return (
+              <div key={kind} className="px-2 py-3">
+                <p className="label">{label}</p>
+                <p className={`nums mt-1 text-sm font-semibold ${colorClass}`}>
+                  {fmtG(eatenG, t("common.grams"))}
+                </p>
+                <p className="nums text-[11px] text-ink-faint">/ {fmtG(targetG, t("common.grams"))}</p>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -154,10 +165,13 @@ export default function DiaryPage() {
                     <li key={e.id} className="flex items-center gap-3 py-2.5">
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm text-ink">{e.food_name}</p>
-                        <p className="nums text-xs text-ink-faint">
-                          {fmtG(e.grams, t("common.grams"))} · P {Math.round(e.nutrients.protein_g)} F {Math.round(e.nutrients.fat_g)} C{" "}
-                          {Math.round(e.nutrients.carb_g)}
-                        </p>
+                        <div className="mt-0.5 flex items-center gap-2">
+                          <span className="nums text-xs text-ink-faint">{fmtG(e.grams, t("common.grams"))}</span>
+                          <span className="text-ink-faint/40">·</span>
+                          <MacroDot kind="protein" value={e.nutrients.protein_g} />
+                          <MacroDot kind="fat" value={e.nutrients.fat_g} />
+                          <MacroDot kind="carb" value={e.nutrients.carb_g} />
+                        </div>
                       </div>
                       {editing?.id === e.id ? (
                         <div className="flex items-center gap-1.5">
