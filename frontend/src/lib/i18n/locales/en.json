@@ -224,6 +224,12 @@
       "barcodePlaceholder": "Barcode number…",
       "find": "Find",
       "barcodeNotFound": "No product with that barcode",
+      "scanCamera": "Scan with camera",
+      "scanTitle": "Scan barcode",
+      "scanHint": "Point the camera at a barcode",
+      "scanStarting": "Starting camera…",
+      "scanDenied": "Camera access was denied. Please allow camera access in your browser settings.",
+      "scanUnsupported": "Camera scanning is not supported in this browser.",
       "added": "Added to diary",
       "addError": "Could not add entry",
       "typeToSearch": "Type to search.",
@@ -250,6 +256,7 @@
       "name": "Name",
       "namePlaceholder": "e.g. Homemade granola",
       "brandOptional": "Brand (optional)",
+      "barcodeOptional": "Barcode (optional)",
       "per100g": "Per 100 g",
       "createFood": "Create food"
     },
@@ -588,7 +595,16 @@
     "verifying": "Verifying your email…",
     "verifyOk": "Your email is confirmed. You're all set.",
     "verifyError": "This verification link is invalid or has expired.",
-    "goToDashboard": "Go to dashboard"
+    "goToDashboard": "Go to dashboard",
+    "tosPrefix": "I agree to the",
+    "tosTerms": "Terms of Service",
+    "tosAnd": "and",
+    "tosPrivacy": "Privacy Policy"
+  },
+  "cookie": {
+    "notice": "We use essential cookies to keep you logged in and remember your preferences.",
+    "learnMore": "Cookie policy",
+    "accept": "Got it"
   },
   "onboarding": {
     "title": "Set up your profile",

@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type ReactNode } from "react";
 import { ToastProvider } from "@/components/ui/toast";
+import { CookieBanner } from "@/components/site/CookieBanner";
 import { I18nProvider } from "@/lib/i18n/I18nProvider";
 import i18n from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
@@ -55,7 +56,10 @@ export function Providers({ children }: { children: ReactNode }) {
       <I18nProvider>
         <ThemeInit />
         <LocaleQuerySync />
-        <ToastProvider>{children}</ToastProvider>
+        <ToastProvider>
+          {children}
+          <CookieBanner />
+        </ToastProvider>
       </I18nProvider>
     </QueryClientProvider>
   );

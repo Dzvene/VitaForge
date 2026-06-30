@@ -224,6 +224,12 @@
       "barcodePlaceholder": "Barcode-Nummer…",
       "find": "Suchen",
       "barcodeNotFound": "Kein Produkt mit diesem Barcode",
+      "scanCamera": "Mit Kamera scannen",
+      "scanTitle": "Barcode scannen",
+      "scanHint": "Kamera auf den Barcode richten",
+      "scanStarting": "Kamera wird gestartet…",
+      "scanDenied": "Kamerazugriff verweigert. Bitte in den Browsereinstellungen erlauben.",
+      "scanUnsupported": "Barcode-Scan wird in diesem Browser nicht unterstützt.",
       "added": "Zum Tagebuch hinzugefügt",
       "addError": "Eintrag konnte nicht hinzugefügt werden",
       "typeToSearch": "Tippe zum Suchen.",
@@ -250,6 +256,7 @@
       "name": "Name",
       "namePlaceholder": "z. B. Selbstgemachtes Granola",
       "brandOptional": "Marke (optional)",
+      "barcodeOptional": "Barcode (optional)",
       "per100g": "Pro 100 g",
       "createFood": "Lebensmittel erstellen"
     },
@@ -588,7 +595,16 @@
     "verifying": "E-Mail wird bestätigt…",
     "verifyOk": "Deine E-Mail ist bestätigt. Alles bereit.",
     "verifyError": "Dieser Bestätigungslink ist ungültig oder abgelaufen.",
-    "goToDashboard": "Zum Dashboard"
+    "goToDashboard": "Zum Dashboard",
+    "tosPrefix": "Ich stimme den",
+    "tosTerms": "Nutzungsbedingungen",
+    "tosAnd": "und der",
+    "tosPrivacy": "Datenschutzerklärung"
+  },
+  "cookie": {
+    "notice": "Wir verwenden notwendige Cookies, um Sie eingeloggt zu halten und Ihre Einstellungen zu speichern.",
+    "learnMore": "Cookie-Richtlinie",
+    "accept": "Verstanden"
   },
   "onboarding": {
     "title": "Richte dein Profil ein",

@@ -23,6 +23,7 @@ export default function DiaryPage() {
   const [day, setDay] = useState(isoDate());
   const [addMeal, setAddMeal] = useState<Meal | null>(null);
   const [customOpen, setCustomOpen] = useState(false);
+  const [customBarcode, setCustomBarcode] = useState<string | undefined>();
   const [editing, setEditing] = useState<{ id: number; grams: string } | null>(null);
 
   const summary = useDay(day);
@@ -235,12 +236,17 @@ export default function DiaryPage() {
         onClose={() => setAddMeal(null)}
         day={day}
         defaultMeal={addMeal ?? "breakfast"}
-        onCreateCustom={() => {
+        onCreateCustom={(barcode) => {
           setAddMeal(null);
+          setCustomBarcode(barcode);
           setCustomOpen(true);
         }}
       />
-      <CustomFoodDialog open={customOpen} onClose={() => setCustomOpen(false)} />
+      <CustomFoodDialog
+        open={customOpen}
+        onClose={() => { setCustomOpen(false); setCustomBarcode(undefined); }}
+        initialBarcode={customBarcode}
+      />
     </div>
   );
 }

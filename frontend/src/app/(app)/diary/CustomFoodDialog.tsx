@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { foods } from "@/lib/api/endpoints";
 import { qk } from "@/lib/api/hooks";
@@ -10,11 +10,31 @@ import { Button, Field, Input } from "@/components/ui/primitives";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
 
-export function CustomFoodDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function CustomFoodDialog({
+  open,
+  onClose,
+  initialBarcode,
+}: {
+  open: boolean;
+  onClose: () => void;
+  initialBarcode?: string;
+}) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const toast = useToast();
-  const [f, setF] = useState({ name: "", brand: "", kcal: "", protein: "", fat: "", carb: "" });
+  const [f, setF] = useState({ name: "", brand: "", barcode: "", kcal: "", protein: "", fat: "", carb: "" });
+
+  // Pre-fill barcode when dialog opens with a failed scan barcode.
+  const prevOpen = useRef(false);
+  useEffect(() => {
+    if (open && !prevOpen.current && initialBarcode) {
+      setF((s) => ({ ...s, barcode: initialBarcode }));
+    }
+    if (!open && prevOpen.current) {
+      setF({ name: "", brand: "", barcode: "", kcal: "", protein: "", fat: "", carb: "" });
+    }
+    prevOpen.current = open;
+  }, [open, initialBarcode]);
 
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setF((s) => ({ ...s, [k]: e.target.value }));
@@ -24,6 +44,7 @@ export function CustomFoodDialog({ open, onClose }: { open: boolean; onClose: ()
       const body: FoodCreate = {
         name: f.name.trim(),
         brand: f.brand.trim() || null,
+        barcode: f.barcode.trim() || null,
         kcal_100g: Number(f.kcal),
         protein_100g: Number(f.protein) || 0,
         fat_100g: Number(f.fat) || 0,
@@ -36,7 +57,6 @@ export function CustomFoodDialog({ open, onClose }: { open: boolean; onClose: ()
       qc.invalidateQueries({ queryKey: qk.recent });
       qc.invalidateQueries({ queryKey: ["foods"] });
       toast(t("diary.custom.created"), "ok");
-      setF({ name: "", brand: "", kcal: "", protein: "", fat: "", carb: "" });
       onClose();
     },
     onError: () => toast(t("diary.custom.createError"), "error"),
@@ -56,6 +76,9 @@ export function CustomFoodDialog({ open, onClose }: { open: boolean; onClose: ()
         </Field>
         <Field label={t("diary.custom.brandOptional")}>
           <Input value={f.brand} onChange={set("brand")} />
+        </Field>
+        <Field label={t("diary.custom.barcodeOptional")}>
+          <Input inputMode="numeric" value={f.barcode} onChange={set("barcode")} />
         </Field>
         <p className="label pt-1">{t("diary.custom.per100g")}</p>
         <div className="grid grid-cols-4 gap-3">

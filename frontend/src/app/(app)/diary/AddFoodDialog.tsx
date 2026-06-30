@@ -5,13 +5,14 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import Link from "next/link";
-import { ArrowLeft, Barcode, ChefHat, Heart, Plus, Search, Star } from "lucide-react";
+import { ArrowLeft, Barcode, Camera, ChefHat, Heart, Plus, Search, Star } from "lucide-react";
 import { diary, foods, recipes } from "@/lib/api/endpoints";
 import { qk } from "@/lib/api/hooks";
 import type { FoodOut, Meal, RecipeOut } from "@/lib/api/types";
 import { Button, Field, Input, Segmented, Spinner } from "@/components/ui/primitives";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
+import { BarcodeScannerDialog } from "@/components/ui/BarcodeScannerDialog";
 
 // Common log amounts for foods without named portions (one-tap, still editable).
 const QUICK_GRAMS = [30, 50, 100, 150, 200, 250];
@@ -35,7 +36,7 @@ export function AddFoodDialog({
   onClose: () => void;
   day: string;
   defaultMeal: Meal;
-  onCreateCustom: () => void;
+  onCreateCustom: (barcode?: string) => void;
 }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -44,6 +45,7 @@ export function AddFoodDialog({
   const [query, setQuery] = useState("");
   const [submitted, setSubmitted] = useState("");
   const [barcode, setBarcode] = useState("");
+  const [scannerOpen, setScannerOpen] = useState(false);
   const [selected, setSelected] = useState<FoodOut | null>(null);
 
   const lookup = useMutation({
@@ -52,7 +54,10 @@ export function AddFoodDialog({
       setBarcode("");
       pick(food);
     },
-    onError: () => toast(t("diary.addFood.barcodeNotFound"), "error"),
+    onError: (_err, code) => {
+      // Product not found in DB or OFF → open custom creation with barcode pre-filled.
+      onCreateCustom(code);
+    },
   });
 
   // quantity step
@@ -184,11 +189,28 @@ export function AddFoodDialog({
                   onChange={(e) => setBarcode(e.target.value)}
                 />
               </div>
+              <button
+                type="button"
+                onClick={() => setScannerOpen(true)}
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-line bg-surface-2 text-ink-muted hover:border-line-strong hover:text-ink"
+                aria-label={t("diary.addFood.scanCamera") ?? "Scan with camera"}
+              >
+                <Camera className="h-4 w-4" />
+              </button>
               <Button type="submit" variant="secondary" loading={lookup.isPending}>
                 {t("diary.addFood.find")}
               </Button>
             </form>
           )}
+
+          <BarcodeScannerDialog
+            open={scannerOpen}
+            onDetected={(code) => {
+              setScannerOpen(false);
+              lookup.mutate(code);
+            }}
+            onClose={() => setScannerOpen(false)}
+          />
 
           {tab === "recipes" ? (
             <>
@@ -258,7 +280,7 @@ export function AddFoodDialog({
                 )}
               </div>
 
-              <Button variant="ghost" full onClick={onCreateCustom}>
+              <Button variant="ghost" full onClick={() => onCreateCustom()}>
                 <Plus className="h-4 w-4" /> {t("diary.addFood.createCustom")}
               </Button>
             </>

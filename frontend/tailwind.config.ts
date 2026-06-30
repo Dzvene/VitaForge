@@ -72,10 +72,16 @@ const config: Config = {
         shimmer: {
           "100%": { transform: "translateX(100%)" },
         },
+        "scan-line": {
+          "0%": { transform: "translateY(-44px)" },
+          "50%": { transform: "translateY(44px)" },
+          "100%": { transform: "translateY(-44px)" },
+        },
       },
       animation: {
         "fade-up": "fade-up 0.3s ease-out both",
         shimmer: "shimmer 1.6s infinite",
+        "scan-line": "scan-line 2s ease-in-out infinite",
       },
     },
   },

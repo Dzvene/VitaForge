@@ -21,6 +21,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [tosAccepted, setTosAccepted] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +78,26 @@ export default function RegisterPage() {
             placeholder="••••••••"
           />
         </Field>
-        <Button type="submit" full size="lg" loading={loading}>
+        <label className="flex items-start gap-2.5 text-sm text-ink-muted">
+          <input
+            type="checkbox"
+            required
+            checked={tosAccepted}
+            onChange={(e) => setTosAccepted(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-line accent-brand-500"
+          />
+          <span>
+            {t("auth.tosPrefix")}{" "}
+            <Link href="/legal/terms" className="text-brand-400 hover:underline">
+              {t("auth.tosTerms")}
+            </Link>{" "}
+            {t("auth.tosAnd")}{" "}
+            <Link href="/legal/privacy" className="text-brand-400 hover:underline">
+              {t("auth.tosPrivacy")}
+            </Link>
+          </span>
+        </label>
+        <Button type="submit" full size="lg" loading={loading} disabled={!tosAccepted}>
           {t("auth.createAccount")}
         </Button>
       </form>

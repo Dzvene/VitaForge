@@ -4,6 +4,9 @@ Search hits the local DB only (dumps are imported ahead of time), so it never
 depends on Open Food Facts / USDA uptime (spec §7).
 """
 
+import logging
+
+import httpx
 from sqlalchemy import case, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,6 +14,10 @@ from app.core.i18n import tr
 from app.modules.foods.models import Food, FoodFavorite, FoodPortion
 from app.modules.foods.schemas import FoodCreate
 from app.shared.exceptions import NotFoundError
+
+_log = logging.getLogger(__name__)
+_OFF_URL = "https://world.openfoodfacts.org/api/v2/product/{barcode}.json"
+_OFF_FIELDS = "product_name,product_name_de,product_name_en,brands,nutriments"
 
 
 class FoodService:
@@ -52,7 +59,73 @@ class FoodService:
             )
         ).scalars().first()
         if food is None:
+            food = await self._fetch_off(barcode)
+        if food is None:
             raise NotFoundError(tr("error.barcode_not_found"))
+        return food
+
+    async def _fetch_off(self, barcode: str) -> Food | None:
+        """Query Open Food Facts for a single barcode and cache the result."""
+        try:
+            async with httpx.AsyncClient(timeout=6) as client:
+                r = await client.get(
+                    _OFF_URL.format(barcode=barcode),
+                    params={"fields": _OFF_FIELDS},
+                    headers={"User-Agent": "VitaForge/1.0 (https://vita-forge.app)"},
+                )
+            if r.status_code != 200:
+                return None
+            data = r.json()
+        except Exception:
+            _log.warning("OFF API request failed for barcode %s", barcode)
+            return None
+
+        if data.get("status") != 1:
+            return None
+
+        p = data.get("product", {})
+        n = p.get("nutriments", {})
+
+        # Prefer German name, fall back to English, then generic.
+        name = (
+            p.get("product_name_de")
+            or p.get("product_name_en")
+            or p.get("product_name")
+            or ""
+        ).strip()
+        if not name:
+            return None
+
+        # kcal per 100 g — try direct field first, then convert from kJ.
+        kcal = n.get("energy-kcal_100g") or n.get("energy-kcal")
+        if kcal is None:
+            kj = n.get("energy_100g") or n.get("energy")
+            if kj:
+                kcal = float(kj) / 4.184
+        if not kcal:
+            return None
+
+        food = Food(
+            source="off",
+            barcode=barcode,
+            name=name,
+            name_de=p.get("product_name_de", "").strip() or None,
+            brand=(p.get("brands") or "").strip()[:255] or None,
+            kcal_100g=round(float(kcal), 1),
+            protein_100g=round(float(n.get("proteins_100g") or n.get("proteins") or 0), 1),
+            fat_100g=round(float(n.get("fat_100g") or n.get("fat") or 0), 1),
+            carb_100g=round(float(n.get("carbohydrates_100g") or n.get("carbohydrates") or 0), 1),
+            priority=1,
+        )
+        try:
+            self.db.add(food)
+            await self.db.commit()
+            await self.db.refresh(food)
+            _log.info("OFF live fetch: saved %r barcode=%s", name, barcode)
+        except Exception:
+            await self.db.rollback()
+            _log.warning("OFF live fetch: could not save barcode=%s", barcode)
+            return None
         return food
 
     async def search(self, user_id: int | None, query: str, limit: int = 30) -> list[Food]:
@@ -70,6 +143,18 @@ class FoodService:
             Food.name_de.ilike(like),
             Food.aliases.ilike(like),
         )
+        # Stem fallback: strip the last character to handle Russian/German
+        # morphological endings (e.g. "сарделька" → "сардельк%" hits "сардельки").
+        # Only for queries >= 4 chars to avoid over-broadening short lookups.
+        if len(q) >= 4:
+            stem = f"{q[:-1]}%"
+            matches = or_(
+                matches,
+                Food.name.ilike(stem),
+                Food.name_ru.ilike(stem),
+                Food.name_de.ilike(stem),
+                Food.aliases.ilike(stem),
+            )
         # Relevance, not alphabetical (the catalog is ~2M rows; "chicken" must not
         # surface "Abc chicken brand X" before plain "Chicken"). Portable ordering
         # that works on both Postgres (prod, trigram GIN indexes) and SQLite
